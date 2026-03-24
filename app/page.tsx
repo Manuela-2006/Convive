@@ -86,7 +86,7 @@ export default function HomePage() {
           <p className="landing-section-two__text">
             Convive integra en una sola plataforma todo lo que necesita un piso compartido.
             Su inteligencia artificial automatiza los procesos más tediosos y su diseño está
-            orientado a la convivencia en su totalidad, no solo a las finanzas.
+            orientado a la convivencia en su totalidad.
           </p>
           <Button className="landing-section-two__button">Crear piso</Button>
         </div>
