@@ -1,8 +1,12 @@
 import Image from "next/image";
+import { createClient } from "../utils/supabase/server";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: todos } = await supabase.from("todos").select();
+
   return (
     <main>
       <section
@@ -266,6 +270,19 @@ export default function HomePage() {
             </Button>
           </div>
         </Card>
+      </section>
+
+      <section aria-label="Lista de tareas de Supabase">
+        <div className="landing-section-two__grid">
+          <h2 className="landing-section-two__title">Tareas compartidas</h2>
+          <ul className="landing-section-two__text">
+            {todos?.length ? (
+              todos.map((todo) => <li key={todo.id}>{todo.name}</li>)
+            ) : (
+              <li>No hay tareas disponibles todavia.</li>
+            )}
+          </ul>
+        </div>
       </section>
     </main>
   );
