@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { createClient } from "../utils/supabase/server";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 
@@ -16,8 +15,10 @@ export default async function HomePage() {
       >
         <div className="landing-hero__grid">
           <div className="landing-hero__top-actions">
-            <Button>Crear piso</Button>
-            <Button>Inicar sesión</Button>
+            <Link href="/login?flow=create" className="convive-button">
+              Crear piso
+            </Link>
+            <Link href="/login" className="convive-button">Iniciar sesión</Link>
           </div>
           <Card className="landing-hero__bottom-card">
             <div className="landing-hero__card-content">
@@ -48,10 +49,13 @@ export default async function HomePage() {
                   <span className="landing-hero__card-line" />
                 </a>
               </div>
-              <Button className="landing-hero__card-button landing-hero__card-button--bottom">
+              <a
+                href="#landing-section-five"
+                className="landing-hero__card-button landing-hero__card-button--bottom landing-hero__card-link"
+              >
                 <span className="landing-hero__card-label">PB</span>
                 <span className="landing-hero__card-line" />
-              </Button>
+              </a>
             </div>
           </Card>
           <div className="landing-hero__content">
@@ -73,7 +77,9 @@ export default async function HomePage() {
               Convive organiza los gastos, facturas y tareas de tu piso compartido para
               que lo unico que tengas que hacer sea convivir sin dramas
             </p>
-            <Button className="landing-hero__button">Unirse a un piso</Button>
+            <Link href="/login?flow=join" className="convive-button landing-hero__button">
+              Unirse a un piso
+            </Link>
           </div>
         </div>
       </section>
@@ -92,7 +98,9 @@ export default async function HomePage() {
             Su inteligencia artificial automatiza los procesos más tediosos y su diseño está
             orientado a la convivencia en su totalidad.
           </p>
-          <Button className="landing-section-two__button">Crear piso</Button>
+          <Link href="/login?flow=create" className="convive-button landing-section-two__button">
+            Crear piso
+          </Link>
         </div>
         <Card className="landing-hero__bottom-card landing-section-two__bottom-card">
           <div className="landing-hero__card-content">
@@ -123,10 +131,13 @@ export default async function HomePage() {
                 <span className="landing-hero__card-line" />
               </a>
             </div>
-            <Button className="landing-hero__card-button landing-hero__card-button--bottom">
+            <a
+              href="#landing-section-five"
+              className="landing-hero__card-button landing-hero__card-button--bottom landing-hero__card-link"
+            >
               <span className="landing-hero__card-label">PB</span>
               <span className="landing-hero__card-line" />
-            </Button>
+            </a>
           </div>
         </Card>
       </section>
@@ -211,10 +222,13 @@ export default async function HomePage() {
                 <span className="landing-hero__card-line" />
               </Button>
             </div>
-            <Button className="landing-hero__card-button landing-hero__card-button--bottom">
+            <a
+              href="#landing-section-five"
+              className="landing-hero__card-button landing-hero__card-button--bottom landing-hero__card-link"
+            >
               <span className="landing-hero__card-label">PB</span>
               <span className="landing-hero__card-line" />
-            </Button>
+            </a>
           </div>
         </Card>
       </section>
@@ -233,7 +247,12 @@ export default async function HomePage() {
             de las deudas puede ser más complejo de lo que parece. Convive nace para
             eliminar esa carga.
           </p>
-          <Button className="landing-section-two__button">Unirme a un piso</Button>
+          <Link
+            href="/login?flow=join"
+            className="convive-button landing-section-two__button"
+          >
+            Unirme a un piso
+          </Link>
         </div>
         <Card className="landing-hero__bottom-card landing-section-four__bottom-card">
           <div className="landing-hero__card-content">
@@ -264,7 +283,72 @@ export default async function HomePage() {
                 <span className="landing-hero__card-line" />
               </a>
             </div>
-            <Button className="landing-hero__card-button landing-hero__card-button--bottom">
+            <a
+              href="#landing-section-five"
+              className="landing-hero__card-button landing-hero__card-button--bottom landing-hero__card-link"
+            >
+              <span className="landing-hero__card-label">PB</span>
+              <span className="landing-hero__card-line" />
+            </a>
+          </div>
+        </Card>
+      </section>
+
+      <section
+        id="landing-section-five"
+        className="landing-section-five"
+        aria-label="Quinta sección de Convive"
+      >
+        <div className="landing-section-five__grid">
+          <div className="landing-section-five__content">
+            <h2 className="landing-section-five__title">EMPIEZA A CONVIVIR MEJOR</h2>
+            <div className="landing-section-five__actions">
+              <Link href="/login?flow=create" className="convive-button">
+                Crear piso
+              </Link>
+              <Link href="/login" className="convive-button">Iniciar sesión</Link>
+              <Link
+                href="/login?flow=join"
+                className="convive-button landing-section-five__action-bottom"
+              >
+                Unirse a un piso
+              </Link>
+            </div>
+          </div>
+        </div>
+        <Card className="landing-hero__bottom-card landing-section-five__bottom-card">
+          <div className="landing-hero__card-content">
+            <div className="landing-hero__card-grid">
+              <a
+                href="#landing-section-two"
+                className="landing-hero__card-button landing-hero__card-link"
+              >
+                <span className="landing-hero__card-label">3</span>
+                <span className="landing-hero__card-line" />
+              </a>
+              <a
+                href="#landing-section-one"
+                className="landing-hero__card-button landing-hero__card-link"
+              >
+                <span className="landing-hero__card-label">A</span>
+                <span className="landing-hero__card-line" />
+              </a>
+              <a
+                href="#landing-section-four"
+                className="landing-hero__card-button landing-hero__card-link"
+              >
+                <span className="landing-hero__card-label">1</span>
+                <span className="landing-hero__card-line" />
+              </a>
+              <a
+                href="#landing-section-three"
+                className="landing-hero__card-button landing-hero__card-link"
+              >
+                <span className="landing-hero__card-label">2</span>
+                <span className="landing-hero__card-line" />
+              </a>
+            </div>
+            <Button className="landing-hero__card-button landing-hero__card-button--active landing-hero__card-button--bottom">
               <span className="landing-hero__card-label">PB</span>
               <span className="landing-hero__card-line" />
             </Button>
@@ -287,3 +371,5 @@ export default async function HomePage() {
     </main>
   );
 }
+
+
