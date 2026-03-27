@@ -969,11 +969,11 @@ main {
   .landing-section-two__text {
     text-align: left;
     justify-self: start;
-    grid-column: 5 / span 7;
+    grid-column: 6 / span 7;
   }
 
   .landing-section-two__button {
-    grid-column: 5 / span 3;
+    grid-column: 6 / span 3;
     justify-self: start;
   }
 
