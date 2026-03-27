@@ -932,6 +932,7 @@ main {
 
   .landing-hero__content {
     grid-column: 2 / span 7;
+    row-gap: 1.65rem;
   }
 
   .landing-hero__brandline {
@@ -958,11 +959,13 @@ main {
     max-width: 64rem;
     text-align: left;
     font-size: clamp(1.9rem, 1.55vw, 2.35rem);
+    margin-top: 0.35rem;
   }
 
   .landing-hero__button {
     grid-column: 1 / span 7;
     justify-self: start;
+    margin-top: 0.45rem;
   }
 
   .landing-section-two__title,
@@ -972,9 +975,14 @@ main {
     grid-column: 6 / span 7;
   }
 
+  .landing-section-two__text {
+    margin-top: 1.45rem;
+  }
+
   .landing-section-two__button {
     grid-column: 6 / span 3;
     justify-self: start;
+    margin-top: 1.2rem;
   }
 
   .landing-section-five__title {
@@ -990,6 +998,14 @@ main {
   .landing-section-two__text {
     font-size: clamp(1.6rem, 1.5vw, 2rem);
     max-width: 50ch;
+  }
+
+  .landing-section-four__grid .landing-section-two__text {
+    margin-top: 1.45rem;
+  }
+
+  .landing-section-four__grid .landing-section-two__button {
+    margin-top: 1.2rem;
   }
 }
 
