@@ -239,6 +239,27 @@
     width: clamp(260px, 20vw, 360px);
   }
 
+  .tile {
+    padding: clamp(1.35rem, 1.9vw, 2rem);
+    gap: 1.65rem;
+  }
+
+  .title {
+    font-size: clamp(1.3rem, 1.9vw, 2.2rem);
+  }
+
+  .value {
+    margin-top: 0.4rem;
+  }
+
+  .meta {
+    margin-top: 0.45rem;
+  }
+
+  .activity {
+    gap: 0.45rem;
+  }
+
   .menu {
     font-size: 32px;
   }
