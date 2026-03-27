@@ -976,13 +976,13 @@ main {
   }
 
   .landing-section-two__text {
-    margin-top: 1.45rem;
+    margin-top: 2rem;
   }
 
   .landing-section-two__button {
     grid-column: 6 / span 3;
     justify-self: start;
-    margin-top: 1.2rem;
+    margin-top: 1.7rem;
   }
 
   .landing-section-five__title {
@@ -998,14 +998,16 @@ main {
   .landing-section-two__text {
     font-size: clamp(1.6rem, 1.5vw, 2rem);
     max-width: 50ch;
+    line-height: 1.38;
   }
 
   .landing-section-four__grid .landing-section-two__text {
-    margin-top: 1.45rem;
+    margin-top: 2rem;
+    line-height: 1.38;
   }
 
   .landing-section-four__grid .landing-section-two__button {
-    margin-top: 1.2rem;
+    margin-top: 1.7rem;
   }
 
   .landing-section-four .landing-section-two__grid {
