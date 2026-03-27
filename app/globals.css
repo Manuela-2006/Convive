@@ -911,6 +911,20 @@ main {
     width: min(1700px, 100%);
   }
 
+  .landing-hero__bottom-card {
+    width: clamp(245px, 14vw, 300px);
+    min-height: clamp(170px, 21vh, 250px);
+  }
+
+  .landing-hero__card-content {
+    padding: 0.82rem;
+    gap: 0.68rem;
+  }
+
+  .landing-hero__card-button {
+    min-height: 2.55rem;
+  }
+
   .landing-hero__content {
     grid-column: 2 / span 7;
   }
