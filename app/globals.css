@@ -42,7 +42,7 @@ main {
   width: 100%;
   min-height: 100vh;
   min-height: 100svh;
-  background-image: url("/images/s1landing.webp");
+  background-image: url("/images/landing/s1landing.webp");
   background-size: cover;
   background-position: center 70%;
   background-repeat: no-repeat;
@@ -62,7 +62,7 @@ main {
   width: 100%;
   min-height: calc(100vh + 10vh);
   min-height: calc(100svh + 10vh);
-  background-image: url("/images/s2landing.webp");
+  background-image: url("/images/landing/s2landing.webp");
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
@@ -140,7 +140,7 @@ main {
   width: 100%;
   min-height: 100vh;
   min-height: 100svh;
-  background-image: url("/images/s3landing.webp");
+  background-image: url("/images/landing/s3landing.webp");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -657,7 +657,7 @@ main {
   width: 100%;
   min-height: calc(100vh + var(--section-four-blend));
   min-height: calc(100svh + var(--section-four-blend));
-  background-image: url("/images/s4landing.webp");
+  background-image: url("/images/landing/s4landing.webp");
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
@@ -769,7 +769,7 @@ main {
   width: 100%;
   min-height: calc(100vh + var(--section-five-blend));
   min-height: calc(100svh + var(--section-five-blend));
-  background-image: url("/images/s5landing.webp");
+  background-image: url("/images/landing/s5landing.webp");
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;

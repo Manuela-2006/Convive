@@ -1,0 +1,235 @@
+.page {
+  min-height: 100svh;
+  background-image: url("/images/home/Fondo.webp");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: repeat(12, minmax(0, 1fr));
+  gap: 0;
+  padding: clamp(0.8rem, 1.2vw, 1.25rem);
+}
+
+.logo {
+  width: clamp(170px, 22vw, 260px);
+  height: auto;
+  grid-column: 1 / span 4;
+  grid-row: 1 / span 2;
+  align-self: start;
+  justify-self: start;
+}
+
+.boardFrame {
+  width: calc(100% * 7 / 12);
+  height: calc(100% * 9 / 12);
+  margin: 0;
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  align-self: center;
+  justify-self: center;
+  background: #8b1a2f;
+  border-radius: 10px;
+  padding: clamp(0.8rem, 1.6vw, 1.2rem);
+}
+
+.board {
+  background-image: url("/images/home/Corcho.webp");
+  background-position: center;
+  background-size: cover;
+  border-radius: 6px;
+  padding: clamp(0.8rem, 1.4vw, 1.2rem);
+  height: 100%;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.7rem, 1.4vw, 1rem);
+  height: 100%;
+}
+
+.tile {
+  background: #8b1a2f;
+  color: #f6f0ea;
+  border-radius: 8px;
+  padding: clamp(1rem, 1.6vw, 1.35rem);
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  text-align: center;
+  gap: 1.15rem;
+}
+
+.tileWide {
+  grid-column: span 4;
+}
+
+.tileNarrow {
+  grid-column: span 3;
+}
+
+.tilePayments {
+  justify-items: center;
+  text-align: center;
+}
+
+.tileTop {
+  grid-template-rows: auto auto auto;
+  align-content: start;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: clamp(1.1rem, 1.8vw, 1.9rem);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.value {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(1.5rem, 2.2vw, 2.35rem);
+  font-weight: 600;
+  line-height: 1;
+  margin-top: 0.25rem;
+}
+
+.valueTop {
+  min-height: 0;
+  display: grid;
+  align-items: center;
+}
+
+.meta {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(0.95rem, 1.2vw, 1.4rem);
+  font-weight: 500;
+  line-height: 1.2;
+  margin-top: 0.25rem;
+}
+
+.progress {
+  margin-top: 0.35rem;
+  display: inline-grid;
+  grid-auto-flow: column;
+  gap: 0.24rem;
+  min-height: 0;
+  align-items: center;
+}
+
+.bar {
+  width: clamp(20px, 1.75vw, 26px);
+  height: clamp(20px, 1.75vw, 26px);
+  border-radius: 2px;
+  background: #f2ece7;
+  opacity: 0.35;
+}
+
+.barActive {
+  opacity: 1;
+}
+
+.activity {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.25rem;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(0.95rem, 1.15vw, 1.3rem);
+  line-height: 1.25;
+  justify-items: center;
+}
+
+.activityRecent {
+  width: fit-content;
+  margin: 0 auto;
+  justify-items: start;
+  text-align: left;
+}
+
+.menu {
+  position: fixed;
+  left: 1.25rem;
+  bottom: 1.25rem;
+  width: calc(100vw / 12);
+  height: calc((100svh / 12) * 2.5);
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 248, 241, 0.97);
+  color: #8b1a2f;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 25px;
+  font-weight: 500;
+  cursor: pointer;
+  overflow: visible;
+}
+
+.menuIcon {
+  width: clamp(19px, 2vw, 26px);
+  height: auto;
+  position: absolute;
+  top: 44%;
+  left: 70%;
+  transform: translate(-50%, -50%);
+}
+
+.menu span {
+  position: absolute;
+  bottom: 0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+    gap: 1rem;
+  }
+
+  .logo {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .boardFrame {
+    grid-column: 1;
+    grid-row: 2 / 4;
+    width: min(100%, 930px);
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .board {
+    height: auto;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    height: auto;
+  }
+
+  .tileWide,
+  .tileNarrow {
+    grid-column: auto;
+  }
+
+  .tile {
+    min-height: 105px;
+  }
+}

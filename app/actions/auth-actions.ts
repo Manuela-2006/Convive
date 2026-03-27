@@ -49,5 +49,5 @@ export async function signInWithEmail({
     return { success: true, userId: data.user.id };
   }
 
-  redirect(redirectTo ?? `/dashboard/profile/${data.user.id}`);
+  redirect(redirectTo ?? "/dashboard");
 }

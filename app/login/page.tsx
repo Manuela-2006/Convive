@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { LoginCard } from "../../components/auth/login-card";
 import styles from "./page.module.css";
 
@@ -16,7 +17,21 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <main className={styles.page}>
-      <LoginCard initialFlow={flow} />
+      <section className={styles.content}>
+        <h1 className={styles.title}>Bienvenido</h1>
+        <Image
+          src="/Logonegro.webp"
+          alt="Logo Convive"
+          width={290}
+          height={95}
+          className={styles.logo}
+          priority
+        />
+        <p className={styles.subtitle}>Pon en orden tu piso compartido</p>
+        <div className={styles.cardWrap}>
+          <LoginCard initialFlow={flow} />
+        </div>
+      </section>
     </main>
   );
 }

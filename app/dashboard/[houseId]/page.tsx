@@ -1,6 +1,7 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { createClient } from "../../../utils/supabase/server";
+import { HomeBoard } from "../../../components/home/home-board";
 
 type HouseDashboardPageProps = {
   params: Promise<{
@@ -19,11 +20,7 @@ export default async function HouseDashboardPage({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return (
-      <main style={{ padding: "2rem" }}>
-        <h1>No hay sesion activa</h1>
-      </main>
-    );
+    redirect("/login");
   }
 
   const { data: house, error: houseError } = await supabase
@@ -56,42 +53,14 @@ export default async function HouseDashboardPage({
     .eq("house_id", house.id)
     .eq("is_active", true);
 
-  return (
-    <main style={{ padding: "2rem" }}>
-      <Link href={`/dashboard/profile/${user.id}`}>Volver a mi perfil</Link>
-      <h1>Dashboard del piso</h1>
-      <p>
-        <strong>Nombre:</strong> {house.name}
-      </p>
-      <p>
-        <strong>Codigo del piso:</strong> {house.public_code}
-      </p>
-
-      <h2 style={{ marginTop: "2rem" }}>Miembros del piso</h2>
-
-      {membersError ? (
+  if (membersError) {
+    return (
+      <main style={{ padding: "2rem" }}>
+        <h1>No he podido cargar la home del piso</h1>
         <pre>{JSON.stringify(membersError, null, 2)}</pre>
-      ) : !members?.length ? (
-        <p>No hay miembros en este piso todavia.</p>
-      ) : (
-        <ul>
-          {members.map((member) => {
-            const profile = Array.isArray(member.profiles)
-              ? member.profiles[0]
-              : member.profiles;
+      </main>
+    );
+  }
 
-            return (
-              <li key={member.id}>
-                {profile?.full_name?.trim()
-                  ? profile.full_name
-                  : profile?.email ?? member.profile_id}
-                {" - "}
-                {member.role}
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </main>
-  );
+  return <HomeBoard houseName={house.name} memberCount={members?.length ?? 0} />;
 }
