@@ -258,6 +258,7 @@
 
   .activity {
     gap: 0.7rem;
+    font-size: clamp(1.15rem, 1.35vw, 1.6rem);
   }
 
   .menu {
