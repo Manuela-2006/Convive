@@ -244,6 +244,6 @@
   }
 
   .menuIcon {
-    width: clamp(28px, 2.4vw, 36px);
+    width: clamp(34px, 3vw, 44px);
   }
 }
