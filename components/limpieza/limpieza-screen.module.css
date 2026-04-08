@@ -1,0 +1,209 @@
+.page {
+  min-height: 100svh;
+  background-image: url("/images/limpieza/fondo.webp");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  padding: clamp(0.9rem, 1.8vw, 1.5rem);
+  display: grid;
+  place-items: center;
+}
+
+.panel {
+  width: calc(100% * 7 / 12);
+  max-width: 980px;
+  background: rgba(240, 234, 228, 0.5);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+  border: none;
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+}
+
+.header {
+  background: #8b1a2f;
+  color: #f0eae4;
+  padding: 1.05rem 0.95rem;
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  align-items: center;
+}
+
+.backLink {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+}
+
+.backIcon {
+  width: 44px;
+  height: 44px;
+}
+
+.headerCenter {
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 25px;
+  font-weight: 700;
+  color: #f0eae4;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  margin: 0.3rem 0 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #f0eae4;
+}
+
+.content {
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 0.95rem;
+  align-items: start;
+}
+
+.leftCol {
+  background: #8b1a2f;
+  border-radius: 8px;
+  padding: 0.55rem;
+}
+
+.topActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  margin-bottom: 0.6rem;
+}
+
+.topButton {
+  background: rgba(240, 234, 228, 0.18);
+  border-radius: 8px;
+  color: #f0eae4;
+  font-size: 13px;
+  padding: 0.4rem 0.45rem;
+}
+
+.groupCard {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  margin-top: 0.45rem;
+}
+
+.groupTitle {
+  margin: 0;
+  color: #f0eae4;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.groupRows {
+  margin-top: 0.35rem;
+  display: grid;
+  gap: 0.32rem;
+}
+
+.taskRow {
+  background: #f0ebe6;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.45rem;
+  padding: 0.35rem 0.4rem;
+  align-items: start;
+}
+
+.taskLeft {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 0.35rem;
+}
+
+.taskLeft p {
+  margin: 0;
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+}
+
+.taskLeft small {
+  color: #5a5652;
+  font-size: 10px;
+}
+
+.taskOwner {
+  color: #1f1a17;
+  font-size: 11px;
+  font-family: "Poppins", sans-serif;
+}
+
+.floorWrap {
+  min-height: 100%;
+  display: grid;
+}
+
+.floorImageWrap {
+  position: relative;
+  width: 100%;
+  min-height: 520px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid rgba(240, 234, 228, 0.85);
+}
+
+.floorImage {
+  object-fit: cover;
+}
+
+.overlayTask {
+  position: absolute;
+  background: #f0ebe6;
+  border-radius: 8px;
+  padding: 0.28rem 0.35rem;
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  gap: 0.3rem;
+  align-items: start;
+  min-width: 170px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.overlayTask p {
+  margin: 0;
+  color: #1f1a17;
+  font-size: 10px;
+  font-family: "Poppins", sans-serif;
+}
+
+.overlayTask small {
+  color: #5a5652;
+  font-size: 9px;
+}
+
+.overlayTask span {
+  color: #1f1a17;
+  font-size: 9px;
+}
+
+@media (max-width: 900px) {
+  .panel {
+    width: min(100%, 650px);
+  }
+
+  .content {
+    grid-template-columns: 1fr;
+  }
+}
+

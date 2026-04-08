@@ -1,0 +1,352 @@
+.page {
+  min-height: 100svh;
+  background-image: url("/images/perfil/fondo.webp");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  padding: clamp(0.75rem, 2vw, 1.4rem);
+  display: grid;
+  place-items: center;
+}
+
+.panel {
+  width: min(100%, 1040px);
+  border-radius: 8px;
+  overflow: hidden;
+  background: color-mix(in srgb, #f0eae4 40%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.28);
+}
+
+.header {
+  background: #8b1a2f;
+  color: #f0eae4;
+  padding: 1rem 1.1rem;
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+}
+
+.backLink {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+}
+
+.backIcon {
+  width: 28px;
+  height: 28px;
+}
+
+.headerCenter {
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  color: #f0eae4;
+  text-transform: uppercase;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: clamp(1.45rem, 1.6vw, 1.85rem);
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.subtitle {
+  margin: 0.25rem 0 0;
+  color: #f0eae4;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.95rem;
+}
+
+.content {
+  padding: 1.05rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.topGrid {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+.block {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
+}
+
+.personalBlock {
+  background: #8b1a2f;
+  padding: 0.8rem 0.75rem;
+}
+
+.profileBlock,
+.houseBlock {
+  background: #f2eeeb;
+}
+
+.profileBlock {
+  position: relative;
+  padding: 1.2rem 1rem 0.95rem;
+  display: grid;
+  justify-items: center;
+}
+
+.houseBlock {
+  padding: 0.95rem 1rem 1rem;
+}
+
+.appBlock {
+  background: #8b1a2f;
+  color: #f0eae4;
+  padding: 0.95rem 1rem 1.1rem;
+}
+
+.blockTitle {
+  margin: 0;
+  color: #f0eae4;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: clamp(1.1rem, 1.1vw, 1.3rem);
+  text-transform: uppercase;
+}
+
+.personalFields {
+  margin-top: 0.65rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.inputLike {
+  min-height: 32px;
+  border-radius: 7px;
+  border: 1px solid #be6f8b;
+  background: #f2eeeb;
+  padding: 0.35rem 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  color: #3d3733;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.8rem;
+}
+
+.editButton {
+  border: 1px solid #be6f8b;
+  background: transparent;
+  color: #8b1a2f;
+  border-radius: 999px;
+  min-width: 44px;
+  height: 20px;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.66rem;
+  padding: 0 0.45rem;
+}
+
+.avatarBadge {
+  position: absolute;
+  top: -24px;
+  border: 9px solid #f2eeeb;
+  border-radius: 999px;
+  background: #8b1a2f;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+}
+
+.avatarBadge img {
+  border-radius: 999px;
+}
+
+.profileName {
+  margin: 1.2rem 0 0;
+  text-align: center;
+  color: #8b1a2f;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: clamp(1.35rem, 1.5vw, 1.7rem);
+  line-height: 1.05;
+  font-weight: 800;
+}
+
+.avatarRow {
+  margin-top: 0.85rem;
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.navArrow {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.avatarList {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.avatarList img {
+  border-radius: 999px;
+  border: 3px solid #be6f8b;
+  background: #fff;
+}
+
+.sectionTitle {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: clamp(1.15rem, 1.25vw, 1.45rem);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.houseBlock .sectionTitle {
+  color: #8b1a2f;
+}
+
+.appBlock .sectionTitle {
+  color: #f0eae4;
+}
+
+.settingRow {
+  margin-top: 0.55rem;
+  min-height: 34px;
+  border-radius: 8px;
+  border: 1px solid #be6f8b;
+  background: #f2eeeb;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.45rem;
+}
+
+.settingLabel,
+.settingValue {
+  color: #3d3733;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.84rem;
+}
+
+.settingLabel {
+  font-weight: 600;
+}
+
+.settingValue {
+  font-weight: 500;
+}
+
+.appSettings {
+  margin-top: 0.75rem;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.notifications {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: start;
+}
+
+.notifications span {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.73rem;
+  color: #f0eae4;
+}
+
+.toggle {
+  width: 46px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid #e6c8d2;
+  background: #f0eae4;
+  padding: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.toggle span {
+  width: 18px;
+  height: 16px;
+  border-radius: 999px;
+  background: #8b1a2f;
+}
+
+.appButton {
+  min-height: 33px;
+  border: none;
+  border-radius: 8px;
+  background: #be6f8b;
+  color: #f0eae4;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.95rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 960px) {
+  .topGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .appSettings {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .appButton {
+    width: 100%;
+    white-space: normal;
+    text-align: left;
+  }
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: 0.7rem;
+  }
+
+  .header {
+    padding: 0.85rem 0.7rem;
+    grid-template-columns: 30px 1fr 30px;
+  }
+
+  .backLink {
+    width: 30px;
+    height: 30px;
+  }
+
+  .backIcon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .sectionTitle {
+    font-size: 1rem;
+  }
+
+  .settingRow {
+    grid-template-columns: 1fr;
+    justify-items: start;
+    gap: 0.3rem;
+  }
+}
