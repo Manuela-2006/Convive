@@ -8,6 +8,7 @@ import styles from "./facturas-luz-screen.module.css";
 
 type FacturasLuzScreenProps = {
   houseCode: string;
+  dashboardPath?: string;
 };
 
 const monthlyRows = [
@@ -21,12 +22,16 @@ const monthlyRows = [
   },
 ];
 
-export function FacturasLuzScreen({ houseCode }: FacturasLuzScreenProps) {
+export function FacturasLuzScreen({
+  houseCode,
+  dashboardPath,
+}: FacturasLuzScreenProps) {
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`/dashboard/${houseCode}/facturas`} className={styles.backLink}>
+          <Link href={`${basePath}/facturas`} className={styles.backLink}>
             <Image src="/iconos/flechaatras.svg" alt="Volver" width={20} height={20} className={styles.backIcon} />
           </Link>
           <div className={styles.headerCenter}>
@@ -40,7 +45,7 @@ export function FacturasLuzScreen({ houseCode }: FacturasLuzScreenProps) {
           <Card className={styles.card}>
             <div className={styles.cardTop}>
               <div className={styles.titleWrap}>
-                <Link href={`/dashboard/${houseCode}/facturas`} className={styles.inlineBack} aria-label="Volver a facturas">
+                <Link href={`${basePath}/facturas`} className={styles.inlineBack} aria-label="Volver a facturas">
                   ←
                 </Link>
                 <h2 className={styles.cardTitle}>Facturas luz</h2>

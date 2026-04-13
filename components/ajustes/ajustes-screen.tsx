@@ -7,14 +7,16 @@ import styles from "./ajustes-screen.module.css";
 
 type AjustesScreenProps = {
   houseCode: string;
+  dashboardPath?: string;
 };
 
-export function AjustesScreen({ houseCode }: AjustesScreenProps) {
+export function AjustesScreen({ houseCode, dashboardPath }: AjustesScreenProps) {
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`/dashboard/${houseCode}/menu`} className={styles.backLink}>
+          <Link href={`${basePath}/menu`} className={styles.backLink}>
             <Image src="/iconos/flechaatras.svg" alt="Volver" width={20} height={20} className={styles.backIcon} />
           </Link>
           <div className={styles.headerCenter}>

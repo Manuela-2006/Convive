@@ -8,6 +8,7 @@ import styles from "./history-screen.module.css";
 
 type AreaPersonalHistoryScreenProps = {
   houseCode: string;
+  dashboardPath?: string;
 };
 
 const entries = [
@@ -32,12 +33,16 @@ const entries = [
   },
 ];
 
-export function AreaPersonalHistoryScreen({ houseCode }: AreaPersonalHistoryScreenProps) {
+export function AreaPersonalHistoryScreen({
+  houseCode,
+  dashboardPath,
+}: AreaPersonalHistoryScreenProps) {
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`/dashboard/${houseCode}/menu`} className={styles.backLink}>
+          <Link href={`${basePath}/menu`} className={styles.backLink}>
             <Image src="/iconos/flechaatras.svg" alt="Volver" width={22} height={22} className={styles.backIcon} />
           </Link>
           <div className={styles.headerCenter}>
@@ -51,7 +56,7 @@ export function AreaPersonalHistoryScreen({ houseCode }: AreaPersonalHistoryScre
           <Card className={styles.historyCard}>
             <div className={styles.historyTop}>
               <div className={styles.historyTitleWrap}>
-                <Link href={`/dashboard/${houseCode}/area-personal`} className={styles.inlineBack} aria-label="Volver al resumen">
+                <Link href={`${basePath}/area-personal`} className={styles.inlineBack} aria-label="Volver al resumen">
                   ←
                 </Link>
                 <h2 className={styles.historyTitle}>Historial</h2>

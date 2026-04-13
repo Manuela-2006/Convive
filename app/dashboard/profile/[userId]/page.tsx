@@ -5,7 +5,11 @@ import {
   createHouseFromFormAction,
   joinHouseFromFormAction,
 } from "../../../actions/house-actions";
-import { createClient } from "../../../../utils/supabase/server";
+import {
+  buildDashboardPath,
+  buildProfilePath,
+  getAuthenticatedProfileContext,
+} from "../../../../lib/dashboard";
 
 type ProfileDashboardPageProps = {
   params: Promise<{
@@ -20,25 +24,18 @@ export default async function ProfileDashboardPage({
   params,
   searchParams,
 }: ProfileDashboardPageProps) {
-  const { userId } = await params;
+  const { userId: userCode } = await params;
   const resolvedSearchParams = await searchParams;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, profile } = await getAuthenticatedProfileContext();
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  if (user.id !== userId) {
-    redirect(`/dashboard/profile/${user.id}`);
+  if (profile.public_code !== userCode) {
+    redirect(buildProfilePath(profile.public_code));
   }
 
   const { data: memberships, error: membershipsError } = await supabase
     .from("house_members")
     .select("house_id, role")
-    .eq("profile_id", user.id)
+    .eq("profile_id", profile.id)
     .eq("is_active", true);
 
   const houseIds = memberships?.map((membership) => membership.house_id) ?? [];
@@ -57,11 +54,7 @@ export default async function ProfileDashboardPage({
       house: housesById.get(membership.house_id),
     })) ?? [];
 
-  const displayName =
-    user.user_metadata?.full_name?.trim() ||
-    user.user_metadata?.name?.trim() ||
-    user.email ||
-    user.id;
+  const displayName = profile.full_name?.trim() || profile.email || profile.public_code;
   const profileError = resolvedSearchParams?.error;
 
   return (
@@ -99,8 +92,8 @@ export default async function ProfileDashboardPage({
           >
             Bienvenido, {displayName}
           </h1>
-          <p style={{ margin: 0 }}>Usuario: {user.email ?? "Sin correo disponible"}</p>
-          <p style={{ margin: "0.5rem 0 0" }}>ID: {user.id}</p>
+          <p style={{ margin: 0 }}>Usuario: {profile.email ?? "Sin correo disponible"}</p>
+          <p style={{ margin: "0.5rem 0 0" }}>Código público: {profile.public_code}</p>
           {profileError ? (
             <p style={{ margin: "0.75rem 0 0", color: "#8b1a2f", fontWeight: 600 }}>
               {profileError}
@@ -125,9 +118,9 @@ export default async function ProfileDashboardPage({
           >
             <h2 style={{ marginTop: 0 }}>Tus pisos</h2>
             {membershipsError || housesError ? (
-              <p>No he podido cargar tus pisos todavia.</p>
+              <p>No he podido cargar tus pisos todavía.</p>
             ) : !houseSummaries.length ? (
-              <p>Todavia no estas en ningun piso.</p>
+              <p>Todavía no estás en ningún piso.</p>
             ) : (
               <div style={{ display: "grid", gap: "0.75rem" }}>
                 {houseSummaries.map((summary) => {
@@ -147,11 +140,14 @@ export default async function ProfileDashboardPage({
                     >
                       <h3 style={{ margin: "0 0 0.4rem" }}>{summary.house.name}</h3>
                       <p style={{ margin: "0 0 0.35rem" }}>
-                        Codigo: {summary.house.public_code}
+                        Código: {summary.house.public_code}
                       </p>
                       <p style={{ margin: "0 0 0.9rem" }}>Rol: {summary.role}</p>
                       <Link
-                        href={`/dashboard/${summary.house.public_code}`}
+                        href={buildDashboardPath(
+                          profile.public_code,
+                          summary.house.public_code
+                        )}
                         style={{
                           display: "inline-block",
                           padding: "0.7rem 1rem",
@@ -183,7 +179,7 @@ export default async function ProfileDashboardPage({
             <div>
               <h2 style={{ marginTop: 0 }}>Volver a los pisos</h2>
               <p style={{ marginBottom: 0 }}>
-                Desde aqui puedes crear un piso nuevo o unirte a uno existente.
+                Desde aquí puedes crear un piso nuevo o unirte a uno existente.
               </p>
             </div>
 
@@ -238,7 +234,7 @@ export default async function ProfileDashboardPage({
               <input
                 name="code"
                 type="text"
-                placeholder="Codigo del piso"
+                placeholder="Código del piso"
                 required
                 style={{
                   borderRadius: "12px",
@@ -271,9 +267,9 @@ export default async function ProfileDashboardPage({
             boxShadow: "0 10px 24px rgba(0, 0, 0, 0.06)",
           }}
         >
-          <h2 style={{ marginTop: 0 }}>Configuracion del usuario</h2>
+          <h2 style={{ marginTop: 0 }}>Configuración del usuario</h2>
           <p style={{ marginBottom: 0 }}>
-            Aqui dejaremos luego la configuracion del perfil, preferencias y ajustes de
+            Aquí dejaremos luego la configuración del perfil, preferencias y ajustes de
             la cuenta.
           </p>
         </section>

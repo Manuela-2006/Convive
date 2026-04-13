@@ -7,6 +7,7 @@ import styles from "./electrical-menu.module.css";
 
 type ElectricalMenuProps = {
   houseCode: string;
+  dashboardPath?: string;
 };
 
 type MenuItem = {
@@ -34,33 +35,37 @@ function MenuSwitchItem({ item, isActive }: { item: MenuItem; isActive: boolean 
   );
 }
 
-export function ElectricalMenu({ houseCode }: ElectricalMenuProps) {
+export function ElectricalMenu({
+  houseCode,
+  dashboardPath,
+}: ElectricalMenuProps) {
   const pathname = usePathname();
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
 
   const groups: MenuGroup[] = [
     {
       title: "Principal",
       items: [
-        { code: "01", label: "Inicio", href: `/dashboard/${houseCode}` },
-        { code: "02", label: "Área personal", href: `/dashboard/${houseCode}/area-grupal` },
-        { code: "03", label: "Gastos", href: `/dashboard/${houseCode}/gastos` },
-        { code: "04", label: "Facturas", href: `/dashboard/${houseCode}/facturas` },
+        { code: "01", label: "Inicio", href: basePath },
+        { code: "02", label: "Área personal", href: `${basePath}/area-personal` },
+        { code: "03", label: "Gastos", href: `${basePath}/gastos` },
+        { code: "04", label: "Facturas", href: `${basePath}/facturas` },
       ],
     },
     {
       title: "Gestión",
       items: [
-        { code: "05", label: "Área grupal", href: `/dashboard/${houseCode}/area-grupal` },
-        { code: "06", label: "Calendario", href: `/dashboard/${houseCode}/calendario` },
-        { code: "07", label: "Limpieza", href: `/dashboard/${houseCode}/limpieza` },
-        { code: "08", label: "Herramientas", href: `/dashboard/${houseCode}/herramientas` },
+        { code: "05", label: "Área grupal", href: `${basePath}/area-grupal` },
+        { code: "06", label: "Calendario", href: `${basePath}/calendario` },
+        { code: "07", label: "Limpieza", href: `${basePath}/limpieza` },
+        { code: "08", label: "Herramientas", href: `${basePath}/herramientas` },
       ],
     },
     {
       title: "Configuración",
       items: [
-        { code: "09", label: "Ajustes", href: `/dashboard/${houseCode}/ajustes` },
-        { code: "10", label: "Notificaciones", href: `/dashboard/${houseCode}/notificaciones` },
+        { code: "09", label: "Ajustes", href: `${basePath}/ajustes` },
+        { code: "10", label: "Notificaciones", href: `${basePath}/notificaciones` },
       ],
     },
   ];

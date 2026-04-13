@@ -8,6 +8,7 @@ import styles from "./facturas-screen.module.css";
 
 type FacturasScreenProps = {
   houseCode: string;
+  dashboardPath?: string;
 };
 
 const sections = [
@@ -18,12 +19,16 @@ const sections = [
   { key: "luz", title: "Luz", text: "Factura de la luz", date: "15 de Mayo" },
 ];
 
-export function FacturasScreen({ houseCode }: FacturasScreenProps) {
+export function FacturasScreen({
+  houseCode,
+  dashboardPath,
+}: FacturasScreenProps) {
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`/dashboard/${houseCode}/menu`} className={styles.backLink}>
+          <Link href={`${basePath}/menu`} className={styles.backLink}>
             <Image src="/iconos/flechaatras.svg" alt="Volver" width={20} height={20} className={styles.backIcon} />
           </Link>
           <div className={styles.headerCenter}>
@@ -43,16 +48,16 @@ export function FacturasScreen({ houseCode }: FacturasScreenProps) {
                 <Link
                   href={
                     section.key === "alquiler"
-                      ? `/dashboard/${houseCode}/facturas/alquiler`
+                      ? `${basePath}/facturas/alquiler`
                       : section.key === "suscripciones"
-                        ? `/dashboard/${houseCode}/facturas/suscripciones`
+                        ? `${basePath}/facturas/suscripciones`
                         : section.key === "wifi"
-                          ? `/dashboard/${houseCode}/facturas/wifi`
+                          ? `${basePath}/facturas/wifi`
                           : section.key === "agua"
-                            ? `/dashboard/${houseCode}/facturas/agua`
+                            ? `${basePath}/facturas/agua`
                             : section.key === "luz"
-                              ? `/dashboard/${houseCode}/facturas/luz`
-                      : `/dashboard/${houseCode}/facturas`
+                              ? `${basePath}/facturas/luz`
+                      : `${basePath}/facturas`
                   }
                   className={styles.viewAll}
                 >

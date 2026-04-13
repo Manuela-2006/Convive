@@ -10,6 +10,7 @@ import styles from "./area-personal-screen.module.css";
 
 type AreaPersonalScreenProps = {
   houseCode: string;
+  dashboardPath?: string;
 };
 
 const summaryCards = [
@@ -24,12 +25,16 @@ const pieData = [
   { name: "Compras", value: 25, color: "#8B1A2F" },
 ];
 
-export function AreaPersonalScreen({ houseCode }: AreaPersonalScreenProps) {
+export function AreaPersonalScreen({
+  houseCode,
+  dashboardPath,
+}: AreaPersonalScreenProps) {
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`/dashboard/${houseCode}/menu`} className={styles.backLink}>
+          <Link href={`${basePath}/menu`} className={styles.backLink}>
             <Image
               src="/iconos/flechaatras.svg"
               alt="Volver"
@@ -116,7 +121,7 @@ export function AreaPersonalScreen({ houseCode }: AreaPersonalScreenProps) {
           <Card className={styles.sectionCard}>
             <div className={styles.historyTop}>
               <h2 className={styles.sectionHeader}>Historial</h2>
-              <Link href={`/dashboard/${houseCode}/area-personal/historial`} className={styles.viewAll}>
+              <Link href={`${basePath}/area-personal/historial`} className={styles.viewAll}>
                 Ver todo &gt;
               </Link>
             </div>

@@ -9,14 +9,19 @@ import styles from "./herramientas-entra-screen.module.css";
 
 type HerramientasEntraScreenProps = {
   houseCode: string;
+  dashboardPath?: string;
 };
 
-export function HerramientasEntraScreen({ houseCode }: HerramientasEntraScreenProps) {
+export function HerramientasEntraScreen({
+  houseCode,
+  dashboardPath,
+}: HerramientasEntraScreenProps) {
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`/dashboard/${houseCode}/herramientas`} className={styles.backLink}>
+          <Link href={`${basePath}/herramientas`} className={styles.backLink}>
             <Image src="/iconos/flechaatras.svg" alt="Volver" width={20} height={20} className={styles.backIcon} />
           </Link>
           <div className={styles.headerCenter}>
@@ -29,7 +34,7 @@ export function HerramientasEntraScreen({ houseCode }: HerramientasEntraScreenPr
         <div className={styles.content}>
           <Card className={styles.card}>
             <div className={styles.topRow}>
-              <Link href={`/dashboard/${houseCode}/herramientas`} className={styles.inlineBack}>
+              <Link href={`${basePath}/herramientas`} className={styles.inlineBack}>
                 ←
               </Link>
               <h2 className={styles.cardTitle}>Simulador de escenarios</h2>

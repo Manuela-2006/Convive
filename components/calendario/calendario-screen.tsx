@@ -11,6 +11,7 @@ import styles from "./calendario-screen.module.css";
 
 type CalendarioScreenProps = {
   houseCode: string;
+  dashboardPath?: string;
 };
 
 const weekdayMap = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
@@ -26,9 +27,13 @@ function monthLabel(date: Date) {
     .toUpperCase();
 }
 
-export function CalendarioScreen({ houseCode }: CalendarioScreenProps) {
+export function CalendarioScreen({
+  houseCode,
+  dashboardPath,
+}: CalendarioScreenProps) {
   const calendarRef = useRef<FullCalendar | null>(null);
   const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 2, 1));
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
 
   const currentLabel = useMemo(() => monthLabel(currentDate), [currentDate]);
 
@@ -43,7 +48,7 @@ export function CalendarioScreen({ houseCode }: CalendarioScreenProps) {
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`/dashboard/${houseCode}/menu`} className={styles.backLink}>
+          <Link href={`${basePath}/menu`} className={styles.backLink}>
             <Image src="/iconos/flechaatras.svg" alt="Volver" width={20} height={20} className={styles.backIcon} />
           </Link>
           <div className={styles.headerCenter}>

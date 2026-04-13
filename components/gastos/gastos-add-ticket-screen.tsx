@@ -13,6 +13,7 @@ import styles from "./gastos-add-ticket-screen.module.css";
 
 type GastosAddTicketScreenProps = {
   houseCode: string;
+  dashboardPath?: string;
 };
 
 function formatDate(date?: Date) {
@@ -23,14 +24,18 @@ function formatDate(date?: Date) {
   return `${day}/${month}/${year}`;
 }
 
-export function GastosAddTicketScreen({ houseCode }: GastosAddTicketScreenProps) {
+export function GastosAddTicketScreen({
+  houseCode,
+  dashboardPath,
+}: GastosAddTicketScreenProps) {
   const [date, setDate] = useState<Date | undefined>(new Date(2026, 1, 21));
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
 
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`/dashboard/${houseCode}/gastos`} className={styles.backLink}>
+          <Link href={`${basePath}/gastos`} className={styles.backLink}>
             <Image src="/iconos/flechaatras.svg" alt="Volver" width={20} height={20} className={styles.backIcon} />
           </Link>
           <div className={styles.headerCenter}>
@@ -43,7 +48,7 @@ export function GastosAddTicketScreen({ houseCode }: GastosAddTicketScreenProps)
         <div className={styles.content}>
           <Card className={styles.card}>
             <div className={styles.cardTop}>
-              <Link href={`/dashboard/${houseCode}/gastos`} className={styles.inlineBack} aria-label="Volver a gastos">
+              <Link href={`${basePath}/gastos`} className={styles.inlineBack} aria-label="Volver a gastos">
                 ←
               </Link>
               <h2 className={styles.cardTitle}>Añadir ticket</h2>
@@ -71,7 +76,7 @@ export function GastosAddTicketScreen({ houseCode }: GastosAddTicketScreenProps)
             </section>
 
             <section className={styles.block}>
-              <h3 className={styles.blockTitle}>3 - Selecciona los aticulos del piso</h3>
+              <h3 className={styles.blockTitle}>3 - Selecciona los articulos del piso</h3>
               <div className={styles.checkCol}>
                 <label className={styles.checkLabel}>
                   <Checkbox className={styles.checkbox} id="art-leche" /> Leche

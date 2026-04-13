@@ -8,14 +8,19 @@ import styles from "./herramientas-screen.module.css";
 
 type HerramientasScreenProps = {
   houseCode: string;
+  dashboardPath?: string;
 };
 
-export function HerramientasScreen({ houseCode }: HerramientasScreenProps) {
+export function HerramientasScreen({
+  houseCode,
+  dashboardPath,
+}: HerramientasScreenProps) {
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`/dashboard/${houseCode}/menu`} className={styles.backLink}>
+          <Link href={`${basePath}/menu`} className={styles.backLink}>
             <Image src="/iconos/flechaatras.svg" alt="Volver" width={20} height={20} className={styles.backIcon} />
           </Link>
           <div className={styles.headerCenter}>
@@ -32,7 +37,7 @@ export function HerramientasScreen({ houseCode }: HerramientasScreenProps) {
               Simula como afectaria a los pagos comunes, la entrada o salida de personas al piso o incluso el cambio en otros factores.
             </p>
             <div className={styles.actionsRow}>
-              <Link href={`/dashboard/${houseCode}/herramientas/entra-alguien`} className={`convive-button ${styles.smallButton}`}>
+              <Link href={`${basePath}/herramientas/entra-alguien`} className={`convive-button ${styles.smallButton}`}>
                 + Entra alguien
               </Link>
               <Button className={styles.smallButton}>- Sale alguien</Button>

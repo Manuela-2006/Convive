@@ -2,44 +2,54 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "../ui/button";
 import { Card } from "../ui/card";
+import type { SharedExpense } from "../../lib/dashboard-types";
+import {
+  formatCurrency,
+  formatMonthLabel,
+  formatShortDate,
+} from "../../lib/dashboard-presenters";
 import styles from "./gastos-division-screen.module.css";
 
 type GastosDivisionScreenProps = {
   houseCode: string;
+  dashboardPath?: string;
+  sharedExpenses?: SharedExpense[];
 };
 
-const monthlySplits = [
-  {
-    month: "Enero 2026",
-    rows: [
-      { concept: "Compra Mercadona", date: "2/01/2026", meta: "Participantes: Lucia, Claudia, Samuel y Esteban", amount: "23€" },
-      { concept: "Factura del wifi", date: "2/01/2026", meta: "Participantes: Lucia, Claudia, Samuel y Esteban", amount: "23€" },
-      { concept: "Compra Mercadona", date: "2/01/2026", meta: "Participantes: Lucia, Claudia, Samuel y Esteban", amount: "23€" },
-      { concept: "Factura del wifi", date: "2/01/2026", meta: "Participantes: Lucia, Claudia, Samuel y Esteban", amount: "23€" },
-    ],
-  },
-  {
-    month: "Diciembre 2025",
-    rows: [
-      { concept: "Compra Mercadona", date: "2/01/2026", meta: "Participantes: Lucia, Claudia, Samuel y Esteban", amount: "23€" },
-      { concept: "Factura del wifi", date: "2/01/2026", meta: "Participantes: Lucia, Claudia, Samuel y Esteban", amount: "23€" },
-      { concept: "Compra Mercadona", date: "2/01/2026", meta: "Participantes: Lucia, Claudia, Samuel y Esteban", amount: "23€" },
-      { concept: "Factura del wifi", date: "2/01/2026", meta: "Participantes: Lucia, Claudia, Samuel y Esteban", amount: "23€" },
-      { concept: "Compra Mercadona", date: "2/01/2026", meta: "Participantes: Lucia, Claudia, Samuel y Esteban", amount: "23€" },
-      { concept: "Factura del wifi", date: "2/01/2026", meta: "Participantes: Lucia, Claudia, Samuel y Esteban", amount: "23€" },
-    ],
-  },
-];
+export function GastosDivisionScreen({
+  houseCode,
+  dashboardPath,
+  sharedExpenses = [],
+}: GastosDivisionScreenProps) {
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const groupedExpenses = sharedExpenses.reduce<
+    Array<{ month: string; rows: SharedExpense[] }>
+  >((groups, expense) => {
+    const month = formatMonthLabel(expense.expense_date);
+    const currentGroup = groups.find((group) => group.month === month);
 
-export function GastosDivisionScreen({ houseCode }: GastosDivisionScreenProps) {
+    if (currentGroup) {
+      currentGroup.rows.push(expense);
+      return groups;
+    }
+
+    groups.push({ month, rows: [expense] });
+    return groups;
+  }, []);
+
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`/dashboard/${houseCode}/gastos`} className={styles.backLink}>
-            <Image src="/iconos/flechaatras.svg" alt="Volver" width={20} height={20} className={styles.backIcon} />
+          <Link href={`${basePath}/gastos`} className={styles.backLink}>
+            <Image
+              src="/iconos/flechaatras.svg"
+              alt="Volver"
+              width={20}
+              height={20}
+              className={styles.backIcon}
+            />
           </Link>
           <div className={styles.headerCenter}>
             <h1 className={styles.title}>Gastos</h1>
@@ -52,39 +62,65 @@ export function GastosDivisionScreen({ houseCode }: GastosDivisionScreenProps) {
           <Card className={styles.card}>
             <div className={styles.cardTop}>
               <div className={styles.titleWrap}>
-                <Link href={`/dashboard/${houseCode}/gastos`} className={styles.inlineBack} aria-label="Volver a gastos">
+                <Link
+                  href={`${basePath}/gastos`}
+                  className={styles.inlineBack}
+                  aria-label="Volver a gastos"
+                >
                   ←
                 </Link>
                 <h2 className={styles.cardTitle}>Division de gastos</h2>
               </div>
               <div className={styles.searchWrap}>
-                <input className={styles.searchInput} placeholder="Buscar" />
+                <input
+                  className={styles.searchInput}
+                  placeholder="Buscar"
+                  aria-label="Buscar gastos"
+                />
                 <Image src="/iconos/Lupa.svg" alt="" width={14} height={14} />
               </div>
             </div>
 
             <div className={styles.listWrap}>
-              {monthlySplits.map((group) => (
-                <section key={group.month} className={styles.monthBlock}>
-                  <h3 className={styles.monthTitle}>{group.month}</h3>
-                  <div className={styles.monthRows}>
-                    {group.rows.map((item, idx) => (
-                      <div key={`${group.month}-${idx}`} className={styles.row}>
-                        <div className={styles.left}>
-                          <Image src="/iconos/building-2-svgrepo-com 1.svg" alt="" width={20} height={20} />
-                          <div>
-                            <p className={styles.main}>{item.concept}</p>
-                            <p className={styles.sub}>{item.date}</p>
-                            <p className={styles.meta}>{item.meta}</p>
+              {groupedExpenses.length ? (
+                groupedExpenses.map((group) => (
+                  <section key={group.month} className={styles.monthBlock}>
+                    <h3 className={styles.monthTitle}>{group.month}</h3>
+                    <div className={styles.monthRows}>
+                      {group.rows.map((expense) => (
+                        <div key={expense.expense_id} className={styles.row}>
+                          <div className={styles.left}>
+                            <Image
+                              src="/iconos/building-2-svgrepo-com 1.svg"
+                              alt=""
+                              width={20}
+                              height={20}
+                            />
+                            <div>
+                              <p className={styles.main}>{expense.title}</p>
+                              <p className={styles.sub}>
+                                {formatShortDate(expense.expense_date)}
+                              </p>
+                              <p className={styles.meta}>
+                                Participantes:{" "}
+                                {expense.participants_text || "Sin participantes"}
+                              </p>
+                            </div>
                           </div>
+                          <p className={styles.amount}>
+                            {formatCurrency(expense.total_amount, expense.currency)}
+                          </p>
+                          <button className={styles.button}>Ver reparto</button>
                         </div>
-                        <p className={styles.amount}>{item.amount}</p>
-                        <Button className={styles.button}>Ver reparto</Button>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              ))}
+                      ))}
+                    </div>
+                  </section>
+                ))
+              ) : (
+                <p className={styles.emptyState}>
+                  Todavía no hay repartos de gastos registrados.
+                </p>
+              )}
             </div>
           </Card>
         </div>
@@ -92,4 +128,3 @@ export function GastosDivisionScreen({ houseCode }: GastosDivisionScreenProps) {
     </main>
   );
 }
-

@@ -8,6 +8,7 @@ import styles from "./limpieza-screen.module.css";
 
 type LimpiezaScreenProps = {
   houseCode: string;
+  dashboardPath?: string;
 };
 
 const taskGroups = [
@@ -34,12 +35,16 @@ const overlayTasks = [
   { top: "64%", left: "69%" },
 ];
 
-export function LimpiezaScreen({ houseCode }: LimpiezaScreenProps) {
+export function LimpiezaScreen({
+  houseCode,
+  dashboardPath,
+}: LimpiezaScreenProps) {
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`/dashboard/${houseCode}/menu`} className={styles.backLink}>
+          <Link href={`${basePath}/menu`} className={styles.backLink}>
             <Image src="/iconos/flechaatras.svg" alt="Volver" width={20} height={20} className={styles.backIcon} />
           </Link>
           <div className={styles.headerCenter}>

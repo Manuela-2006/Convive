@@ -12,6 +12,7 @@ import styles from "./area-grupal-screen.module.css";
 
 type AreaGrupalScreenProps = {
   houseCode: string;
+  dashboardPath?: string;
 };
 
 const barData = [
@@ -37,12 +38,16 @@ const compareItems = [
   { name: "Wifi", value: "50€", trend: "down", text: "Igual que el ano pasado" },
 ];
 
-export function AreaGrupalScreen({ houseCode }: AreaGrupalScreenProps) {
+export function AreaGrupalScreen({
+  houseCode,
+  dashboardPath,
+}: AreaGrupalScreenProps) {
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`/dashboard/${houseCode}/menu`} className={styles.backLink}>
+          <Link href={`${basePath}/menu`} className={styles.backLink}>
             <Image src="/iconos/flechaatras.svg" alt="Volver" width={20} height={20} className={styles.backIcon} />
           </Link>
           <div className={styles.headerCenter}>

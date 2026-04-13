@@ -7,9 +7,16 @@ type HomeBoardProps = {
   houseCode: string;
   houseName: string;
   memberCount: number;
+  dashboardPath?: string;
 };
 
-export function HomeBoard({ houseCode, houseName, memberCount }: HomeBoardProps) {
+export function HomeBoard({
+  houseCode,
+  houseName,
+  memberCount,
+  dashboardPath,
+}: HomeBoardProps) {
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
   const totalPayments = Math.max(memberCount + 6, 8);
   const verifiedPayments = Math.max(totalPayments - 3, 1);
   const pendingPayments = totalPayments - verifiedPayments;
@@ -67,7 +74,7 @@ export function HomeBoard({ houseCode, houseName, memberCount }: HomeBoardProps)
         </div>
       </section>
 
-      <Link href={`/dashboard/${houseCode}/menu`} className={styles.menu}>
+      <Link href={`${basePath}/menu`} className={styles.menu}>
         <Image
           src="/iconos/Iconopuerta.svg"
           alt="Menú"
