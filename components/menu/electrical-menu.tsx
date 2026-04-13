@@ -42,7 +42,7 @@ export function ElectricalMenu({ houseCode }: ElectricalMenuProps) {
       title: "Principal",
       items: [
         { code: "01", label: "Inicio", href: `/dashboard/${houseCode}` },
-        { code: "02", label: "Área personal", href: `/dashboard/${houseCode}/area-personal` },
+        { code: "02", label: "Área personal", href: `/dashboard/${houseCode}/area-grupal` },
         { code: "03", label: "Gastos", href: `/dashboard/${houseCode}/gastos` },
         { code: "04", label: "Facturas", href: `/dashboard/${houseCode}/facturas` },
       ],

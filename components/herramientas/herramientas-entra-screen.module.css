@@ -1,0 +1,319 @@
+﻿.page {
+  min-height: 100svh;
+  background-image: url("/images/herramientas/fondo.webp");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  padding: clamp(0.9rem, 2vw, 1.5rem);
+  display: grid;
+  place-items: center;
+}
+
+.panel {
+  width: calc(100% * 7 / 12);
+  max-width: 980px;
+  background: rgba(240, 234, 228, 0.5);
+  border-radius: 10px;
+  overflow: hidden;
+  border: none;
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+}
+
+.header {
+  background: #8b1a2f;
+  color: #f0eae4;
+  padding: 1.05rem 0.95rem;
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  align-items: center;
+}
+
+.backLink {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+}
+
+.backIcon {
+  width: 44px;
+  height: 44px;
+}
+
+.headerCenter {
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  color: #f0eae4;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  margin: 0.3rem 0 0;
+  color: #f0eae4;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.content {
+  padding: 1rem;
+}
+
+.card {
+  background: #f0ebe6;
+  border: none;
+  border-radius: 8px;
+  padding: 1.2rem 1.3rem 1.35rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.inlineBack {
+  color: #8b1a2f;
+  text-decoration: none;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.cardTitle {
+  margin: 0;
+  color: #8b1a2f;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: clamp(26px, 2vw, 38px);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.question {
+  margin: 1rem 0 0.3rem;
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.formBlock {
+  margin-top: 0.45rem;
+  display: grid;
+  gap: 0.28rem;
+  width: min(360px, 100%);
+}
+
+.formBlock label {
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+}
+
+.field,
+.fieldSelect {
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #be6f8b;
+  background: #f0ebe6;
+  color: #3a3531;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+}
+
+.field {
+  padding: 0 0.65rem;
+}
+
+.fieldSelect {
+  padding: 0 0.65rem;
+}
+
+.simButton {
+  margin-top: 0.8rem;
+  background: #be6f8b;
+  color: #f0eae4;
+  border: none;
+  border-radius: 8px;
+  height: 34px;
+  padding: 0 1.1rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+}
+
+.sectionTitle {
+  margin: 1.05rem 0 0.35rem;
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.stateCard {
+  width: min(420px, 100%);
+  background: #8b1a2f;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 0.75rem 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+}
+
+.stateRow {
+  background: #f0ebe6;
+  border-radius: 8px;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.55rem;
+}
+
+.stateRow + .stateRow {
+  margin-top: 0.42rem;
+}
+
+.personTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+}
+
+.stateRow strong {
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stateLabel {
+  margin: 0.45rem -0.75rem 0;
+  color: #f0eae4;
+  background: #8b1a2f;
+  border-top: 1px solid #6f1728;
+  border-radius: 0 0 8px 8px;
+  text-align: center;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.3rem 0 0.36rem;
+}
+
+.durationTitle {
+  margin: 0.35rem 0 0.2rem;
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+}
+
+.timeline {
+  width: min(270px, 100%);
+  height: 2px;
+  background: #d8b7c1;
+  margin: 0.35rem 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #be6f8b;
+  margin-top: -1px;
+}
+
+.dates {
+  width: min(300px, 100%);
+  margin-top: 0.35rem;
+  display: flex;
+  justify-content: space-between;
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+}
+
+@media (max-width: 1200px) {
+  .panel {
+    width: min(100%, 760px);
+  }
+
+  .cardTitle {
+    font-size: clamp(24px, 4vw, 34px);
+  }
+
+  .sectionTitle {
+    font-size: 24px;
+  }
+
+  .stateLabel {
+    font-size: 34px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .panel {
+    width: 100%;
+  }
+
+  .card {
+    padding: 0.95rem 0.8rem 1rem;
+  }
+
+  .backLink {
+    width: 38px;
+    height: 38px;
+  }
+
+  .backIcon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .inlineBack {
+    font-size: 28px;
+  }
+
+  .question {
+    font-size: 17px;
+  }
+
+  .formBlock label {
+    font-size: 14px;
+  }
+
+  .sectionTitle {
+    font-size: 20px;
+  }
+
+  .stateRow strong {
+    font-size: 28px;
+  }
+
+  .personTag {
+    font-size: 16px;
+  }
+
+  .stateLabel {
+    font-size: 28px;
+  }
+}
