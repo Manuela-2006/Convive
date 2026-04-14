@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { FacturasAddScreen } from "../../../../../../components/facturas/facturas-add-screen";
+import { MiniDoorLink } from "../../../../../../components/ui/mini-door-link";
 import { getAccessibleHouseContext } from "../../../../../../lib/dashboard";
 import { createClient } from "../../../../../../utils/supabase/server";
 
@@ -26,9 +27,16 @@ export default async function FacturasAddPage({ params }: FacturasAddPageProps) 
   const routeContext = await getAccessibleHouseContext(userCode, houseCode);
 
   return (
-    <FacturasAddScreen
-      houseCode={routeContext.house.public_code}
-      dashboardPath={routeContext.dashboardPath}
-    />
+    <>
+      <MiniDoorLink
+        menuHref={`${routeContext.dashboardPath}/menu`}
+        dashboardPath={routeContext.dashboardPath}
+        currentScreen="facturas"
+      />
+      <FacturasAddScreen
+        houseCode={routeContext.house.public_code}
+        dashboardPath={routeContext.dashboardPath}
+      />
+    </>
   );
 }

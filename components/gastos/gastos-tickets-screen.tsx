@@ -67,7 +67,12 @@ export function GastosTicketsScreen({
                   className={styles.inlineBack}
                   aria-label="Volver a gastos"
                 >
-                  ←
+                  <Image
+                    src="/iconos/flechaatras.svg"
+                    alt=""
+                    width={34}
+                    height={34}
+                  />
                 </Link>
                 <h2 className={styles.cardTitle}>Tickets de compra</h2>
               </div>

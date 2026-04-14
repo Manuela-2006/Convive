@@ -77,7 +77,7 @@ export function GastosScreen({
                 Ver todo &gt;
               </Link>
             </div>
-            <Card className={styles.innerPaper}>
+            <Card className={`${styles.innerPaper} ${styles.ticketsPaper}`}>
               {visibleTickets.length ? (
                 visibleTickets.map((ticket) => (
                   <div key={ticket.ticket_id} className={styles.innerRow}>
@@ -118,7 +118,7 @@ export function GastosScreen({
                 Ver todo &gt;
               </Link>
             </div>
-            <Card className={styles.innerPaper}>
+            <Card className={`${styles.innerPaper} ${styles.divisionPaper}`}>
               {visibleSharedExpenses.length ? (
                 visibleSharedExpenses.map((expense) => (
                   <div key={expense.expense_id} className={styles.innerRow}>

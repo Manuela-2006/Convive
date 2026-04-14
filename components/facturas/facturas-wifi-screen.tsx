@@ -46,7 +46,12 @@ export function FacturasWifiScreen({
             <div className={styles.cardTop}>
               <div className={styles.titleWrap}>
                 <Link href={`${basePath}/facturas`} className={styles.inlineBack} aria-label="Volver a facturas">
-                  ←
+                  <Image
+                    src="/iconos/flechaatras.svg"
+                    alt=""
+                    width={34}
+                    height={34}
+                  />
                 </Link>
                 <h2 className={styles.cardTitle}>Facturas wifi</h2>
               </div>

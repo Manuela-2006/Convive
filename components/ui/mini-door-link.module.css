@@ -1,0 +1,237 @@
+.miniPanel {
+  position: fixed;
+  bottom: 14px;
+  left: 14px;
+  z-index: 70;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.miniDoorLink {
+  display: inline-block;
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+.doorCard {
+  position: relative;
+  width: 52px;
+  height: 64px;
+  display: block;
+  border-radius: 10px;
+  background: #f0ebe6;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+}
+
+.doorHandle {
+  position: absolute;
+  top: 19px;
+  right: 8px;
+  width: 15px;
+  height: 15px;
+  display: block;
+  filter: brightness(0) saturate(100%) invert(23%) sepia(33%) saturate(2458%) hue-rotate(327deg) brightness(89%) contrast(90%);
+}
+
+.menuText {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 7px;
+  text-align: center;
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.switchesWrap {
+  width: 150px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+  background: rgba(240, 234, 228, 0.34);
+  border: 1px solid rgba(240, 234, 228, 0.4);
+  border-radius: 8px;
+  padding: 5px;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  max-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.24s ease,
+    visibility 0s linear 0.24s;
+}
+
+.miniPanel:hover .switchesWrap,
+.miniPanel:focus-within .switchesWrap {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  max-height: 520px;
+  pointer-events: auto;
+  transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.24s ease;
+}
+
+.miniItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  width: 132px;
+  min-height: 30px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.miniSwitch {
+  width: 27px;
+  height: 32px;
+  border-radius: 4px;
+  background: #cbc7c3;
+  border: 1px solid #b8b4b0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+  display: grid;
+  place-items: center;
+  padding-top: 0;
+  position: relative;
+}
+
+.miniLever {
+  width: 7px;
+  height: 13px;
+  border-radius: 5px 5px 3px 3px;
+  background: linear-gradient(to bottom, #cfcac5, #aaa6a2 72%, #9a9692);
+  border: 1px solid #8f8b86;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  z-index: 1;
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: height 0.2s ease;
+}
+
+.miniLeverActive {
+  height: 16px;
+}
+
+.miniPiece {
+  width: 13px;
+  height: 7px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, #f4f2ef, #e8e5e1);
+  border: 1px solid #d2ceca;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  z-index: 2;
+  transition: top 0.2s ease, bottom 0.2s ease, background-color 0.2s ease,
+    border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.miniPieceActive {
+  top: 6px;
+  bottom: auto;
+  background: #8b1a2f;
+  border-color: rgba(97, 20, 33, 0.82);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 1px 1px rgba(0, 0, 0, 0.24);
+}
+
+
+.miniLabel {
+  pointer-events: auto;
+  color: #111111;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-family: "Poppins", sans-serif;
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 1.1;
+  text-shadow: none;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+@media (max-width: 640px) {
+  .miniPanel {
+    bottom: 10px;
+    left: 10px;
+    gap: 6px;
+  }
+
+  .doorCard {
+    width: 46px;
+    height: 56px;
+    border-radius: 9px;
+  }
+
+  .doorHandle {
+    top: 16px;
+    right: 7px;
+    width: 13px;
+    height: 13px;
+  }
+
+  .menuText {
+    bottom: 6px;
+    font-size: 9px;
+  }
+
+  .switchesWrap {
+    width: 138px;
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .miniItem {
+    gap: 8px;
+    width: 122px;
+    min-height: 27px;
+    padding: 0;
+  }
+
+  .miniSwitch {
+    width: 24px;
+    height: 29px;
+    padding-top: 0;
+  }
+
+  .miniLever {
+    width: 6px;
+    height: 11px;
+    border-radius: 5px 5px 3px 3px;
+  }
+
+  .miniLeverActive {
+    height: 14px;
+  }
+
+  .miniPiece {
+    width: 11px;
+    height: 6px;
+    bottom: 7px;
+  }
+
+  .miniPieceActive {
+    top: 6px;
+  }
+
+  .miniLabel {
+    font-size: 7px;
+  }
+}

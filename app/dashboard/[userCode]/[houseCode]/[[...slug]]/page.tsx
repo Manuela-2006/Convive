@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 
 import { AjustesScreen } from "../../../../../components/ajustes/ajustes-screen";
 import { AreaGrupalScreen } from "../../../../../components/area-grupal/area-grupal-screen";
@@ -22,6 +23,7 @@ import { HerramientasScreen } from "../../../../../components/herramientas/herra
 import { HomeBoard } from "../../../../../components/home/home-board";
 import { LimpiezaScreen } from "../../../../../components/limpieza/limpieza-screen";
 import { ElectricalMenu } from "../../../../../components/menu/electrical-menu";
+import { MiniDoorLink, type MenuKey } from "../../../../../components/ui/mini-door-link";
 import {
   getAccessibleHouseContext,
   loadHouseExpensesDashboardWithClient,
@@ -35,6 +37,23 @@ type HouseRoutePageProps = {
     slug?: string[];
   }>;
 };
+
+function withMiniDoor(
+  content: ReactNode,
+  dashboardPath: string,
+  currentScreen: MenuKey
+) {
+  return (
+    <>
+      <MiniDoorLink
+        menuHref={`${dashboardPath}/menu`}
+        dashboardPath={dashboardPath}
+        currentScreen={currentScreen}
+      />
+      {content}
+    </>
+  );
+}
 
 async function loadMemberCount(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -80,128 +99,156 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
   }
 
   if (sectionPath === "area-personal") {
-    return (
+    return withMiniDoor(
       <AreaPersonalScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "area-personal"
     );
   }
 
   if (sectionPath === "area-personal/historial") {
-    return (
+    return withMiniDoor(
       <AreaPersonalHistoryScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "area-personal"
     );
   }
 
   if (sectionPath === "area-grupal") {
-    return (
+    return withMiniDoor(
       <AreaGrupalScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "area-grupal"
     );
   }
 
   if (sectionPath === "calendario") {
-    return (
+    return withMiniDoor(
       <CalendarioScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "calendario"
     );
   }
 
   if (sectionPath === "limpieza") {
-    return (
+    return withMiniDoor(
       <LimpiezaScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "limpieza"
     );
   }
 
   if (sectionPath === "herramientas") {
-    return (
+    return withMiniDoor(
       <HerramientasScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "herramientas"
     );
   }
 
   if (sectionPath === "herramientas/entra-alguien") {
-    return (
+    return withMiniDoor(
       <HerramientasEntraScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "herramientas"
     );
   }
 
   if (sectionPath === "ajustes") {
-    return (
+    return withMiniDoor(
       <AjustesScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "ajustes"
     );
   }
 
   if (sectionPath === "facturas") {
-    return (
+    return withMiniDoor(
       <FacturasScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "facturas"
     );
   }
 
   if (sectionPath === "facturas/alquiler") {
-    return (
+    return withMiniDoor(
       <FacturasAlquilerScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "facturas"
     );
   }
 
   if (sectionPath === "facturas/suscripciones") {
-    return (
+    return withMiniDoor(
       <FacturasSuscripcionesScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "facturas"
     );
   }
 
   if (sectionPath === "facturas/wifi") {
-    return (
+    return withMiniDoor(
       <FacturasWifiScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "facturas"
     );
   }
 
   if (sectionPath === "facturas/agua") {
-    return (
+    return withMiniDoor(
       <FacturasAguaScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "facturas"
     );
   }
 
   if (sectionPath === "facturas/luz") {
-    return (
+    return withMiniDoor(
       <FacturasLuzScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "facturas"
     );
   }
 
@@ -215,63 +262,75 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
     : null;
 
   if (sectionPath === "gastos") {
-    return (
+    return withMiniDoor(
       <GastosScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
         tickets={expensesDashboard?.tickets ?? []}
         sharedExpenses={expensesDashboard?.shared_expenses ?? []}
         settlements={expensesDashboard?.settlements ?? []}
-      />
+      />,
+      routeContext.dashboardPath,
+      "gastos"
     );
   }
 
   if (sectionPath === "gastos/tickets") {
-    return (
+    return withMiniDoor(
       <GastosTicketsScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
         tickets={expensesDashboard?.tickets ?? []}
-      />
+      />,
+      routeContext.dashboardPath,
+      "gastos"
     );
   }
 
   if (sectionPath === "gastos/division") {
-    return (
+    return withMiniDoor(
       <GastosDivisionScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
         sharedExpenses={expensesDashboard?.shared_expenses ?? []}
-      />
+      />,
+      routeContext.dashboardPath,
+      "gastos"
     );
   }
 
   if (sectionPath === "gastos/simplificar") {
-    return (
+    return withMiniDoor(
       <GastosSimplificarScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
         settlements={expensesDashboard?.settlements ?? []}
-      />
+      />,
+      routeContext.dashboardPath,
+      "gastos"
     );
   }
 
   if (sectionPath === "gastos/simplificar/pago-simplificado") {
-    return (
+    return withMiniDoor(
       <GastosPagoSimplificadoScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
         settlements={expensesDashboard?.settlements ?? []}
-      />
+      />,
+      routeContext.dashboardPath,
+      "gastos"
     );
   }
 
   if (sectionPath === "gastos/anadir-ticket") {
-    return (
+    return withMiniDoor(
       <GastosAddTicketScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-      />
+      />,
+      routeContext.dashboardPath,
+      "gastos"
     );
   }
 

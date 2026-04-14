@@ -67,7 +67,12 @@ export function GastosDivisionScreen({
                   className={styles.inlineBack}
                   aria-label="Volver a gastos"
                 >
-                  ←
+                  <Image
+                    src="/iconos/flechaatras.svg"
+                    alt=""
+                    width={34}
+                    height={34}
+                  />
                 </Link>
                 <h2 className={styles.cardTitle}>Division de gastos</h2>
               </div>
