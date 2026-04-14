@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
-import styles from "./facturas-alquiler-screen.module.css";
+import styles from "./facturas-history-screen.module.css";
 
 type FacturasAlquilerScreenProps = {
   houseCode: string;
@@ -41,7 +41,7 @@ export function FacturasAlquilerScreen({ houseCode }: FacturasAlquilerScreenProp
             <div className={styles.cardTop}>
               <div className={styles.titleWrap}>
                 <Link href={`/dashboard/${houseCode}/facturas`} className={styles.inlineBack} aria-label="Volver a facturas">
-                  ←
+                  <Image src="/iconos/flechaatras.svg" alt="" width={42} height={42} />
                 </Link>
                 <h2 className={styles.cardTitle}>Facturas alquiler</h2>
               </div>
@@ -61,11 +61,11 @@ export function FacturasAlquilerScreen({ houseCode }: FacturasAlquilerScreenProp
                         <div className={styles.left}>
                           <Image src="/iconos/building-2-svgrepo-com 1.svg" alt="" width={20} height={20} />
                           <div>
-                            <p className={styles.mainText}>Factura de el alquiler</p>
+                            <p className={styles.mainText}>Factura del alquiler</p>
                             <p className={styles.dateText}>15 de Mayo</p>
                           </div>
                         </div>
-                        <p className={styles.amount}>23€</p>
+                        <p className={styles.amount}>{"23\u20AC"}</p>
                         <Button className={styles.actionButton}>Ver factura</Button>
                       </div>
                     ))}
@@ -79,4 +79,3 @@ export function FacturasAlquilerScreen({ houseCode }: FacturasAlquilerScreenProp
     </main>
   );
 }
-

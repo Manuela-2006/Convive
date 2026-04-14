@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
-import styles from "./facturas-luz-screen.module.css";
+import styles from "./facturas-history-screen.module.css";
 
 type FacturasLuzScreenProps = {
   houseCode: string;
@@ -41,7 +41,7 @@ export function FacturasLuzScreen({ houseCode }: FacturasLuzScreenProps) {
             <div className={styles.cardTop}>
               <div className={styles.titleWrap}>
                 <Link href={`/dashboard/${houseCode}/facturas`} className={styles.inlineBack} aria-label="Volver a facturas">
-                  ←
+                  <Image src="/iconos/flechaatras.svg" alt="" width={42} height={42} />
                 </Link>
                 <h2 className={styles.cardTitle}>Facturas luz</h2>
               </div>
@@ -65,7 +65,7 @@ export function FacturasLuzScreen({ houseCode }: FacturasLuzScreenProps) {
                             <p className={styles.dateText}>15 de Mayo</p>
                           </div>
                         </div>
-                        <p className={styles.amount}>23€</p>
+                        <p className={styles.amount}>{"23\u20AC"}</p>
                         <Button className={styles.actionButton}>Ver factura</Button>
                       </div>
                     ))}
@@ -79,4 +79,3 @@ export function FacturasLuzScreen({ houseCode }: FacturasLuzScreenProps) {
     </main>
   );
 }
-

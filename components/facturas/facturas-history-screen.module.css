@@ -1,6 +1,6 @@
-.page {
+﻿.page {
   min-height: 100svh;
-  background-image: url("/images/Gastos/gastos.webp");
+  background-image: url("/images/gastos/gastos.webp");
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -92,16 +92,22 @@
 .inlineBack {
   color: #8b1a2f;
   text-decoration: none;
-  font-family: "Poppins", sans-serif;
-  font-size: 30px;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.inlineBack :global(img) {
+  filter: brightness(0) saturate(100%) invert(15%) sepia(25%) saturate(4849%) hue-rotate(329deg) brightness(84%) contrast(98%);
 }
 
 .cardTitle {
   margin: 0;
   color: #8b1a2f;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: 34px;
+  font-size: 22px;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -129,25 +135,46 @@
   margin-top: 0.8rem;
   max-height: min(60vh, 680px);
   overflow-y: auto;
-  padding-right: 0.15rem;
+  padding-right: 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: #8b1a2f transparent;
+}
+
+.listWrap::-webkit-scrollbar {
+  width: 10px;
+}
+
+.listWrap::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 999px;
+}
+
+.listWrap::-webkit-scrollbar-thumb {
+  background: #8b1a2f;
+  border-radius: 999px;
+  border: 0;
+}
+
+.listWrap::-webkit-scrollbar-thumb:hover {
+  background: #761428;
 }
 
 .monthBlock + .monthBlock {
-  margin-top: 1rem;
+  margin-top: 1.8rem;
 }
 
 .monthTitle {
   margin: 0;
   color: #8b1a2f;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: 32px;
+  font-size: 18px;
   font-weight: 700;
 }
 
 .monthRows {
-  margin-top: 0.45rem;
+  margin-top: 1.1rem;
   display: grid;
-  gap: 0.6rem;
+  gap: 1.5rem;
 }
 
 .row {
@@ -155,6 +182,7 @@
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 0.8rem;
+  padding-right: 0.3rem;
 }
 
 .left {
@@ -184,8 +212,8 @@
   margin: 0;
   color: #8b1a2f;
   font-family: "Poppins", sans-serif;
-  font-size: 36px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 600;
 }
 
 .actionButton {
@@ -201,14 +229,6 @@
   .panel {
     width: min(100%, 650px);
   }
-
-  .cardTitle {
-    font-size: 28px;
-  }
-
-  .monthTitle {
-    font-size: 26px;
-  }
 }
 
 @media (max-width: 640px) {
@@ -221,9 +241,19 @@
     align-items: start;
   }
 
+  .listWrap {
+    padding-right: 2rem;
+  }
+
   .row {
     grid-template-columns: 1fr;
     gap: 0.35rem;
+    padding-right: 1.6rem;
+    align-items: start;
+  }
+
+  .actionButton {
+    justify-self: start;
+    margin-left: 0;
   }
 }
-

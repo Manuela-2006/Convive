@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -30,7 +30,9 @@ export function FacturasScreen({ houseCode }: FacturasScreenProps) {
             <h1 className={styles.title}>Facturas</h1>
             <p className={styles.subtitle}>Gestiona las facturas del piso de forma clara</p>
           </div>
-          <span className={styles.headerPlus}>+</span>
+          <Link href={`/dashboard/${houseCode}/facturas/anadir-factura`} className={styles.headerPlusLink} aria-label="Añadir factura">
+            <Image src="/iconos/A%C3%B1adir.svg" alt="Añadir" width={24} height={24} className={styles.headerPlusIcon} />
+          </Link>
         </header>
 
         <div className={styles.content}>
@@ -52,15 +54,22 @@ export function FacturasScreen({ houseCode }: FacturasScreenProps) {
                             ? `/dashboard/${houseCode}/facturas/agua`
                             : section.key === "luz"
                               ? `/dashboard/${houseCode}/facturas/luz`
-                      : `/dashboard/${houseCode}/facturas`
+                              : `/dashboard/${houseCode}/facturas`
                   }
                   className={styles.viewAll}
                 >
-                  Ver todo &gt;
+                  <span className={styles.viewAllContent}>
+                    Ver todo
+                    <Image src="/iconos/flechascalendario.svg" alt="" width={14} height={14} className={styles.viewAllArrow} />
+                  </span>
                 </Link>
               </div>
 
-              <Card className={styles.paper}>
+              <Card
+                className={`${styles.paper} ${styles.paperStack} ${
+                  section.key === "suscripciones" || section.key === "wifi" || section.key === "luz" ? styles.paperStackTwo : ""
+                }`}
+              >
                 <div className={styles.paperRow}>
                   <div className={styles.left}>
                     <Image src="/iconos/building-2-svgrepo-com 1.svg" alt="" width={20} height={20} />
@@ -69,10 +78,11 @@ export function FacturasScreen({ houseCode }: FacturasScreenProps) {
                       <p className={styles.dateText}>{section.date}</p>
                     </div>
                   </div>
-                  <p className={styles.amount}>23€</p>
+                  <p className={styles.amount}>{"23\u20AC"}</p>
                   <Button className={styles.actionButton}>Ver factura</Button>
                 </div>
               </Card>
+              <div className={styles.groupFooter} aria-hidden="true" />
             </Card>
           ))}
         </div>

@@ -1,0 +1,244 @@
+.page {
+  min-height: 100svh;
+  background-image: url("/images/gastos/gastos.webp");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  padding: clamp(0.9rem, 1.8vw, 1.5rem);
+  display: grid;
+  place-items: center;
+}
+
+.panel {
+  width: calc(100% * 7 / 12);
+  max-width: 980px;
+  background: rgba(240, 234, 228, 0.5);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+  border: none;
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+}
+
+.header {
+  background: #8b1a2f;
+  color: #f0eae4;
+  padding: 1.05rem 0.95rem;
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  align-items: center;
+}
+
+.backLink {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+}
+
+.backIcon {
+  width: 44px;
+  height: 44px;
+}
+
+.headerCenter {
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 25px;
+  font-weight: 700;
+  color: #f0eae4;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  margin: 0.3rem 0 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #f0eae4;
+}
+
+.content {
+  padding: 1rem;
+}
+
+.card {
+  border-radius: 8px;
+  border: none;
+  background: #f0ebe6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+  padding: 1rem 1rem 1.05rem;
+}
+
+.cardTop {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inlineBack {
+  color: #8b1a2f;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.inlineBack :global(img) {
+  filter: brightness(0) saturate(100%) invert(15%) sepia(25%) saturate(4849%) hue-rotate(329deg) brightness(84%) contrast(98%);
+}
+
+.cardTitle {
+  margin: 0;
+  color: #8b1a2f;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.block {
+  margin-top: 1.45rem;
+}
+
+.cardTop + .block {
+  margin-top: 0.4rem;
+}
+
+.blockTitle {
+  margin: 0;
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.uploadBox {
+  margin-top: 0.45rem;
+  border: 1px dashed #8b1a2f;
+  min-height: 190px;
+  border-radius: 2px;
+  display: grid;
+  place-items: center;
+}
+
+.typesRow {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem 1.2rem;
+}
+
+.typeItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+}
+
+.checkbox {
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid #8b1a2f;
+  border-radius: 2px;
+  background: transparent;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkbox[data-state="checked"] {
+  background: #8b1a2f;
+}
+
+.membersCol {
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.42rem;
+}
+
+.memberRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+}
+
+.dateTrigger {
+  margin-top: 0.5rem;
+  width: 142px;
+  height: 28px;
+  border: 1.5px solid #8b1a2f;
+  border-radius: 8px;
+  background: transparent;
+  color: #1f1a17;
+  justify-content: space-between;
+  padding: 0 0.55rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+}
+
+.dateArrow {
+  width: 14px;
+  height: 14px;
+  transform: rotate(-90deg);
+  display: block;
+  filter: brightness(0) saturate(100%) invert(15%) sepia(25%) saturate(4849%) hue-rotate(329deg) brightness(84%) contrast(98%);
+}
+
+.calendarPopover {
+  background: #f0ebe6;
+  border: 1px solid #d8d0cb;
+  border-radius: 8px;
+  padding: 0.45rem;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+}
+
+.calendar {
+  margin: 0;
+}
+
+.saveWrap {
+  margin-top: 1rem;
+  display: grid;
+  justify-content: center;
+}
+
+.saveButton {
+  background: #be6f8b;
+  color: #f0eae4;
+  border-radius: 8px;
+  padding: 0.78rem 1.6rem;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+@media (max-width: 900px) {
+  .panel {
+    width: min(100%, 650px);
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    align-items: start;
+  }
+
+  .typesRow {
+    gap: 0.7rem 0.95rem;
+  }
+}
