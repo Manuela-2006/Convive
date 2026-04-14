@@ -17,11 +17,11 @@ const taskGroups = [
     tasks: ["Barrer la cocina", "Tirar la basura", "Limpiar la vitro"],
   },
   {
-    room: "SALON",
+    room: "SALÓN",
     tasks: ["Barrer la cocina", "Tirar la basura", "Limpiar la vitro"],
   },
   {
-    room: "BANO",
+    room: "BAÑO",
     tasks: ["Barrer la cocina"],
   },
 ];
