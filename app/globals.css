@@ -1,3 +1,5 @@
+@import "react-day-picker/dist/style.css";
+
 :root {
   color-scheme: light;
   --landing-overlay: rgba(0, 0, 0, 0.2);

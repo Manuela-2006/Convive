@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -64,6 +64,7 @@ export function GastosPagoSimplificadoScreen({
 
             <Card className={styles.resultBox}>
               <div className={styles.flow}>
+<<<<<<< HEAD
                 {settlements.length ? (
                   settlements.map((settlement, index) => (
                     <div
@@ -98,6 +99,24 @@ export function GastosPagoSimplificadoScreen({
                 ) : (
                   <p className={styles.personTag}>No hay pagos pendientes.</p>
                 )}
+=======
+                <span className={styles.personTag}>
+                  <Image src="/images/IconoperfilM.webp" alt="" width={22} height={22} />
+                  Laura
+                </span>
+                <span className={styles.amount}>23€</span>
+                <Image src="/iconos/flechaderecha.svg" alt="" width={16} height={16} />
+                <span className={styles.personTag}>
+                  <Image src="/images/IconoperfilH.webp" alt="" width={22} height={22} />
+                  Marc
+                </span>
+                <span className={styles.amount}>23€</span>
+                <Image src="/iconos/flechaderecha.svg" alt="" width={16} height={16} />
+                <span className={styles.personTag}>
+                  <Image src="/images/IconoperfilH.webp" alt="" width={22} height={22} />
+                  Julian
+                </span>
+>>>>>>> frontend
               </div>
               <div className={styles.resultLabel}>Recomendado</div>
             </Card>
@@ -105,6 +124,7 @@ export function GastosPagoSimplificadoScreen({
             <Card className={styles.resultBox}>
               <div className={styles.flow}>
                 <span className={styles.personTag}>
+<<<<<<< HEAD
                   <Image
                     src="/iconos/building-2-svgrepo-com 1.svg"
                     alt=""
@@ -112,6 +132,16 @@ export function GastosPagoSimplificadoScreen({
                     height={22}
                   />
                   {settlements.length} pagos
+=======
+                  <Image src="/images/IconoperfilM.webp" alt="" width={22} height={22} />
+                  Laura
+                </span>
+                <span className={styles.amount}>23€</span>
+                <Image src="/iconos/flechaderecha.svg" alt="" width={16} height={16} />
+                <span className={styles.personTag}>
+                  <Image src="/images/IconoperfilH.webp" alt="" width={22} height={22} />
+                  Julian
+>>>>>>> frontend
                 </span>
                 <span className={styles.amount}>{formatCurrency(totalAmount)}</span>
               </div>
@@ -127,3 +157,10 @@ export function GastosPagoSimplificadoScreen({
     </main>
   );
 }
+<<<<<<< HEAD
+=======
+
+
+
+
+>>>>>>> frontend

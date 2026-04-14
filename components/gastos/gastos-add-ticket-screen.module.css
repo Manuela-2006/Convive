@@ -85,36 +85,46 @@
 .inlineBack {
   color: #8b1a2f;
   text-decoration: none;
-  font-family: "Poppins", sans-serif;
-  font-size: 30px;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.inlineBack :global(img) {
+  filter: brightness(0) saturate(100%) invert(15%) sepia(25%) saturate(4849%) hue-rotate(329deg) brightness(84%) contrast(98%);
 }
 
 .cardTitle {
   margin: 0;
   color: #8b1a2f;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: 34px;
+  font-size: 22px;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .block {
-  margin-top: 0.92rem;
+  margin-top: 1.9rem;
+}
+
+.cardTop + .block {
+  margin-top: 0.35rem;
 }
 
 .blockTitle {
   margin: 0;
   color: #1f1a17;
   font-family: "Poppins", sans-serif;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 400;
 }
 
 .uploadBox {
   margin-top: 0.45rem;
-  border: 1px dashed #be6f8b;
-  min-height: 120px;
+  border: 1px dashed #8b1a2f;
+  min-height: 220px;
   border-radius: 2px;
   display: grid;
   place-items: center;
@@ -140,7 +150,7 @@
 .radioItem {
   width: 15px;
   height: 15px;
-  border: 1.5px solid #be6f8b;
+  border: 1.5px solid #8b1a2f;
   border-radius: 999px;
   background: transparent;
   padding: 0;
@@ -150,7 +160,7 @@
 }
 
 .radioItem[data-state="checked"] {
-  background: radial-gradient(circle at center, #be6f8b 45%, transparent 46%);
+  background: radial-gradient(circle at center, #8b1a2f 45%, transparent 46%);
 }
 
 .checkCol {
@@ -171,7 +181,7 @@
 .checkbox {
   width: 15px;
   height: 15px;
-  border: 1.5px solid #be6f8b;
+  border: 1.5px solid #8b1a2f;
   border-radius: 2px;
   background: transparent;
   padding: 0;
@@ -181,7 +191,7 @@
 }
 
 .checkbox[data-state="checked"] {
-  background: #be6f8b;
+  background: #8b1a2f;
 }
 
 .membersCol {
@@ -203,7 +213,7 @@
   margin-top: 0.45rem;
   width: 142px;
   height: 28px;
-  border: 1.5px solid #be6f8b;
+  border: 1.5px solid #8b1a2f;
   border-radius: 8px;
   background: transparent;
   color: #1f1a17;
@@ -214,9 +224,11 @@
 }
 
 .dateArrow {
-  color: #8b1a2f;
-  font-size: 12px;
-  line-height: 1;
+  width: 14px;
+  height: 14px;
+  transform: rotate(-90deg);
+  display: block;
+  filter: brightness(0) saturate(100%) invert(15%) sepia(25%) saturate(4849%) hue-rotate(329deg) brightness(84%) contrast(98%);
 }
 
 .calendarPopover {
@@ -241,18 +253,15 @@
   background: #be6f8b;
   color: #f0eae4;
   border-radius: 8px;
-  padding: 0.52rem 1.05rem;
-  font-size: 14px;
+  padding: 0.78rem 1.6rem;
+  font-size: 17px;
+  font-weight: 500;
   line-height: 1;
 }
 
 @media (max-width: 900px) {
   .panel {
     width: min(100%, 650px);
-  }
-
-  .cardTitle {
-    font-size: 28px;
   }
 }
 

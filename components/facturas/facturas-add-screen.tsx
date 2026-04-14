@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -8,12 +8,10 @@ import { Calendar } from "../ui/calendar";
 import { Card } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import styles from "./gastos-add-ticket-screen.module.css";
+import styles from "./facturas-add-screen.module.css";
 
-type GastosAddTicketScreenProps = {
+type FacturasAddScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
 };
 
 function formatDate(date?: Date) {
@@ -24,23 +22,19 @@ function formatDate(date?: Date) {
   return `${day}/${month}/${year}`;
 }
 
-export function GastosAddTicketScreen({
-  houseCode,
-  dashboardPath,
-}: GastosAddTicketScreenProps) {
+export function FacturasAddScreen({ houseCode }: FacturasAddScreenProps) {
   const [date, setDate] = useState<Date | undefined>(new Date(2026, 1, 21));
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
 
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`${basePath}/gastos`} className={styles.backLink}>
+          <Link href={`/dashboard/${houseCode}/facturas`} className={styles.backLink}>
             <Image src="/iconos/flechaatras.svg" alt="Volver" width={20} height={20} className={styles.backIcon} />
           </Link>
           <div className={styles.headerCenter}>
-            <h1 className={styles.title}>Gastos</h1>
-            <p className={styles.subtitle}>Compras, imprevistos y gastos compartidos</p>
+            <h1 className={styles.title}>Facturas</h1>
+            <p className={styles.subtitle}>Gestiona las facturas del piso de forma clara</p>
           </div>
           <span />
         </header>
@@ -48,68 +42,55 @@ export function GastosAddTicketScreen({
         <div className={styles.content}>
           <Card className={styles.card}>
             <div className={styles.cardTop}>
-<<<<<<< HEAD
-              <Link href={`${basePath}/gastos`} className={styles.inlineBack} aria-label="Volver a gastos">
-                ←
-=======
-              <Link href={`/dashboard/${houseCode}/gastos`} className={styles.inlineBack} aria-label="Volver a gastos">
-                <Image src="/iconos/flechaatras.svg" alt="" width={42} height={42} />
->>>>>>> frontend
+              <Link href={`/dashboard/${houseCode}/facturas`} className={styles.inlineBack} aria-label="Volver a facturas">
+                <Image src="/iconos/flechaatras.svg" alt="" width={32} height={32} />
               </Link>
-              <h2 className={styles.cardTitle}>Añadir ticket</h2>
+              <h2 className={styles.cardTitle}>Añadir factura</h2>
             </div>
 
             <section className={styles.block}>
-              <h3 className={styles.blockTitle}>1 - Escanea el ticket</h3>
+              <h3 className={styles.blockTitle}>1 - Adjunta la factura</h3>
               <div className={styles.uploadBox}>
-                <Image src="/iconos/Escanearimagen.svg" alt="Subir imagen" width={52} height={52} />
+                <Image src="/iconos/Escanearimagen.svg" alt="Subir imagen" width={48} height={48} />
               </div>
             </section>
 
             <section className={styles.block}>
-              <h3 className={styles.blockTitle}>2 - Elige que tipo de ticket es</h3>
-              <RadioGroup defaultValue="compra" className={styles.radioRow}>
-                <label className={styles.radioLabel}>
-                  <RadioGroupItem id="ticket-compra" value="compra" className={styles.radioItem} />
-                  Ticket de compra
+              <h3 className={styles.blockTitle}>2 - Elige que tipo de factura es</h3>
+              <div className={styles.typesRow}>
+                <label className={styles.typeItem}>
+                  <Checkbox className={styles.checkbox} /> Alquiler
                 </label>
-                <label className={styles.radioLabel}>
-                  <RadioGroupItem id="ticket-imprevisto" value="imprevisto" className={styles.radioItem} />
-                  Ticket de imprevisto
+                <label className={styles.typeItem}>
+                  <Checkbox className={styles.checkbox} /> Suscripciones
                 </label>
-              </RadioGroup>
-            </section>
-
-            <section className={styles.block}>
-              <h3 className={styles.blockTitle}>3 - Selecciona los articulos del piso</h3>
-              <div className={styles.checkCol}>
-                <label className={styles.checkLabel}>
-                  <Checkbox className={styles.checkbox} id="art-leche" /> Leche
+                <label className={styles.typeItem}>
+                  <Checkbox className={styles.checkbox} /> Wifi
                 </label>
-                <label className={styles.checkLabel}>
-                  <Checkbox className={styles.checkbox} id="art-huevos" /> Huevos
+                <label className={styles.typeItem}>
+                  <Checkbox className={styles.checkbox} /> Agua
                 </label>
-                <label className={styles.checkLabel}>
-                  <Checkbox className={styles.checkbox} id="art-agua" /> Agua
+                <label className={styles.typeItem}>
+                  <Checkbox className={styles.checkbox} /> Luz
                 </label>
               </div>
             </section>
 
             <section className={styles.block}>
-              <h3 className={styles.blockTitle}>4 - Selecciona los miembros del piso</h3>
+              <h3 className={styles.blockTitle}>3 - Selecciona los miembros del piso</h3>
               <div className={styles.membersCol}>
                 <label className={styles.memberRow}>
-                  <Checkbox className={styles.checkbox} id="m-antonio" />
+                  <Checkbox className={styles.checkbox} />
                   <Image src="/images/IconoperfilM.webp" alt="" width={22} height={22} />
                   Antonio
                 </label>
                 <label className={styles.memberRow}>
-                  <Checkbox className={styles.checkbox} id="m-juan" />
+                  <Checkbox className={styles.checkbox} />
                   <Image src="/images/IconoperfilM.webp" alt="" width={22} height={22} />
                   Juan
                 </label>
                 <label className={styles.memberRow}>
-                  <Checkbox className={styles.checkbox} id="m-alvaro" />
+                  <Checkbox className={styles.checkbox} />
                   <Image src="/images/IconoperfilM.webp" alt="" width={22} height={22} />
                   Alvaro
                 </label>
@@ -117,7 +98,7 @@ export function GastosAddTicketScreen({
             </section>
 
             <section className={styles.block}>
-              <h3 className={styles.blockTitle}>5 - Fecha de compra</h3>
+              <h3 className={styles.blockTitle}>4 - Fecha de factura</h3>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button className={styles.dateTrigger}>
@@ -140,5 +121,4 @@ export function GastosAddTicketScreen({
     </main>
   );
 }
-
 

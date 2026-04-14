@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -62,12 +62,17 @@ export function GastosTicketsScreen({
           <Card className={styles.ticketsCard}>
             <div className={styles.cardTop}>
               <div className={styles.cardTitleWrap}>
+<<<<<<< HEAD
                 <Link
                   href={`${basePath}/gastos`}
                   className={styles.inlineBack}
                   aria-label="Volver a gastos"
                 >
                   ←
+=======
+                <Link href={`/dashboard/${houseCode}/gastos`} className={styles.inlineBack} aria-label="Volver a gastos">
+                  <Image src="/iconos/flechaatras.svg" alt="" width={42} height={42} />
+>>>>>>> frontend
                 </Link>
                 <h2 className={styles.cardTitle}>Tickets de compra</h2>
               </div>
@@ -130,3 +135,11 @@ export function GastosTicketsScreen({
     </main>
   );
 }
+<<<<<<< HEAD
+=======
+
+
+
+
+
+>>>>>>> frontend

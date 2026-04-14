@@ -264,78 +264,205 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.65rem;
+  align-items: stretch;
 }
 
 .bottomCardMaroon {
   background: #8b1a2f;
   color: #f0eae4;
-  border-radius: 6px;
-  padding: 0.48rem 0.55rem 0.58rem;
+  border-radius: 10px;
+  padding: 0.42rem 0.55rem 0.52rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendarCard {
+  border: none;
+  border-radius: 10px;
+  padding: 0.48rem 0.75rem 0.58rem;
+}
+
+.calendarHeader {
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.calendarNavButton {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.calendarNavButtonRight img {
+  transform: rotate(180deg);
 }
 
 .calendarTitle {
   margin: 0;
   text-align: center;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: clamp(1.05rem, 1.2vw, 1.2rem);
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.05;
 }
 
 .calendar {
-  margin-top: 0.28rem;
+  margin-top: 0.35rem;
   display: grid;
   justify-content: center;
 }
 
-.calendar :global(.rdp) {
-  --rdp-day-height: 24px;
-  --rdp-day-width: 24px;
-  --rdp-accent-color: #f0eae4;
-  --rdp-background-color: rgba(240, 234, 228, 0.18);
-  --rdp-accent-color-dark: #f0eae4;
-  --rdp-background-color-dark: rgba(240, 234, 228, 0.18);
+.calendar :global(.react-calendar) {
+  width: min(100%, 340px);
+  border: none;
+  background: transparent;
   margin: 0;
   color: #f0eae4;
   font-family: "Poppins", sans-serif;
 }
 
-.calendar :global(.rdp-month_caption),
-.calendar :global(.rdp-nav) {
-  display: none;
+.calendar :global(.react-calendar button) {
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: default;
 }
 
-.calendar :global(.rdp-weekday) {
-  font-size: 0.62rem;
+.calendar :global(.react-calendar__month-view__weekdays) {
+  margin-bottom: 0.16rem;
+  text-transform: none;
+}
+
+.calendar :global(.react-calendar__month-view__weekdays__weekday) {
+  padding: 0.12rem 0 0.2rem;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 500;
   color: #f0eae4;
+}
+
+.calendar :global(.react-calendar__month-view__weekdays__weekday abbr) {
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.calendar :global(.react-calendar__month-view__days) {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.2rem 0.34rem;
+}
+
+.calendar :global(.react-calendar__tile) {
+  position: relative;
+  overflow: visible;
+  height: 36px;
+  width: 36px;
+  max-width: 36px;
+  margin-inline: auto;
+  padding: 0;
+  text-align: center;
+  line-height: 36px;
+  color: #f0eae4;
+  font-size: 1.15rem;
+  border-radius: 9px;
   font-weight: 500;
 }
 
-.calendar :global(.rdp-day) {
+.calendar :global(.react-calendar__month-view__days__day--neighboringMonth) {
   color: #f0eae4;
-  font-size: 0.68rem;
-  border-radius: 6px;
 }
 
-.calendar :global(.rdp-today:not(.rdp-outside)) {
-  color: #8b1a2f;
+.calendar :global(.react-calendar__tile:enabled:hover),
+.calendar :global(.react-calendar__tile:enabled:focus) {
+  background: transparent;
+}
+
+.calendar :global(.react-calendar__tile--active),
+.calendar :global(.react-calendar__tile--hasActive) {
+  background: transparent;
+}
+
+.calendar :global(.react-calendar__tile--range) {
   background: #f0eae4;
+  color: #8b1a2f;
+}
+
+.calendar :global(.react-calendar__tile--rangeStart),
+.calendar :global(.react-calendar__tile--rangeEnd),
+.calendar :global(.react-calendar__tile--rangeBothEnds) {
+  background: #be6f8b;
+  color: #f0eae4;
+}
+
+.calendar :global(.react-calendar__tile.payment-day) {
+  background: #f0eae4;
+  color: #8b1a2f;
+}
+
+.calendar :global(.react-calendar__tile.payment-day):enabled:hover,
+.calendar :global(.react-calendar__tile.payment-day):enabled:focus {
+  background: #f0eae4;
+  color: #8b1a2f;
+  z-index: 20;
+}
+
+.paymentAnchor {
+  position: absolute;
+  inset: -2px;
+  display: block;
+  cursor: pointer;
+}
+
+.paymentPopoverContent {
+  position: absolute;
+  background: #f0eae4;
+  color: #1f1a17;
+  border-radius: 10px;
+  padding: 0.42rem 0.6rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  z-index: 60;
 }
 
 .pieTitle {
   margin: 0;
   text-align: center;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: clamp(1rem, 1.2vw, 1.2rem);
+  font-size: 20px;
   font-weight: 700;
   text-transform: uppercase;
 }
 
 .pieWrap {
-  margin-top: 0.35rem;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.42rem;
+  margin-top: 0.2rem;
+  display: flex;
+  justify-content: center;
   align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-height: 220px;
+}
+
+.pieChartWrap {
+  min-height: 220px;
+  height: 220px;
+  width: 220px;
+  flex: 0 0 220px;
 }
 
 .pieLegend {
@@ -343,7 +470,8 @@
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.3rem;
+  gap: 0.32rem;
+  align-content: center;
 }
 
 .legendItem {
@@ -351,13 +479,23 @@
   align-items: center;
   gap: 0.35rem;
   font-family: "Poppins", sans-serif;
-  font-size: clamp(0.72rem, 0.9vw, 0.82rem);
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1;
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
+  box-sizing: border-box;
+  display: inline-block;
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
   border-radius: 999px;
+}
+
+.dotOutlined {
+  background: transparent;
+  border: 2px solid #f0eae4;
 }
 
 @media (max-width: 900px) {
@@ -371,6 +509,22 @@
 
   .bottomGrid {
     grid-template-columns: 1fr;
+  }
+
+  .pieChartWrap {
+    min-height: 160px;
+  }
+
+  .calendar :global(.react-calendar__tile) {
+    height: 34px;
+    width: 34px;
+    max-width: 34px;
+    line-height: 34px;
+    font-size: 1rem;
+  }
+
+  .calendar :global(.react-calendar__month-view__weekdays__weekday abbr) {
+    font-size: 0.9rem;
   }
 }
 

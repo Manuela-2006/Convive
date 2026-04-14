@@ -77,6 +77,42 @@
   padding: 0.7rem 0.8rem 0.82rem;
 }
 
+.ticketsSection {
+  position: relative;
+  overflow: hidden;
+  padding-top: 1.02rem;
+  height: 230px;
+}
+
+.ticketsFooter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34px;
+  background: #8b1a2f;
+  box-shadow: 0 -8px 12px rgba(0, 0, 0, 0.22);
+  z-index: 8;
+}
+
+.divisionSection {
+  position: relative;
+  overflow: hidden;
+  padding-top: 1.02rem;
+  height: 250px;
+}
+
+.divisionFooter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34px;
+  background: #8b1a2f;
+  box-shadow: 0 -8px 12px rgba(0, 0, 0, 0.22);
+  z-index: 8;
+}
+
 .sectionTop {
   display: flex;
   align-items: center;
@@ -97,15 +133,15 @@
 }
 
 .plusIcon {
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
 }
 
 .sectionTitle {
   margin: 0;
   color: #f0eae4;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: 30px;
+  font-size: 20px;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -113,14 +149,30 @@
 .viewAll {
   color: #f0eae4;
   text-decoration: none;
-  font-family: var(--font-montserrat), sans-serif;
-  font-size: 14px;
-  font-weight: 700;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
   text-transform: uppercase;
+}
+
+.viewAllContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+}
+
+.viewAllArrow {
+  width: 20px;
+  height: 20px;
+  transform: rotate(180deg);
 }
 
 .viewAllRed {
   color: #8b1a2f;
+}
+
+.viewAllRed .viewAllArrow {
+  filter: brightness(0) saturate(100%) invert(15%) sepia(25%) saturate(4849%) hue-rotate(329deg) brightness(84%) contrast(98%);
 }
 
 .innerPaper {
@@ -130,6 +182,86 @@
   border: 1px solid #d8d0cb;
   box-shadow: 8px -4px 0 rgba(240, 235, 230, 0.9);
   padding: 0.55rem 0.7rem;
+}
+
+.ticketsPaper {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  width: calc(100% - 14px);
+  margin-inline: auto;
+  min-height: 172px;
+  border-radius: 0;
+  border: 1px solid #bf778a;
+  box-shadow: none;
+  transform: none !important;
+  margin-top: 1.8rem;
+  padding: 0.72rem 0.95rem 0.8rem;
+  z-index: 3;
+}
+
+.ticketsPaper::before,
+.ticketsPaper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #f0ebe6;
+  border: 1px solid #bf778a;
+  border-radius: 0;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.ticketsPaper::before {
+  transform: translate(8px, -6px) rotate(0.7deg);
+  transform-origin: top left;
+  z-index: -1;
+}
+
+.ticketsPaper::after {
+  transform: translate(14px, -10px) rotate(0deg);
+  z-index: -2;
+}
+
+.ticketsPaper .innerRow + .innerRow {
+  margin-top: 1.6rem;
+}
+
+.divisionPaper {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  width: calc(100% - 14px);
+  margin-inline: auto;
+  min-height: 192px;
+  border-radius: 0;
+  border: 1px solid #bf778a;
+  box-shadow: none;
+  transform: none !important;
+  margin-top: 1.8rem;
+  padding: 0.72rem 0.95rem 0.8rem;
+  z-index: 3;
+}
+
+.divisionPaper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #f0ebe6;
+  border: 1px solid #bf778a;
+  border-radius: 0;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.divisionPaper::before {
+  transform: translate(8px, -6px) rotate(0.7deg);
+  transform-origin: top left;
+  z-index: -1;
+}
+
+.divisionPaper .innerRow + .innerRow {
+  margin-top: 1.15rem;
 }
 
 .innerRow {
@@ -178,7 +310,7 @@
   margin: 0;
   color: #8b1a2f;
   font-family: "Poppins", sans-serif;
-  font-size: 42px;
+  font-size: 20px;
   font-weight: 700;
 }
 
@@ -207,7 +339,7 @@
   margin: 0;
   color: #8b1a2f;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: 32px;
+  font-size: 20px;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -269,11 +401,11 @@
 
   .sectionTitle,
   .simpleTitle {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .amount {
-    font-size: 34px;
+    font-size: 20px;
   }
 }
 
@@ -294,6 +426,6 @@
   }
 
   .amount {
-    font-size: 28px;
+    font-size: 20px;
   }
 }
