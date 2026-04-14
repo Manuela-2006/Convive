@@ -45,13 +45,8 @@ export function FacturasWifiScreen({
           <Card className={styles.card}>
             <div className={styles.cardTop}>
               <div className={styles.titleWrap}>
-<<<<<<< HEAD
                 <Link href={`${basePath}/facturas`} className={styles.inlineBack} aria-label="Volver a facturas">
                   ←
-=======
-                <Link href={`/dashboard/${houseCode}/facturas`} className={styles.inlineBack} aria-label="Volver a facturas">
-                  <Image src="/iconos/flechaatras.svg" alt="" width={42} height={42} />
->>>>>>> frontend
                 </Link>
                 <h2 className={styles.cardTitle}>Facturas wifi</h2>
               </div>

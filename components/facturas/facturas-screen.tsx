@@ -35,7 +35,7 @@ export function FacturasScreen({
             <h1 className={styles.title}>Facturas</h1>
             <p className={styles.subtitle}>Gestiona las facturas del piso de forma clara</p>
           </div>
-          <Link href={`/dashboard/${houseCode}/facturas/anadir-factura`} className={styles.headerPlusLink} aria-label="Añadir factura">
+          <Link href={`${basePath}/facturas/anadir-factura`} className={styles.headerPlusLink} aria-label="Añadir factura">
             <Image src="/iconos/A%C3%B1adir.svg" alt="Añadir" width={24} height={24} className={styles.headerPlusIcon} />
           </Link>
         </header>
@@ -58,13 +58,8 @@ export function FacturasScreen({
                           : section.key === "agua"
                             ? `${basePath}/facturas/agua`
                             : section.key === "luz"
-<<<<<<< HEAD
                               ? `${basePath}/facturas/luz`
-                      : `${basePath}/facturas`
-=======
-                              ? `/dashboard/${houseCode}/facturas/luz`
-                              : `/dashboard/${houseCode}/facturas`
->>>>>>> frontend
+                              : `${basePath}/facturas`
                   }
                   className={styles.viewAll}
                 >

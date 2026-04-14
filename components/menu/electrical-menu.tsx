@@ -49,9 +49,7 @@ export function ElectricalMenu({
   dashboardPath,
 }: ElectricalMenuProps) {
   const pathname = usePathname();
-<<<<<<< HEAD
   const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
-=======
   const router = useRouter();
   const [isDoorOpen, setIsDoorOpen] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
@@ -72,23 +70,15 @@ export function ElectricalMenu({
       router.push(href);
     }, 220);
   };
->>>>>>> frontend
 
   const groups: MenuGroup[] = [
     {
       title: "Principal",
       items: [
-<<<<<<< HEAD
         { code: "01", label: "Inicio", href: basePath },
         { code: "02", label: "Área personal", href: `${basePath}/area-personal` },
         { code: "03", label: "Gastos", href: `${basePath}/gastos` },
         { code: "04", label: "Facturas", href: `${basePath}/facturas` },
-=======
-        { code: "01", label: "Inicio", href: `/dashboard/${houseCode}` },
-        { code: "02", label: "Área personal", href: `/dashboard/${houseCode}/area-personal` },
-        { code: "03", label: "Gastos", href: `/dashboard/${houseCode}/gastos` },
-        { code: "04", label: "Facturas", href: `/dashboard/${houseCode}/facturas` },
->>>>>>> frontend
       ],
     },
     {

@@ -58,7 +58,6 @@ export function GastosSimplificarScreen({
             <h3 className={styles.monthTitle}>Pagos recomendados</h3>
 
             <div className={styles.rows}>
-<<<<<<< HEAD
               {settlements.length ? (
                 settlements.map((settlement, index) => (
                   <div
@@ -100,36 +99,6 @@ export function GastosSimplificarScreen({
                     >
                       Optimizar
                     </Link>
-=======
-              {rows.map((row, idx) => (
-                <div key={`${row.from}-${row.mid}-${idx}`} className={styles.row}>
-                  <div className={styles.flow}>
-                    <span className={styles.personTag}>
-                      <Image src="/images/IconoperfilM.webp" alt="" width={18} height={18} />
-                      {row.from}
-                    </span>
-                    <span className={styles.smallAmount}>{row.amount}</span>
-                    <Image
-                      src={row.twoWay ? "/iconos/flechasdosdirecciones.svg" : "/iconos/flechaderecha.svg"}
-                      alt=""
-                      width={16}
-                      height={16}
-                    />
-                    <span className={styles.personTag}>
-                      <Image src="/images/IconoperfilH.webp" alt="" width={18} height={18} />
-                      {row.mid}
-                    </span>
-                    <span className={styles.smallAmount}>{row.amount}</span>
-                    {row.to ? (
-                      <>
-                        <Image src="/iconos/flechaderecha.svg" alt="" width={16} height={16} />
-                        <span className={styles.personTag}>
-                          <Image src="/images/IconoperfilH.webp" alt="" width={18} height={18} />
-                          {row.to}
-                        </span>
-                      </>
-                    ) : null}
->>>>>>> frontend
                   </div>
                 ))
               ) : (

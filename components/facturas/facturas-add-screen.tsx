@@ -12,6 +12,7 @@ import styles from "./facturas-add-screen.module.css";
 
 type FacturasAddScreenProps = {
   houseCode: string;
+  dashboardPath?: string;
 };
 
 function formatDate(date?: Date) {
@@ -22,14 +23,18 @@ function formatDate(date?: Date) {
   return `${day}/${month}/${year}`;
 }
 
-export function FacturasAddScreen({ houseCode }: FacturasAddScreenProps) {
+export function FacturasAddScreen({
+  houseCode,
+  dashboardPath,
+}: FacturasAddScreenProps) {
   const [date, setDate] = useState<Date | undefined>(new Date(2026, 1, 21));
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
 
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
         <header className={styles.header}>
-          <Link href={`/dashboard/${houseCode}/facturas`} className={styles.backLink}>
+          <Link href={`${basePath}/facturas`} className={styles.backLink}>
             <Image src="/iconos/flechaatras.svg" alt="Volver" width={20} height={20} className={styles.backIcon} />
           </Link>
           <div className={styles.headerCenter}>
@@ -42,7 +47,7 @@ export function FacturasAddScreen({ houseCode }: FacturasAddScreenProps) {
         <div className={styles.content}>
           <Card className={styles.card}>
             <div className={styles.cardTop}>
-              <Link href={`/dashboard/${houseCode}/facturas`} className={styles.inlineBack} aria-label="Volver a facturas">
+              <Link href={`${basePath}/facturas`} className={styles.inlineBack} aria-label="Volver a facturas">
                 <Image src="/iconos/flechaatras.svg" alt="" width={32} height={32} />
               </Link>
               <h2 className={styles.cardTitle}>Añadir factura</h2>

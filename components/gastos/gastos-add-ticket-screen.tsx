@@ -48,13 +48,8 @@ export function GastosAddTicketScreen({
         <div className={styles.content}>
           <Card className={styles.card}>
             <div className={styles.cardTop}>
-<<<<<<< HEAD
               <Link href={`${basePath}/gastos`} className={styles.inlineBack} aria-label="Volver a gastos">
                 ←
-=======
-              <Link href={`/dashboard/${houseCode}/gastos`} className={styles.inlineBack} aria-label="Volver a gastos">
-                <Image src="/iconos/flechaatras.svg" alt="" width={42} height={42} />
->>>>>>> frontend
               </Link>
               <h2 className={styles.cardTitle}>Añadir ticket</h2>
             </div>

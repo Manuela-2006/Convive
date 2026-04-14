@@ -62,17 +62,12 @@ export function GastosDivisionScreen({
           <Card className={styles.card}>
             <div className={styles.cardTop}>
               <div className={styles.titleWrap}>
-<<<<<<< HEAD
                 <Link
                   href={`${basePath}/gastos`}
                   className={styles.inlineBack}
                   aria-label="Volver a gastos"
                 >
                   ←
-=======
-                <Link href={`/dashboard/${houseCode}/gastos`} className={styles.inlineBack} aria-label="Volver a gastos">
-                  <Image src="/iconos/flechaatras.svg" alt="" width={42} height={42} />
->>>>>>> frontend
                 </Link>
                 <h2 className={styles.cardTitle}>Division de gastos</h2>
               </div>
@@ -133,11 +128,3 @@ export function GastosDivisionScreen({
     </main>
   );
 }
-<<<<<<< HEAD
-=======
-
-
-
-
-
->>>>>>> frontend

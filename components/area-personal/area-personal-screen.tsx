@@ -27,13 +27,6 @@ const pieData = [
   { name: "Compras", value: 25, color: "#8B1A2F" },
 ];
 
-<<<<<<< HEAD
-export function AreaPersonalScreen({
-  houseCode,
-  dashboardPath,
-}: AreaPersonalScreenProps) {
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
-=======
 const MONTH_NAMES = [
   "Enero",
   "Febrero",
@@ -60,9 +53,13 @@ function isSameDay(left: Date, right: Date) {
   );
 }
 
-export function AreaPersonalScreen({ houseCode }: AreaPersonalScreenProps) {
+export function AreaPersonalScreen({
+  houseCode,
+  dashboardPath,
+}: AreaPersonalScreenProps) {
   const [activeMonth, setActiveMonth] = useState(new Date(2026, 5, 1));
   const [isPaymentPopoverOpen, setIsPaymentPopoverOpen] = useState(false);
+  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
 
   const goPrevMonth = () => {
     setActiveMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1));
@@ -74,7 +71,6 @@ export function AreaPersonalScreen({ houseCode }: AreaPersonalScreenProps) {
 
   const calendarLabel = `${MONTH_NAMES[activeMonth.getMonth()]} / ${activeMonth.getFullYear()}`;
 
->>>>>>> frontend
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
