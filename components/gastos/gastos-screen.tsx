@@ -99,10 +99,7 @@ export function GastosScreen({
                       </div>
                     </div>
                     <p className={styles.amount}>
-                      {formatCurrency(
-                        ticket.my_share_amount ?? ticket.total_amount,
-                        ticket.currency
-                      )}
+                      {formatCurrency(ticket.total_amount, ticket.currency)}
                     </p>
                     <Link
                       href={`${basePath}/gastos/tickets`}
@@ -143,15 +140,15 @@ export function GastosScreen({
                           {formatShortDate(expense.expense_date)}
                         </p>
                         <p className={styles.metaText}>
+                          Pago: {expense.paid_by_name || "Sin pagador"}
+                        </p>
+                        <p className={styles.metaText}>
                           Participantes: {expense.participants_text || "Sin reparto"}
                         </p>
                       </div>
                     </div>
                     <p className={styles.amount}>
-                      {formatCurrency(
-                        expense.my_share_amount ?? expense.total_amount,
-                        expense.currency
-                      )}
+                      {formatCurrency(expense.total_amount, expense.currency)}
                     </p>
                     <Link
                       href={`${basePath}/gastos/division`}
