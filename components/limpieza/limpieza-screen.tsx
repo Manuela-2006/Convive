@@ -8,7 +8,7 @@ import styles from "./limpieza-screen.module.css";
 
 type LimpiezaScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
 };
 
 const taskGroups = [
@@ -39,7 +39,7 @@ export function LimpiezaScreen({
   houseCode,
   dashboardPath,
 }: LimpiezaScreenProps) {
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
@@ -102,4 +102,5 @@ export function LimpiezaScreen({
     </main>
   );
 }
+
 

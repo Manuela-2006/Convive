@@ -8,7 +8,7 @@ import styles from "./history-screen.module.css";
 
 type AreaPersonalHistoryScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
 };
 
 const entries = [
@@ -37,7 +37,7 @@ export function AreaPersonalHistoryScreen({
   houseCode,
   dashboardPath,
 }: AreaPersonalHistoryScreenProps) {
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
@@ -95,3 +95,4 @@ export function AreaPersonalHistoryScreen({
     </main>
   );
 }
+

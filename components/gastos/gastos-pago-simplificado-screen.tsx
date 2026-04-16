@@ -10,7 +10,7 @@ import styles from "./gastos-pago-simplificado-screen.module.css";
 
 type GastosPagoSimplificadoScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
   settlements?: Settlement[];
 };
 
@@ -19,7 +19,7 @@ export function GastosPagoSimplificadoScreen({
   dashboardPath,
   settlements = [],
 }: GastosPagoSimplificadoScreenProps) {
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
   const totalAmount = settlements.reduce((sum, settlement) => {
     const amount =
       typeof settlement.amount === "number"
@@ -127,3 +127,4 @@ export function GastosPagoSimplificadoScreen({
     </main>
   );
 }
+

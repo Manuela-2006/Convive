@@ -7,7 +7,7 @@ type HomeBoardProps = {
   houseCode: string;
   houseName: string;
   memberCount: number;
-  dashboardPath?: string;
+  dashboardPath: string;
 };
 
 export function HomeBoard({
@@ -16,7 +16,7 @@ export function HomeBoard({
   memberCount,
   dashboardPath,
 }: HomeBoardProps) {
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
   const totalPayments = Math.max(memberCount + 6, 8);
   const verifiedPayments = Math.max(totalPayments - 3, 1);
   const pendingPayments = totalPayments - verifiedPayments;
@@ -87,3 +87,4 @@ export function HomeBoard({
     </main>
   );
 }
+

@@ -8,7 +8,7 @@ import styles from "./facturas-screen.module.css";
 
 type FacturasScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
 };
 
 const sections = [
@@ -23,7 +23,7 @@ export function FacturasScreen({
   houseCode,
   dashboardPath,
 }: FacturasScreenProps) {
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
@@ -95,3 +95,4 @@ export function FacturasScreen({
     </main>
   );
 }
+

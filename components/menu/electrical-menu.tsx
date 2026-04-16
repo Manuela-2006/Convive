@@ -10,7 +10,7 @@ import styles from "./electrical-menu.module.css";
 
 type ElectricalMenuProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
 };
 
 type MenuItem = {
@@ -49,7 +49,7 @@ export function ElectricalMenu({
   dashboardPath,
 }: ElectricalMenuProps) {
   const pathname = usePathname();
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
   const router = useRouter();
   const [isDoorOpen, setIsDoorOpen] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
@@ -149,3 +149,4 @@ export function ElectricalMenu({
     </main>
   );
 }
+

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Card } from "../ui/card";
 import type {
   ExpenseTicket,
+  PendingPaymentConfirmation,
   Settlement,
   SharedExpense,
 } from "../../lib/dashboard-types";
@@ -16,10 +17,12 @@ import styles from "./gastos-screen.module.css";
 
 type GastosScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
   tickets?: ExpenseTicket[];
   sharedExpenses?: SharedExpense[];
   settlements?: Settlement[];
+  pendingPaymentConfirmations?: PendingPaymentConfirmation[];
+  canReviewPayments?: boolean;
 };
 
 export function GastosScreen({
@@ -28,8 +31,10 @@ export function GastosScreen({
   tickets = [],
   sharedExpenses = [],
   settlements = [],
+  pendingPaymentConfirmations = [],
+  canReviewPayments = false,
 }: GastosScreenProps) {
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
   const visibleTickets = tickets.slice(0, 2);
   const visibleSharedExpenses = sharedExpenses.slice(0, 2);
   const visibleSettlements = settlements.slice(0, 2);
@@ -94,7 +99,10 @@ export function GastosScreen({
                       </div>
                     </div>
                     <p className={styles.amount}>
-                      {formatCurrency(ticket.total_amount, ticket.currency)}
+                      {formatCurrency(
+                        ticket.my_share_amount ?? ticket.total_amount,
+                        ticket.currency
+                      )}
                     </p>
                     <Link
                       href={`${basePath}/gastos/tickets`}
@@ -140,7 +148,10 @@ export function GastosScreen({
                       </div>
                     </div>
                     <p className={styles.amount}>
-                      {formatCurrency(expense.total_amount, expense.currency)}
+                      {formatCurrency(
+                        expense.my_share_amount ?? expense.total_amount,
+                        expense.currency
+                      )}
                     </p>
                     <Link
                       href={`${basePath}/gastos/division`}
@@ -224,6 +235,68 @@ export function GastosScreen({
               )}
             </div>
           </Card>
+
+          {canReviewPayments ? (
+            <Card className={styles.simpleCard}>
+              <div className={styles.sectionTop}>
+                <div>
+                  <h2 className={styles.simpleTitle}>Validaciones</h2>
+                  <p className={styles.simpleSub}>
+                    Pagos marcados por los participantes pendientes de revisión
+                  </p>
+                </div>
+                <Link
+                  href={`${basePath}/gastos/division`}
+                  className={`${styles.viewAll} ${styles.viewAllRed}`}
+                >
+                  Ver todo &gt;
+                </Link>
+              </div>
+
+              <div className={styles.payRows}>
+                {pendingPaymentConfirmations.length ? (
+                  pendingPaymentConfirmations.slice(0, 3).map((payment) => (
+                    <div key={payment.payment_id} className={styles.payRow}>
+                      <div className={styles.flow}>
+                        <span className={styles.personTag}>
+                          <Image
+                            src="/images/IconoperfilM.webp"
+                            alt=""
+                            width={16}
+                            height={16}
+                          />
+                          {payment.from_name}
+                        </span>
+                        <span className={styles.smallAmount}>
+                          {formatCurrency(payment.amount)}
+                        </span>
+                        <Image
+                          src="/iconos/flechapagos.svg"
+                          alt=""
+                          width={18}
+                          height={18}
+                        />
+                        <span className={styles.personTag}>
+                          <Image
+                            src="/images/IconoperfilH.webp"
+                            alt=""
+                            width={16}
+                            height={16}
+                          />
+                          {payment.to_name}
+                        </span>
+                      </div>
+                      <span className={styles.pendingBadge}>Pendiente</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className={styles.emptyState}>
+                    No hay pagos pendientes de confirmar.
+                  </p>
+                )}
+              </div>
+            </Card>
+          ) : null}
         </div>
       </section>
     </main>

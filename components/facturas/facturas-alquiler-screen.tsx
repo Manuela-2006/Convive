@@ -8,7 +8,7 @@ import styles from "./facturas-history-screen.module.css";
 
 type FacturasAlquilerScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
 };
 
 const monthlyRows = [
@@ -26,7 +26,7 @@ export function FacturasAlquilerScreen({
   houseCode,
   dashboardPath,
 }: FacturasAlquilerScreenProps) {
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
@@ -89,3 +89,4 @@ export function FacturasAlquilerScreen({
     </main>
   );
 }
+

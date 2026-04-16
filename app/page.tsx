@@ -3,7 +3,32 @@ import Link from "next/link";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 
-export default function HomePage() {
+type HomePageProps = {
+  searchParams?: Promise<{
+    flow?: "join";
+    code?: string;
+  }>;
+};
+
+function buildAuthHref(mode: "login" | "register", inviteCode: string) {
+  if (!inviteCode) {
+    return mode === "register" ? "/login?flow=create" : "/login";
+  }
+
+  return mode === "register"
+    ? `/login?flow=join&code=${encodeURIComponent(inviteCode)}`
+    : `/login?flow=join&code=${encodeURIComponent(inviteCode)}`;
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const params = await searchParams;
+  const inviteCode = params?.code?.trim() ?? "";
+  const registerHref = buildAuthHref("register", inviteCode);
+  const loginHref = buildAuthHref("login", inviteCode);
+  const joinFloorHref = inviteCode
+    ? loginHref
+    : "/login?flow=join";
+
   return (
     <main>
       <section
@@ -13,10 +38,10 @@ export default function HomePage() {
       >
         <div className="landing-hero__grid">
           <div className="landing-hero__top-actions">
-            <Link href="/login?flow=create" className="convive-button">
+            <Link href={registerHref} className="convive-button">
               Registrarse
             </Link>
-            <Link href="/login" className="convive-button">
+            <Link href={loginHref} className="convive-button">
               Iniciar sesión
             </Link>
           </div>
@@ -86,7 +111,7 @@ export default function HomePage() {
             </p>
 
             <Link
-              href="/login"
+              href={joinFloorHref}
               className="convive-button landing-hero__button"
             >
               Unirse a un piso
@@ -110,7 +135,7 @@ export default function HomePage() {
             tediosos y su diseño está orientado a la convivencia en su totalidad.
           </p>
           <Link
-            href="/login?flow=create"
+            href={registerHref}
             className="convive-button landing-section-two__button"
           >
             Registrarse
@@ -276,7 +301,7 @@ export default function HomePage() {
             nace para eliminar esa carga.
           </p>
           <Link
-            href="/login"
+            href={loginHref}
             className="convive-button landing-section-two__button"
           >
             Unirme a un piso
@@ -338,12 +363,12 @@ export default function HomePage() {
               EMPIEZA A CONVIVIR MEJOR
             </h2>
             <div className="landing-section-five__actions">
-              <Link href="/login?flow=create" className="convive-button">
+              <Link href={registerHref} className="convive-button">
                 Registrarse
               </Link>
-              <Link href="/login" className="convive-button">
+              <Link href={loginHref} className="convive-button">
                 Iniciar sesión
-              </Link>
+              </Link>
             </div>
           </div>
         </div>

@@ -12,7 +12,7 @@ import styles from "./facturas-add-screen.module.css";
 
 type FacturasAddScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
 };
 
 function formatDate(date?: Date) {
@@ -28,7 +28,7 @@ export function FacturasAddScreen({
   dashboardPath,
 }: FacturasAddScreenProps) {
   const [date, setDate] = useState<Date | undefined>(new Date(2026, 1, 21));
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
 
   return (
     <main className={styles.page}>
@@ -126,4 +126,5 @@ export function FacturasAddScreen({
     </main>
   );
 }
+
 

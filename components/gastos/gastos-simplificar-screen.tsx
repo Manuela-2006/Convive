@@ -9,7 +9,7 @@ import styles from "./gastos-simplificar-screen.module.css";
 
 type GastosSimplificarScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
   settlements?: Settlement[];
 };
 
@@ -18,7 +18,7 @@ export function GastosSimplificarScreen({
   dashboardPath,
   settlements = [],
 }: GastosSimplificarScreenProps) {
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
 
   return (
     <main className={styles.page}>
@@ -113,6 +113,7 @@ export function GastosSimplificarScreen({
     </main>
   );
 }
+
 
 
 

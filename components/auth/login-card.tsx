@@ -1,25 +1,34 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+
+import {
+  signInAndJoinHouseWithEmail,
+  signInWithEmail,
+  signUpWithEmail,
+} from "../../app/actions/auth-actions";
+import {
+  createHouseAction,
+  joinHouseAction,
+} from "../../app/actions/house-actions";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import styles from "./login-card.module.css";
-import { signInWithEmail, signUpWithEmail } from "../../app/actions/auth-actions";
-import { createHouseAction, joinHouseAction } from "../../app/actions/house-actions";
 
 const loginSchema = z.object({
   email: z
     .string()
     .min(1, "El correo es obligatorio")
-    .email("Introduce un correo válido"),
+    .email("Introduce un correo valido"),
   password: z
     .string()
-    .min(8, "La contraseña debe tener al menos 8 caracteres"),
+    .min(8, "La contrasena debe tener al menos 8 caracteres"),
 });
 
 const registerSchema = z
@@ -27,32 +36,33 @@ const registerSchema = z
     email: z
       .string()
       .min(1, "El correo es obligatorio")
-      .email("Introduce un correo válido"),
+      .email("Introduce un correo valido"),
     password: z
       .string()
-      .min(8, "La contraseña debe tener al menos 8 caracteres"),
+      .min(8, "La contrasena debe tener al menos 8 caracteres"),
     confirmPassword: z
       .string()
-      .min(8, "La verificación debe tener al menos 8 caracteres"),
+      .min(8, "La verificacion debe tener al menos 8 caracteres"),
   })
   .refine((values) => values.password === values.confirmPassword, {
     path: ["confirmPassword"],
-    message: "Las contraseñas no coinciden",
+    message: "Las contrasenas no coinciden",
   });
 
 const createHomeSchema = z.object({
   name: z.string().min(1, "El nombre es obligatorio"),
   people: z
     .string()
-    .min(1, "El número de personas es obligatorio")
-    .regex(/^\d+$/, "Introduce solo números"),
+    .min(1, "El numero de personas es obligatorio")
+    .regex(/^\d+$/, "Introduce solo numeros"),
 });
 
 const joinHomeSchema = z.object({
   code: z
     .string()
-    .min(1, "El código es obligatorio")
-    .regex(/^[a-zA-Z0-9]+$/, "Introduce solo letras y números"),
+    .trim()
+    .min(1, "El codigo de invitacion es obligatorio")
+    .regex(/^[a-zA-Z0-9]+$/, "Introduce un codigo de invitacion valido"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -62,12 +72,19 @@ type JoinHomeFormValues = z.infer<typeof joinHomeSchema>;
 
 type LoginCardProps = {
   initialFlow?: "login" | "create" | "join";
+  initialJoinCode?: string;
 };
 
-export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
+export function LoginCard({
+  initialFlow = "login",
+  initialJoinCode = "",
+}: LoginCardProps) {
+  const router = useRouter();
   const preferredHomeAction = initialFlow === "join" ? "join" : "create";
   const [showSetupStep, setShowSetupStep] = useState(false);
-  const [homeAction, setHomeAction] = useState<"create" | "join">(preferredHomeAction);
+  const [homeAction, setHomeAction] = useState<"create" | "join">(
+    preferredHomeAction
+  );
   const [globalError, setGlobalError] = useState("");
   const [globalSuccess, setGlobalSuccess] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -100,29 +117,58 @@ export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
   const joinHomeForm = useForm<JoinHomeFormValues>({
     resolver: zodResolver(joinHomeSchema),
     defaultValues: {
-      code: "",
+      code: initialJoinCode,
     },
   });
+
+  const continueWithHouseStep = () => {
+    setGlobalSuccess("Sesion iniciada. Ahora ya puedes crear o unirte a un piso.");
+    setShowSetupStep(true);
+    setHomeAction(preferredHomeAction);
+  };
 
   const onLoginSubmit = (values: LoginFormValues) => {
     setGlobalError("");
     setGlobalSuccess("");
 
     startTransition(async () => {
-      const result = await signInWithEmail({
-        ...values,
-        redirectTo: initialFlow === "login" ? undefined : null,
-      });
+      const inviteCode = joinHomeForm.getValues("code").trim();
+      const result =
+        initialFlow === "join" && inviteCode
+          ? await signInAndJoinHouseWithEmail({
+              ...values,
+              code: inviteCode,
+            })
+          : await signInWithEmail({
+              ...values,
+              redirectTo: initialFlow === "login" ? undefined : null,
+            });
 
       if (result?.error) {
         setGlobalError(result.error);
         return;
       }
 
+      const dashboardPath =
+        result && "dashboardPath" in result ? result.dashboardPath : undefined;
+
+      if (dashboardPath) {
+        router.push(dashboardPath);
+        router.refresh();
+        return;
+      }
+
+      const nextPath =
+        result && "redirectTo" in result ? result.redirectTo : undefined;
+
+      if (nextPath) {
+        router.push(nextPath);
+        router.refresh();
+        return;
+      }
+
       if (initialFlow !== "login") {
-        setGlobalSuccess("Sesion iniciada. Ahora ya puedes crear o unirte a un piso.");
-        setShowSetupStep(true);
-        setHomeAction(preferredHomeAction);
+        continueWithHouseStep();
       }
     });
   };
@@ -142,7 +188,14 @@ export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
         return;
       }
 
-      setGlobalSuccess("Cuenta creada correctamente. Ahora crea o únete a un piso.");
+      if (initialFlow === "join") {
+        setGlobalSuccess(
+          "Cuenta creada correctamente. Inicia sesion y usa tu codigo de invitacion para entrar al piso."
+        );
+        return;
+      }
+
+      setGlobalSuccess("Cuenta creada correctamente. Ahora crea o unete a un piso.");
       setShowSetupStep(true);
       setHomeAction(preferredHomeAction);
     });
@@ -166,7 +219,9 @@ export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
     setGlobalSuccess("");
 
     startTransition(async () => {
-      const result = await joinHouseAction(values);
+      const result = await joinHouseAction({
+        code: values.code.trim(),
+      });
 
       if (result?.error) {
         setGlobalError(result.error);
@@ -233,11 +288,11 @@ export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
                     {...createHomeForm.register("name")}
                   />
                 </div>
-                {createHomeForm.formState.errors.name && (
+                {createHomeForm.formState.errors.name ? (
                   <p className={styles.error}>
                     {createHomeForm.formState.errors.name.message}
                   </p>
-                )}
+                ) : null}
               </div>
 
               <div className={styles.field}>
@@ -253,16 +308,16 @@ export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
                     type="text"
                     inputMode="numeric"
                     className={styles.input}
-                    placeholder="Nº de personas en el piso"
+                    placeholder="N de personas en el piso"
                     disabled={isPending}
                     {...createHomeForm.register("people")}
                   />
                 </div>
-                {createHomeForm.formState.errors.people && (
+                {createHomeForm.formState.errors.people ? (
                   <p className={styles.error}>
                     {createHomeForm.formState.errors.people.message}
                   </p>
-                )}
+                ) : null}
               </div>
 
               <Button type="submit" className={styles.submit} disabled={isPending}>
@@ -279,7 +334,7 @@ export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
                 <div className={styles.inputWrap}>
                   <Image
                     src="/iconos/building-svgrepo-com 1.svg"
-                    alt="Icono de código"
+                    alt="Icono de codigo"
                     width={16}
                     height={16}
                     className={`${styles.icon} ${styles.setupIcon}`}
@@ -287,20 +342,20 @@ export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
                   <Input
                     type="text"
                     className={styles.input}
-                    placeholder="Código de invitación"
+                    placeholder="Codigo de invitacion"
                     disabled={isPending}
                     {...joinHomeForm.register("code")}
                   />
                 </div>
-                {joinHomeForm.formState.errors.code && (
+                {joinHomeForm.formState.errors.code ? (
                   <p className={styles.error}>
                     {joinHomeForm.formState.errors.code.message}
                   </p>
-                )}
+                ) : null}
               </div>
 
               <Button type="submit" className={styles.submit} disabled={isPending}>
-                {isPending ? "Uniéndome..." : "Unirme"}
+                {isPending ? "Uniendome..." : "Unirme"}
               </Button>
             </form>
           )}
@@ -316,7 +371,7 @@ export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
           <div className={styles.tabsShell}>
             <TabsList className={styles.tabs}>
               <TabsTrigger value="login" className={styles.tab}>
-                Iniciar sesión
+                Iniciar sesion
               </TabsTrigger>
               <TabsTrigger value="register" className={styles.tab}>
                 Registrarse
@@ -354,18 +409,18 @@ export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
                     {...loginForm.register("email")}
                   />
                 </div>
-                {loginForm.formState.errors.email && (
+                {loginForm.formState.errors.email ? (
                   <p className={styles.error}>
                     {loginForm.formState.errors.email.message}
                   </p>
-                )}
+                ) : null}
               </div>
 
               <div className={styles.field}>
                 <div className={styles.inputWrap}>
                   <Image
                     src="/iconos/key-svgrepo-com 1.svg"
-                    alt="Icono de contraseña"
+                    alt="Icono de contrasena"
                     width={16}
                     height={16}
                     className={`${styles.icon} ${styles.keyIcon}`}
@@ -373,21 +428,21 @@ export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
                   <Input
                     type="password"
                     className={styles.input}
-                    placeholder="Contraseña"
+                    placeholder="Contrasena"
                     autoComplete="current-password"
                     disabled={isPending}
                     {...loginForm.register("password")}
                   />
                 </div>
-                {loginForm.formState.errors.password && (
+                {loginForm.formState.errors.password ? (
                   <p className={styles.error}>
                     {loginForm.formState.errors.password.message}
                   </p>
-                )}
+                ) : null}
               </div>
 
               <button type="button" className={styles.forgot} disabled={isPending}>
-                ¿Olvidaste tu contraseña?
+                Olvidaste tu contrasena?
               </button>
 
               <Button type="submit" className={styles.submit} disabled={isPending}>
@@ -420,18 +475,18 @@ export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
                     {...registerForm.register("email")}
                   />
                 </div>
-                {registerForm.formState.errors.email && (
+                {registerForm.formState.errors.email ? (
                   <p className={styles.error}>
                     {registerForm.formState.errors.email.message}
                   </p>
-                )}
+                ) : null}
               </div>
 
               <div className={styles.field}>
                 <div className={styles.inputWrap}>
                   <Image
                     src="/iconos/key-svgrepo-com 1.svg"
-                    alt="Icono de contraseña"
+                    alt="Icono de contrasena"
                     width={16}
                     height={16}
                     className={`${styles.icon} ${styles.keyIcon}`}
@@ -439,24 +494,24 @@ export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
                   <Input
                     type="password"
                     className={styles.input}
-                    placeholder="Contraseña"
+                    placeholder="Contrasena"
                     autoComplete="new-password"
                     disabled={isPending}
                     {...registerForm.register("password")}
                   />
                 </div>
-                {registerForm.formState.errors.password && (
+                {registerForm.formState.errors.password ? (
                   <p className={styles.error}>
                     {registerForm.formState.errors.password.message}
                   </p>
-                )}
+                ) : null}
               </div>
 
               <div className={styles.field}>
                 <div className={styles.inputWrap}>
                   <Image
                     src="/iconos/key-svgrepo-com 1.svg"
-                    alt="Icono de verificar contraseña"
+                    alt="Icono de verificar contrasena"
                     width={16}
                     height={16}
                     className={`${styles.icon} ${styles.keyIcon}`}
@@ -464,17 +519,17 @@ export function LoginCard({ initialFlow = "login" }: LoginCardProps) {
                   <Input
                     type="password"
                     className={styles.input}
-                    placeholder="Verificar contraseña"
+                    placeholder="Verificar contrasena"
                     autoComplete="new-password"
                     disabled={isPending}
                     {...registerForm.register("confirmPassword")}
                   />
                 </div>
-                {registerForm.formState.errors.confirmPassword && (
+                {registerForm.formState.errors.confirmPassword ? (
                   <p className={styles.error}>
                     {registerForm.formState.errors.confirmPassword.message}
                   </p>
-                )}
+                ) : null}
               </div>
 
               <Button type="submit" className={styles.submit} disabled={isPending}>

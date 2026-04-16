@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 type LoginPageProps = {
   searchParams?: Promise<{
     flow?: "login" | "create" | "join";
+    code?: string;
   }>;
 };
 
@@ -14,6 +15,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     params?.flow === "create" || params?.flow === "join"
       ? params.flow
       : "login";
+  const joinCode = params?.code?.trim() ?? "";
 
   return (
     <main className={styles.page}>
@@ -29,7 +31,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         />
         <p className={styles.subtitle}>Pon en orden tu piso compartido</p>
         <div className={styles.cardWrap}>
-          <LoginCard initialFlow={flow} />
+          <LoginCard initialFlow={flow} initialJoinCode={joinCode} />
         </div>
       </section>
     </main>

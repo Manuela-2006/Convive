@@ -4,8 +4,9 @@ import { redirect } from "next/navigation";
 
 import {
   buildDashboardPath,
-  buildProfilePath,
   getAuthenticatedProfileContext,
+  getJoinHouseErrorMessage,
+  readHousePublicCode,
 } from "../../lib/dashboard";
 
 export async function createHouseAction(formData: {
@@ -23,46 +24,57 @@ export async function createHouseAction(formData: {
     return { error: error.message };
   }
 
-  redirect(buildDashboardPath(profile.public_code, String(data)));
+  const housePublicCode = readHousePublicCode(data);
+
+  if (!housePublicCode) {
+    return { error: "No he podido obtener el codigo publico del piso." };
+  }
+
+  redirect(buildDashboardPath(profile.public_code, housePublicCode));
 }
 
 export async function joinHouseAction(formData: { code: string }) {
   const { supabase, profile } = await getAuthenticatedProfileContext();
+  const inviteCode = formData.code.trim();
 
   const { data, error } = await supabase.rpc("join_house_by_code", {
-    p_code: formData.code,
+    p_code: inviteCode,
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: getJoinHouseErrorMessage(error.message) };
   }
 
-  redirect(buildDashboardPath(profile.public_code, String(data)));
+  const housePublicCode = readHousePublicCode(data);
+
+  if (!housePublicCode) {
+    return { error: "No he podido obtener el codigo publico del piso." };
+  }
+
+  redirect(buildDashboardPath(profile.public_code, housePublicCode));
 }
 
-export async function createHouseFromFormAction(formData: FormData) {
-  const { profile } = await getAuthenticatedProfileContext();
-  const result = await createHouseAction({
-    name: String(formData.get("name") ?? "").trim(),
-    people: String(formData.get("people") ?? "").trim(),
+export async function joinHouseAndReturnDashboardPathAction(formData: {
+  code: string;
+}) {
+  const { supabase, profile } = await getAuthenticatedProfileContext();
+  const inviteCode = formData.code.trim();
+
+  const { data, error } = await supabase.rpc("join_house_by_code", {
+    p_code: inviteCode,
   });
 
-  if (result?.error) {
-    redirect(
-      `${buildProfilePath(profile.public_code)}?error=${encodeURIComponent(result.error)}`
-    );
+  if (error) {
+    return { error: getJoinHouseErrorMessage(error.message) };
   }
-}
 
-export async function joinHouseFromFormAction(formData: FormData) {
-  const { profile } = await getAuthenticatedProfileContext();
-  const result = await joinHouseAction({
-    code: String(formData.get("code") ?? "").trim(),
-  });
+  const housePublicCode = readHousePublicCode(data);
 
-  if (result?.error) {
-    redirect(
-      `${buildProfilePath(profile.public_code)}?error=${encodeURIComponent(result.error)}`
-    );
+  if (!housePublicCode) {
+    return { error: "No he podido obtener el codigo publico del piso." };
   }
+
+  return {
+    dashboardPath: buildDashboardPath(profile.public_code, housePublicCode),
+  };
 }

@@ -234,6 +234,84 @@
   border: 0;
 }
 
+.buttonMuted {
+  opacity: 0.7;
+}
+
+.statusLine {
+  margin: 0.2rem 0 0;
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.stateBadge {
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pendingSection {
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(139, 26, 47, 0.2);
+}
+
+.pendingRows {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.pendingRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.8rem;
+  align-items: center;
+  border: 1px solid rgba(139, 26, 47, 0.18);
+  border-radius: 10px;
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.pendingInfo {
+  min-width: 0;
+}
+
+.pendingActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.pendingApprove,
+.pendingReject {
+  border-radius: 8px;
+  padding: 0.55rem 0.9rem;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.pendingApprove {
+  background: #8b1a2f;
+  color: #f0eae4;
+}
+
+.pendingReject {
+  background: rgba(139, 26, 47, 0.14);
+  color: #8b1a2f;
+}
+
+.feedbackMessage {
+  margin: 0.85rem 0 0;
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+}
+
 .emptyState {
   margin: 0;
   color: #3a3532;
@@ -266,6 +344,15 @@
     gap: 0.35rem;
     padding-right: 1.6rem;
     align-items: start;
+  }
+
+  .pendingRow {
+    grid-template-columns: 1fr;
+  }
+
+  .pendingActions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .button {

@@ -9,14 +9,14 @@ import styles from "./herramientas-entra-screen.module.css";
 
 type HerramientasEntraScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
 };
 
 export function HerramientasEntraScreen({
   houseCode,
   dashboardPath,
 }: HerramientasEntraScreenProps) {
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
@@ -120,3 +120,4 @@ export function HerramientasEntraScreen({
     </main>
   );
 }
+

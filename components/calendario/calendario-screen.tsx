@@ -11,7 +11,7 @@ import styles from "./calendario-screen.module.css";
 
 type CalendarioScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
 };
 
 const weekdayMap = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
@@ -56,7 +56,7 @@ export function CalendarioScreen({
 }: CalendarioScreenProps) {
   const calendarRef = useRef<FullCalendar | null>(null);
   const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 2, 1));
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
 
   const currentLabel = useMemo(() => monthLabel(currentDate), [currentDate]);
 
@@ -130,3 +130,4 @@ export function CalendarioScreen({
     </main>
   );
 }
+

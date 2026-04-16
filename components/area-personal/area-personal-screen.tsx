@@ -12,7 +12,7 @@ import styles from "./area-personal-screen.module.css";
 
 type AreaPersonalScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
 };
 
 const summaryCards = [
@@ -59,7 +59,7 @@ export function AreaPersonalScreen({
 }: AreaPersonalScreenProps) {
   const [activeMonth, setActiveMonth] = useState(new Date(2026, 5, 1));
   const [isPaymentPopoverOpen, setIsPaymentPopoverOpen] = useState(false);
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
 
   const goPrevMonth = () => {
     setActiveMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1));
@@ -306,6 +306,7 @@ export function AreaPersonalScreen({
     </main>
   );
 }
+
 
 
 

@@ -82,6 +82,12 @@
   align-items: start;
 }
 
+.inviteBox {
+  display: grid;
+  justify-items: end;
+  gap: 0.35rem;
+}
+
 .sectionTitle {
   margin: 0;
   font-family: var(--font-montserrat), sans-serif;
@@ -110,6 +116,14 @@
   font-family: "Poppins", sans-serif;
   font-size: 14px;
   font-weight: 500;
+}
+
+.inviteLink {
+  color: #f0eae4;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .gridTwo {

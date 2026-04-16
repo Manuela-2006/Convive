@@ -7,11 +7,11 @@ import styles from "./ajustes-screen.module.css";
 
 type AjustesScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
 };
 
 export function AjustesScreen({ houseCode, dashboardPath }: AjustesScreenProps) {
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
@@ -130,3 +130,4 @@ export function AjustesScreen({ houseCode, dashboardPath }: AjustesScreenProps) 
     </main>
   );
 }
+

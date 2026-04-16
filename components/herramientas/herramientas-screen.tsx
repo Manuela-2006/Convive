@@ -8,14 +8,14 @@ import styles from "./herramientas-screen.module.css";
 
 type HerramientasScreenProps = {
   houseCode: string;
-  dashboardPath?: string;
+  dashboardPath: string;
 };
 
 export function HerramientasScreen({
   houseCode,
   dashboardPath,
 }: HerramientasScreenProps) {
-  const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
+  const basePath = dashboardPath;
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
@@ -103,3 +103,4 @@ export function HerramientasScreen({
     </main>
   );
 }
+

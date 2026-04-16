@@ -130,6 +130,105 @@
   place-items: center;
 }
 
+.fieldsGrid {
+  margin-top: 0.6rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.fieldGroup {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.fieldLabel {
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+}
+
+.fieldInput,
+.fieldSelect,
+.fieldTextarea {
+  width: 100%;
+  border: 1.5px solid #8b1a2f;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  padding: 0.72rem 0.78rem;
+  outline: none;
+}
+
+.fieldTextarea {
+  margin-top: 0.55rem;
+  resize: vertical;
+  min-height: 108px;
+}
+
+.itemComposer {
+  margin-top: 0.85rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.65rem;
+}
+
+.secondaryButton {
+  align-self: stretch;
+  background: #8b1a2f;
+  color: #f0eae4;
+  border-radius: 8px;
+  padding: 0 1rem;
+  font-size: 14px;
+}
+
+.selectedItems {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.itemChip {
+  border: 1px solid #8b1a2f;
+  border-radius: 999px;
+  background: rgba(139, 26, 47, 0.08);
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  padding: 0.45rem 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+.itemChipClose {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.memberRole {
+  color: #8b1a2f;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.emptyCopy,
+.feedbackMessage {
+  margin: 0.6rem 0 0;
+  color: #3a3532;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+}
+
+.feedbackMessage {
+  color: #8b1a2f;
+  font-weight: 500;
+}
+
 .radioRow {
   margin-top: 0.42rem;
   display: flex;
@@ -263,6 +362,10 @@
   .panel {
     width: min(100%, 650px);
   }
+
+  .fieldsGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
@@ -272,5 +375,9 @@
 
   .radioRow {
     gap: 1rem;
+  }
+
+  .itemComposer {
+    grid-template-columns: 1fr;
   }
 }
