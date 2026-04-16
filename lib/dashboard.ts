@@ -451,6 +451,23 @@ export async function loadHousePurchaseTicketsHistoryWithClient(
   return asArray<Record<string, unknown>>(data).map(mapExpenseTicket);
 }
 
+export async function loadOpenHousePurchaseTicketsWithClient(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  houseCode: string,
+  limit = 50
+) {
+  const { data, error } = await supabase.rpc("get_house_purchase_tickets", {
+    p_house_public_code: houseCode,
+    p_limit: limit,
+  });
+
+  if (error) {
+    notFound();
+  }
+
+  return asArray<Record<string, unknown>>(data).map(mapExpenseTicket);
+}
+
 export async function loadHouseSharedExpensesHistoryWithClient(
   supabase: Awaited<ReturnType<typeof createClient>>,
   houseCode: string,
@@ -461,6 +478,23 @@ export async function loadHouseSharedExpensesHistoryWithClient(
     p_house_public_code: houseCode,
     p_limit: limit,
     p_offset: offset,
+  });
+
+  if (error) {
+    notFound();
+  }
+
+  return asArray<Record<string, unknown>>(data).map(mapSharedExpense);
+}
+
+export async function loadOpenHouseSharedExpensesWithClient(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  houseCode: string,
+  limit = 50
+) {
+  const { data, error } = await supabase.rpc("get_house_shared_expenses", {
+    p_house_public_code: houseCode,
+    p_limit: limit,
   });
 
   if (error) {

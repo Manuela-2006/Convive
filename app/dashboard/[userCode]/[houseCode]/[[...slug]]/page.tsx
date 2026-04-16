@@ -30,6 +30,8 @@ import {
   loadHouseExpensesDashboardWithClient,
   loadHousePendingPaymentConfirmationsWithClient,
   loadHousePurchaseTicketsHistoryWithClient,
+  loadOpenHousePurchaseTicketsWithClient,
+  loadOpenHouseSharedExpensesWithClient,
   loadHouseSharedExpensesHistoryWithClient,
 } from "../../../../../lib/dashboard";
 import { createClient } from "../../../../../utils/supabase/server";
@@ -235,6 +237,22 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
         routeContext.house.public_code
       )
     : [];
+  const openHousePurchaseTickets =
+    sectionPath === "gastos"
+      ? await loadOpenHousePurchaseTicketsWithClient(
+          routeContext.supabase,
+          routeContext.house.public_code,
+          50
+        )
+      : [];
+  const openHouseSharedExpenses =
+    sectionPath === "gastos"
+      ? await loadOpenHouseSharedExpensesWithClient(
+          routeContext.supabase,
+          routeContext.house.public_code,
+          50
+        )
+      : [];
   const ticketsHistory =
     sectionPath === "gastos/tickets"
       ? await loadHousePurchaseTicketsHistoryWithClient(
@@ -274,8 +292,8 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
       <GastosScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-        tickets={expensesDashboard?.tickets ?? []}
-        sharedExpenses={expensesDashboard?.shared_expenses ?? []}
+        tickets={openHousePurchaseTickets}
+        sharedExpenses={openHouseSharedExpenses}
         settlements={expensesDashboard?.settlements ?? []}
         pendingPaymentConfirmations={pendingPaymentConfirmations}
         canReviewPayments={isHouseAdmin}
