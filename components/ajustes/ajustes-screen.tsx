@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Card } from "../ui/card";
@@ -12,6 +13,24 @@ type AjustesScreenProps = {
 
 export function AjustesScreen({ houseCode, dashboardPath }: AjustesScreenProps) {
   const basePath = dashboardPath;
+  const avatars = [
+    "/images/IconoperfilM.webp",
+    "/images/IconoperfilH.webp",
+    "/images/IconoperfilM.webp",
+    "/images/IconoperfilH.webp",
+    "/images/IconoperfilM.webp",
+    "/images/IconoperfilH.webp",
+    "/images/IconoperfilM.webp",
+    "/images/IconoperfilH.webp",
+  ];
+  const [selectedAvatar, setSelectedAvatar] = useState(0);
+  const visibleCount = 3;
+
+  const goPrevAvatar = () =>
+    setSelectedAvatar((prev) => (prev - 1 + avatars.length) % avatars.length);
+  const goNextAvatar = () =>
+    setSelectedAvatar((prev) => (prev + 1) % avatars.length);
+
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
@@ -68,16 +87,41 @@ export function AjustesScreen({ houseCode, dashboardPath }: AjustesScreenProps) 
                 VERA
               </h2>
               <div className={styles.avatarRow}>
-                <button type="button" className={styles.navArrow}>
-                  {"<"}
+                <button type="button" className={styles.navArrow} onClick={goPrevAvatar} aria-label="Avatar anterior">
+                  <Image
+                    src="/iconos/flechascalendario.svg"
+                    alt="Anterior"
+                    width={24}
+                    height={24}
+                    className={styles.navArrowIcon}
+                  />
                 </button>
-                <div className={styles.avatarList}>
-                  <Image src="/images/IconoperfilM.webp" alt="" width={34} height={34} />
-                  <Image src="/images/IconoperfilM.webp" alt="" width={34} height={34} />
-                  <Image src="/images/IconoperfilM.webp" alt="" width={34} height={34} />
+                <div className={styles.avatarSliderBox}>
+                  <div className={styles.avatarList}>
+                    {Array.from({ length: visibleCount }).map((_, offset) => {
+                      const index = (selectedAvatar + offset) % avatars.length;
+                      const avatar = avatars[index];
+                      return (
+                      <button
+                        key={`avatar-${index}`}
+                        type="button"
+                        className={`${styles.avatarDotButton} ${offset === 0 ? styles.avatarDotButtonActive : ""}`}
+                        onClick={() => setSelectedAvatar(index)}
+                        aria-label={`Seleccionar avatar ${index + 1}`}
+                      >
+                        <Image src={avatar} alt="" width={34} height={34} />
+                      </button>
+                    )})}
+                  </div>
                 </div>
-                <button type="button" className={styles.navArrow}>
-                  {">"}
+                <button type="button" className={styles.navArrow} onClick={goNextAvatar} aria-label="Siguiente avatar">
+                  <Image
+                    src="/iconos/flechascalendario.svg"
+                    alt="Siguiente"
+                    width={24}
+                    height={24}
+                    className={`${styles.navArrowIcon} ${styles.navArrowIconRight}`}
+                  />
                 </button>
               </div>
             </Card>

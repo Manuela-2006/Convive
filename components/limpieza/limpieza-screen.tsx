@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -23,6 +23,18 @@ const taskGroups = [
   {
     room: "BAÑO",
     tasks: ["Barrer la cocina"],
+  },
+  {
+    room: "RECIBIDOR",
+    tasks: ["Barrer el recibidor", "Quitar el polvo", "Fregar el suelo"],
+  },
+  {
+    room: "COMEDOR",
+    tasks: ["Limpiar la mesa", "Barrer el comedor", "Fregar el suelo"],
+  },
+  {
+    room: "OTROS",
+    tasks: ["Orden general", "Quitar el polvo", "Revisar pendientes"],
   },
 ];
 
@@ -60,26 +72,27 @@ export function LimpiezaScreen({
               <Button className={styles.topButton}>+ Añadir tarea</Button>
               <Button className={styles.topButton}>↻ Rotar</Button>
             </div>
-
-            {taskGroups.map((group) => (
-              <Card key={group.room} className={styles.groupCard}>
-                <h2 className={styles.groupTitle}>{group.room}</h2>
-                <div className={styles.groupRows}>
-                  {group.tasks.map((task) => (
-                    <div key={`${group.room}-${task}`} className={styles.taskRow}>
-                      <div className={styles.taskLeft}>
-                        <Image src="/images/IconoperfilM.webp" alt="" width={22} height={22} />
-                        <div>
-                          <p>{task}</p>
-                          <small>Martes 13/05/2026</small>
+            <div className={styles.groupsScroll}>
+              {taskGroups.map((group) => (
+                <Card key={group.room} className={styles.groupCard}>
+                  <h2 className={styles.groupTitle}>{group.room}</h2>
+                  <div className={styles.groupRows}>
+                    {group.tasks.map((task) => (
+                      <div key={`${group.room}-${task}`} className={styles.taskRow}>
+                        <div className={styles.taskLeft}>
+                          <Image src="/images/IconoperfilM.webp" alt="" width={22} height={22} />
+                          <div>
+                            <p>{task}</p>
+                            <small>Martes 13/05/2026</small>
+                          </div>
                         </div>
+                        <span className={styles.taskOwner}>Marc</span>
                       </div>
-                      <span className={styles.taskOwner}>Marc</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            ))}
+                    ))}
+                  </div>
+                </Card>
+              ))}
+            </div>
           </div>
 
           <div className={styles.floorWrap}>
@@ -102,5 +115,6 @@ export function LimpiezaScreen({
     </main>
   );
 }
+
 
 

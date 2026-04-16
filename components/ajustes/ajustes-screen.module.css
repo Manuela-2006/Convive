@@ -10,11 +10,12 @@
 }
 
 .panel {
-  width: min(100%, 1040px);
+  width: calc(100% * 7 / 12);
+  max-width: 1040px;
   border-radius: 8px;
   overflow: hidden;
   background: color-mix(in srgb, #f0eae4 40%, transparent);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: none;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 14px 35px rgba(0, 0, 0, 0.28);
@@ -25,20 +26,20 @@
   color: #f0eae4;
   padding: 1rem 1.1rem;
   display: grid;
-  grid-template-columns: 40px 1fr 40px;
+  grid-template-columns: 56px 1fr 56px;
   align-items: center;
 }
 
 .backLink {
-  width: 40px;
-  height: 40px;
+  width: 56px;
+  height: 56px;
   display: grid;
   place-items: center;
 }
 
 .backIcon {
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
 }
 
 .headerCenter {
@@ -95,6 +96,8 @@
   padding: 1.2rem 1rem 0.95rem;
   display: grid;
   justify-items: center;
+  align-content: center;
+  row-gap: 1.5rem;
 }
 
 .houseBlock {
@@ -111,12 +114,13 @@
   margin: 0;
   color: #f0eae4;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: clamp(1.1rem, 1.1vw, 1.3rem);
+  font-size: 20px;
   text-transform: uppercase;
+  text-align: center;
 }
 
 .personalFields {
-  margin-top: 0.65rem;
+  margin-top: 1.35rem;
   display: grid;
   gap: 0.45rem;
 }
@@ -150,7 +154,7 @@
 
 .avatarBadge {
   position: absolute;
-  top: -24px;
+  top: -12px;
   border: 9px solid #f2eeeb;
   border-radius: 999px;
   background: #8b1a2f;
@@ -165,43 +169,77 @@
 }
 
 .profileName {
-  margin: 1.2rem 0 0;
+  margin: 0;
   text-align: center;
   color: #8b1a2f;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: clamp(1.35rem, 1.5vw, 1.7rem);
+  font-size: 20px;
   line-height: 1.05;
   font-weight: 800;
 }
 
 .avatarRow {
-  margin-top: 0.85rem;
-  width: 100%;
+  margin-top: 0.1rem;
+  width: fit-content;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto auto auto;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.3rem;
+  margin-inline: auto;
 }
 
 .navArrow {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border: none;
   background: transparent;
-  color: #8b1a2f;
-  font-family: "Poppins", sans-serif;
-  font-size: 1.5rem;
-  line-height: 1;
+  display: grid;
+  place-items: center;
   padding: 0;
+}
+
+.navArrowIcon {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) saturate(100%) invert(15%) sepia(25%) saturate(4849%)
+    hue-rotate(329deg) brightness(84%) contrast(98%);
+}
+
+.navArrowIconRight {
+  transform: rotate(180deg);
 }
 
 .avatarList {
   display: flex;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0.9rem;
 }
 
-.avatarList img {
+.avatarSliderBox {
+  width: auto;
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+}
+
+.avatarDotButton {
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  opacity: 0.85;
+  transform: scale(0.96);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.avatarDotButtonActive {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.avatarDotButton img {
   border-radius: 999px;
   border: 3px solid #be6f8b;
   background: #fff;
@@ -211,7 +249,7 @@
   margin: 0;
   text-align: center;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: clamp(1.15rem, 1.25vw, 1.45rem);
+  font-size: 20px;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -237,6 +275,10 @@
   padding: 0.35rem 0.45rem;
 }
 
+.houseBlock .sectionTitle + .settingRow {
+  margin-top: 1.9rem;
+}
+
 .settingLabel,
 .settingValue {
   color: #3d3733;
@@ -253,28 +295,40 @@
 }
 
 .appSettings {
-  margin-top: 0.75rem;
+  margin-top: 1.9rem;
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 0.9rem;
 }
 
 .notifications {
-  display: grid;
-  gap: 0.35rem;
-  justify-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+  text-align: center;
+  width: max-content;
+  justify-self: start;
+  align-self: center;
 }
 
 .notifications span {
   font-family: "Poppins", sans-serif;
-  font-size: 0.73rem;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
   color: #f0eae4;
 }
 
 .toggle {
   width: 46px;
+  min-width: 46px;
+  max-width: 46px;
   height: 20px;
+  min-height: 20px;
+  max-height: 20px;
   border-radius: 999px;
   border: 1px solid #e6c8d2;
   background: #f0eae4;
@@ -282,13 +336,21 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  align-self: center;
 }
 
 .toggle span {
   width: 18px;
+  min-width: 18px;
+  max-width: 18px;
   height: 16px;
+  min-height: 16px;
+  max-height: 16px;
   border-radius: 999px;
   background: #8b1a2f;
+  box-sizing: border-box;
 }
 
 .appButton {
@@ -301,6 +363,18 @@
   font-size: 0.85rem;
   padding: 0.35rem 0.95rem;
   white-space: nowrap;
+}
+
+.appButton:first-of-type {
+  justify-self: center;
+}
+
+.appButton:last-of-type {
+  justify-self: end;
+}
+
+.notifications {
+  align-self: center;
 }
 
 @media (max-width: 960px) {
