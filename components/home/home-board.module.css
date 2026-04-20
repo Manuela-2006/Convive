@@ -243,7 +243,7 @@
   .menu {
     z-index: 40;
     text-decoration: none;
-    overflow: hidden;
+    overflow: visible;
     width: 70px;
     height: 94px;
     left: max(0.9rem, env(safe-area-inset-left));
@@ -265,25 +265,22 @@
     min-width: 20px;
     min-height: 20px;
     display: block;
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    margin: 0;
+    position: static;
+    transform: none;
+    margin: 0.2rem 0 0.55rem;
   }
 
   .menu span {
-    position: absolute;
-    bottom: 0.45rem;
-    left: 50%;
-    transform: translateX(-50%);
+    position: static;
+    transform: none;
     margin: 0;
     line-height: 1.05;
     white-space: nowrap;
-    font-size: 1.15rem;
+    font-size: 0.95rem;
     max-width: none;
     overflow: visible;
     text-overflow: clip;
+    text-align: center;
   }
 }
 

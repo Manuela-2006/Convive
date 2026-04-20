@@ -231,6 +231,10 @@
   font-size: 14px;
   line-height: 1;
   border: 0;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .emptyState {

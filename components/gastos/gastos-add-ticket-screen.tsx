@@ -13,6 +13,8 @@ import { Card } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { TicketUploader } from "../ui/ticket-uploader";
+import type { TicketScannerData } from "../../lib/ticket-scanner-types";
 import styles from "./gastos-add-ticket-screen.module.css";
 
 type GastosAddTicketScreenProps = {
@@ -45,6 +47,64 @@ function normalizeItemName(value: string) {
   return value.trim().replace(/\s+/g, " ");
 }
 
+function parseScannerDate(value?: string | null): Date | undefined {
+  if (!value) return undefined;
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
+  if (!match) return undefined;
+  const [, dd, mm, yyyy] = match;
+  const date = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+  if (Number.isNaN(date.getTime())) return undefined;
+  return date;
+}
+
+const SUPERMARKET_KEYWORDS = [
+  "mercadona",
+  "carrefour",
+  "dia",
+  "lidl",
+  "aldi",
+  "eroski",
+  "hipercor",
+  "supercor",
+  "el corte ingles",
+  "alcampo",
+  "simply",
+  "masymas",
+  "mas y mas",
+  "consum",
+  "bonarea",
+  "bonpreu",
+  "esclat",
+  "caprabo",
+  "froiz",
+  "gadis",
+  "bm supermercado",
+  "coviran",
+  "spar",
+  "family cash",
+  "supeco",
+] as const;
+
+function normalizeSearchText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isSupermarketMerchant(merchant?: string | null) {
+  if (!merchant) {
+    return false;
+  }
+
+  const normalizedMerchant = normalizeSearchText(merchant);
+  return SUPERMARKET_KEYWORDS.some((keyword) =>
+    normalizedMerchant.includes(normalizeSearchText(keyword))
+  );
+}
+
 export function GastosAddTicketScreen({
   houseCode,
   dashboardPath,
@@ -75,9 +135,11 @@ export function GastosAddTicketScreen({
   const [selectedParticipantIds, setSelectedParticipantIds] = useState<string[]>(
     defaultParticipantIds
   );
+  const [detectedItemNames, setDetectedItemNames] = useState<string[]>([]);
   const [selectedItemNames, setSelectedItemNames] = useState<string[]>([]);
   const [manualItemName, setManualItemName] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [scanMessage, setScanMessage] = useState<string | null>(null);
 
   const hasMembers = formOptions.members.length > 0;
 
@@ -97,16 +159,18 @@ export function GastosAddTicketScreen({
     );
   };
 
-  const removeItemName = (itemName: string) => {
-    setSelectedItemNames((current) => current.filter((item) => item !== itemName));
-  };
-
   const addManualItem = () => {
     const normalizedItemName = normalizeItemName(manualItemName);
 
     if (!normalizedItemName) {
       return;
     }
+
+    setDetectedItemNames((current) =>
+      current.includes(normalizedItemName)
+        ? current
+        : [...current, normalizedItemName]
+    );
 
     setSelectedItemNames((current) =>
       current.includes(normalizedItemName)
@@ -125,9 +189,11 @@ export function GastosAddTicketScreen({
     setNotes("");
     setPaidByProfileId(defaultPaidByProfileId);
     setSelectedParticipantIds(defaultParticipantIds);
+    setDetectedItemNames([]);
     setSelectedItemNames([]);
     setManualItemName("");
     setErrorMessage(null);
+    setScanMessage(null);
   };
 
   const handleSaveExpense = () => {
@@ -196,6 +262,60 @@ export function GastosAddTicketScreen({
     });
   };
 
+  const handleScanComplete = (data: TicketScannerData) => {
+    if (data.tipo === "desconocido") {
+      setErrorMessage("No se detecto ticket ni factura en el archivo.");
+      return;
+    }
+
+    if (typeof data.importe_total === "number" && Number.isFinite(data.importe_total)) {
+      setTotalAmount(data.importe_total.toFixed(2));
+    }
+
+    if (data.comercio) {
+      setMerchant(data.comercio);
+    }
+
+    const supermarketDetected = isSupermarketMerchant(data.comercio);
+    if (supermarketDetected) {
+      setTicketKind("purchase");
+    }
+
+    const parsedDate = parseScannerDate(data.fecha);
+    if (parsedDate) {
+      setDate(parsedDate);
+    }
+
+    if (data.tipo === "ticket" || supermarketDetected) {
+      if (data.articulos?.length) {
+        const normalizedNames = data.articulos
+          .map((item) => normalizeItemName(item.nombre))
+          .filter((itemName) => !!itemName);
+        const uniqueNames = Array.from(new Set(normalizedNames));
+        setDetectedItemNames(uniqueNames);
+        setSelectedItemNames(uniqueNames);
+      } else {
+        setDetectedItemNames([]);
+      }
+
+      const firstItem = data.articulos?.[0]?.nombre?.trim();
+      const fallbackTitle = data.comercio?.trim();
+      if (firstItem) {
+        setTitle(firstItem);
+      } else if (fallbackTitle) {
+        setTitle(`Compra en ${fallbackTitle}`);
+      }
+    } else if (data.tipo === "factura") {
+      setTicketKind("unexpected");
+      if (data.comercio) {
+        setTitle(`Factura ${data.comercio}`);
+      }
+    }
+
+    setErrorMessage(null);
+    setScanMessage("Datos detectados y cargados en el formulario.");
+  };
+
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
@@ -238,6 +358,15 @@ export function GastosAddTicketScreen({
 
             <section className={styles.block}>
               <h3 className={styles.blockTitle}>1 - Completa los datos del ticket</h3>
+              <TicketUploader
+                onScanComplete={handleScanComplete}
+                className={styles.uploadBox}
+                minHeight={190}
+                scanMode="vision"
+              />
+              {scanMessage ? (
+                <p className={styles.scanMessage}>{scanMessage}</p>
+              ) : null}
               <div className={styles.fieldsGrid}>
                 <label className={styles.fieldGroup}>
                   <span className={styles.fieldLabel}>Título</span>
@@ -305,21 +434,21 @@ export function GastosAddTicketScreen({
 
             <section className={styles.block}>
               <h3 className={styles.blockTitle}>3 - Añade los artículos del piso</h3>
-              {formOptions.items.length ? (
+              {detectedItemNames.length ? (
                 <div className={styles.checkCol}>
-                  {formOptions.items.map((item) => (
-                    <label key={item.item_id} className={styles.checkLabel}>
+                  {detectedItemNames.map((itemName) => (
+                    <label key={itemName} className={styles.checkLabel}>
                       <Checkbox
                         className={styles.checkbox}
-                        checked={selectedItemNames.includes(item.name)}
-                        onCheckedChange={() => toggleItemName(item.name)}
+                        checked={selectedItemNames.includes(itemName)}
+                        onCheckedChange={() => toggleItemName(itemName)}
                       />
-                      {item.name}
+                      {itemName}
                     </label>
                   ))}
                 </div>
               ) : (
-                <p className={styles.emptyCopy}>No hay artículos guardados todavía.</p>
+                <p className={styles.emptyCopy}>No hay articulos detectados.</p>
               )}
 
               <div className={styles.itemComposer}>
@@ -343,24 +472,6 @@ export function GastosAddTicketScreen({
                   Añadir artículo
                 </Button>
               </div>
-
-              {selectedItemNames.length ? (
-                <div className={styles.selectedItems}>
-                  {selectedItemNames.map((itemName) => (
-                    <button
-                      key={itemName}
-                      type="button"
-                      className={styles.itemChip}
-                      onClick={() => removeItemName(itemName)}
-                    >
-                      {itemName}
-                      <span className={styles.itemChipClose}>×</span>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <p className={styles.emptyCopy}>No hay artículos seleccionados.</p>
-              )}
             </section>
 
             <section className={styles.block}>

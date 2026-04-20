@@ -12,6 +12,7 @@ import type {
 import {
   formatCurrency,
   formatShortDate,
+  resolveTicketFileUrl,
 } from "../../lib/dashboard-presenters";
 import styles from "./gastos-screen.module.css";
 
@@ -93,31 +94,46 @@ export function GastosScreen({
             </div>
             <Card className={`${styles.innerPaper} ${styles.ticketsPaper}`}>
               {visibleTickets.length ? (
-                visibleTickets.map((ticket) => (
-                  <div key={ticket.ticket_id} className={styles.innerRow}>
-                    <div className={styles.leftInfo}>
-                      <Image src="/images/IconoperfilM.webp" alt="" width={20} height={20} />
-                      <div>
-                        <p className={styles.mainText}>
-                          {ticket.paid_by_name} -{" "}
-                          {ticket.display_title || ticket.merchant}
-                        </p>
-                        <p className={styles.subText}>
-                          {formatShortDate(ticket.purchase_date)}
-                        </p>
+                visibleTickets.map((ticket) => {
+                  const ticketFileUrl = resolveTicketFileUrl(ticket.ticket_file_path);
+
+                  return (
+                    <div key={ticket.ticket_id} className={styles.innerRow}>
+                      <div className={styles.leftInfo}>
+                        <Image src="/images/IconoperfilM.webp" alt="" width={20} height={20} />
+                        <div>
+                          <p className={styles.mainText}>
+                            {ticket.paid_by_name} -{" "}
+                            {ticket.display_title || ticket.merchant}
+                          </p>
+                          <p className={styles.subText}>
+                            {formatShortDate(ticket.purchase_date)}
+                          </p>
+                        </div>
                       </div>
+                      <p className={styles.amount}>
+                        {formatCurrency(ticket.total_amount, ticket.currency)}
+                      </p>
+                      {ticketFileUrl ? (
+                        <a
+                          href={ticketFileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`convive-button ${styles.actionButton}`}
+                        >
+                          Ver ticket
+                        </a>
+                      ) : (
+                        <Link
+                          href={`${basePath}/gastos/tickets`}
+                          className={`convive-button ${styles.actionButton}`}
+                        >
+                          Ver ticket
+                        </Link>
+                      )}
                     </div>
-                    <p className={styles.amount}>
-                      {formatCurrency(ticket.total_amount, ticket.currency)}
-                    </p>
-                    <Link
-                      href={`${basePath}/gastos/tickets`}
-                      className={`convive-button ${styles.actionButton}`}
-                    >
-                      Ver ticket
-                    </Link>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className={styles.emptyState}>Todavía no hay tickets de compra.</p>
               )}

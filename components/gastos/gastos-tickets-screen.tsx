@@ -9,6 +9,7 @@ import {
   formatCurrency,
   formatMonthLabel,
   formatShortDate,
+  resolveTicketFileUrl,
 } from "../../lib/dashboard-presenters";
 import styles from "./gastos-tickets-screen.module.css";
 
@@ -120,33 +121,46 @@ export function GastosTicketsScreen({
                   <section key={group.month} className={styles.monthBlock}>
                     <h3 className={styles.monthTitle}>{group.month}</h3>
                     <div className={styles.monthRows}>
-                      {group.rows.map((ticket) => (
-                        <div className={styles.ticketRow} key={ticket.ticket_id}>
-                          <div className={styles.ticketLeft}>
-                            <Image
-                              src="/images/IconoperfilM.webp"
-                              alt=""
-                              width={20}
-                              height={20}
-                            />
-                            <div>
-                              <p className={styles.ticketMain}>
-                                {ticket.paid_by_name} -{" "}
-                                {ticket.display_title || ticket.merchant}
-                              </p>
-                              <p className={styles.ticketDate}>
-                                {formatShortDate(ticket.purchase_date)}
-                              </p>
+                      {group.rows.map((ticket) => {
+                        const ticketFileUrl = resolveTicketFileUrl(ticket.ticket_file_path);
+
+                        return (
+                          <div className={styles.ticketRow} key={ticket.ticket_id}>
+                            <div className={styles.ticketLeft}>
+                              <Image
+                                src="/images/IconoperfilM.webp"
+                                alt=""
+                                width={20}
+                                height={20}
+                              />
+                              <div>
+                                <p className={styles.ticketMain}>
+                                  {ticket.paid_by_name} -{" "}
+                                  {ticket.display_title || ticket.merchant}
+                                </p>
+                                <p className={styles.ticketDate}>
+                                  {formatShortDate(ticket.purchase_date)}
+                                </p>
+                              </div>
                             </div>
+                            <p className={styles.ticketAmount}>
+                              {formatCurrency(ticket.total_amount, ticket.currency)}
+                            </p>
+                            {ticketFileUrl ? (
+                              <a
+                                href={ticketFileUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className={styles.ticketButton}
+                              >
+                                Ver ticket
+                              </a>
+                            ) : (
+                              <span className={styles.ticketButton}>Ver ticket</span>
+                            )}
                           </div>
-                          <p className={styles.ticketAmount}>
-                            {formatCurrency(ticket.total_amount, ticket.currency)}
-                          </p>
-                          <span className={styles.ticketButton}>
-                            Ver ticket
-                          </span>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </section>
                 ))
