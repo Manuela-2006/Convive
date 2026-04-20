@@ -237,8 +237,17 @@
   }
 
   .cardTop {
-    flex-wrap: wrap;
-    align-items: start;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .cardTitle {
+    font-size: 20px;
+    line-height: 1.1;
+  }
+
+  .searchInput {
+    width: 96px;
   }
 
   .listWrap {
@@ -246,14 +255,25 @@
   }
 
   .row {
-    grid-template-columns: 1fr;
-    gap: 0.35rem;
-    padding-right: 1.6rem;
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.55rem;
+    padding-right: 1rem;
+    align-items: center;
+  }
+
+  .amount {
+    font-size: 20px;
+    text-align: right;
   }
 
   .actionButton {
-    justify-self: start;
-    margin-left: 0;
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-self: stretch;
+    margin-top: 0.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 }

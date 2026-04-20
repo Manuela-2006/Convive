@@ -85,23 +85,29 @@
 .inlineBack {
   color: #8b1a2f;
   text-decoration: none;
-  font-family: "Poppins", sans-serif;
-  font-size: 30px;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.inlineBack :global(img) {
+  filter: brightness(0) saturate(100%) invert(15%) sepia(25%) saturate(4849%) hue-rotate(329deg) brightness(84%) contrast(98%);
 }
 
 .cardTitle {
   margin: 0;
   color: #8b1a2f;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: 34px;
+  font-size: 22px;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .resultBox {
   margin-top: 1rem;
-  border: 1.5px solid #be6f8b;
+  border: 1.5px solid #8b1a2f;
   border-radius: 10px;
   background: #f0ebe6;
   padding: 0.9rem 0.9rem 0;
@@ -135,7 +141,7 @@
 
 .resultLabel {
   margin-top: 0.75rem;
-  border-top: 1px solid #be6f8b;
+  border-top: 1px solid #8b1a2f;
   text-align: center;
   color: #8b1a2f;
   font-family: var(--font-montserrat), sans-serif;
@@ -162,10 +168,6 @@
 @media (max-width: 900px) {
   .panel {
     width: min(100%, 650px);
-  }
-
-  .cardTitle {
-    font-size: 28px;
   }
 }
 

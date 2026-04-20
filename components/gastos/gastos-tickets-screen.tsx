@@ -135,17 +135,15 @@ export function GastosTicketsScreen({
                                 {ticket.display_title || ticket.merchant}
                               </p>
                               <p className={styles.ticketDate}>
-                                {formatShortDate(ticket.purchase_date)} ·{" "}
-                                {formatCurrency(ticket.total_amount, ticket.currency)}
+                                {formatShortDate(ticket.purchase_date)}
                               </p>
                             </div>
                           </div>
+                          <p className={styles.ticketAmount}>
+                            {formatCurrency(ticket.total_amount, ticket.currency)}
+                          </p>
                           <span className={styles.ticketButton}>
-                            {ticket.settlement_status === "settled"
-                              ? "Liquidado"
-                              : ticket.ticket_file_path
-                                ? "Archivo disponible"
-                                : "Ticket registrado"}
+                            Ver ticket
                           </span>
                         </div>
                       ))}

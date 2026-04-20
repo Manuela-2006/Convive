@@ -53,11 +53,16 @@ export function GastosPagoSimplificadoScreen({
           <Card className={styles.card}>
             <div className={styles.cardTop}>
               <Link
-                href={`${basePath}/gastos/simplificar`}
+                href={`${basePath}/gastos`}
                 className={styles.inlineBack}
                 aria-label="Volver a simplificar"
               >
-                ←
+                <Image
+                  src="/iconos/flechaatras.svg"
+                  alt=""
+                  width={34}
+                  height={34}
+                />
               </Link>
               <h2 className={styles.cardTitle}>Pago simplificado</h2>
             </div>
@@ -81,7 +86,7 @@ export function GastosPagoSimplificadoScreen({
                         {formatCurrency(settlement.amount)}
                       </span>
                       <Image
-                        src="/iconos/flechapagos.svg"
+                        src="/iconos/flechaderecha.svg"
                         alt=""
                         width={18}
                         height={18}

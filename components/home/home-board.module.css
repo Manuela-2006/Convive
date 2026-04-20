@@ -63,6 +63,12 @@
   gap: 1.15rem;
 }
 
+.tile:link,
+.tile:visited {
+  color: #f6f0ea;
+  text-decoration: none;
+}
+
 .tileWide {
   grid-column: span 4;
 }
@@ -194,8 +200,9 @@
 @media (max-width: 900px) {
   .page {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr;
-    gap: 1rem;
+    grid-template-rows: auto 1fr;
+    gap: 0.62rem;
+    padding-top: 0.7rem;
   }
 
   .logo {
@@ -205,10 +212,11 @@
 
   .boardFrame {
     grid-column: 1;
-    grid-row: 2 / 4;
+    grid-row: 2;
     width: min(100%, 930px);
     height: auto;
-    margin: 0 auto;
+    margin: 0.55rem auto 0;
+    align-self: start;
   }
 
   .board {
@@ -228,6 +236,54 @@
 
   .tile {
     min-height: 105px;
+  }
+}
+
+@media (max-width: 640px) {
+  .menu {
+    z-index: 40;
+    text-decoration: none;
+    overflow: hidden;
+    width: 70px;
+    height: 94px;
+    left: max(0.9rem, env(safe-area-inset-left));
+    bottom: max(0.9rem, env(safe-area-inset-bottom));
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0;
+    padding: 0.42rem 0.45rem 0.28rem;
+    font-size: 1rem;
+    position: fixed;
+  }
+
+  .menuIcon {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    display: block;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+  }
+
+  .menu span {
+    position: absolute;
+    bottom: 0.45rem;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    line-height: 1.05;
+    white-space: nowrap;
+    font-size: 1.15rem;
+    max-width: none;
+    overflow: visible;
+    text-overflow: clip;
   }
 }
 

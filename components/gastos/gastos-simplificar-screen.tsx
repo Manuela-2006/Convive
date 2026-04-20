@@ -49,7 +49,12 @@ export function GastosSimplificarScreen({
                   className={styles.inlineBack}
                   aria-label="Volver a gastos"
                 >
-                  ←
+                  <Image
+                    src="/iconos/flechaatras.svg"
+                    alt=""
+                    width={34}
+                    height={34}
+                  />
                 </Link>
                 <h2 className={styles.cardTitle}>Simplificar pagos</h2>
               </div>
@@ -78,7 +83,7 @@ export function GastosSimplificarScreen({
                         {formatCurrency(settlement.amount)}
                       </span>
                       <Image
-                        src="/iconos/flechapagos.svg"
+                        src="/iconos/flechaderecha.svg"
                         alt=""
                         width={18}
                         height={18}

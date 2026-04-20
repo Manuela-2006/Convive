@@ -259,8 +259,72 @@
     align-items: start;
   }
 
+  .title {
+    font-size: 22px;
+  }
+
+  .backLink {
+    justify-self: start;
+    transform: translateX(-0.8rem);
+  }
+
+  .group {
+    padding: 0.7rem 0.8rem 0.82rem;
+    padding-top: 1.02rem;
+    height: 220px;
+  }
+
+  .groupTop {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .groupTitle {
+    font-size: 17px;
+    line-height: 1.1;
+  }
+
+  .viewAll {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .paperStack {
+    width: calc(100% - 14px);
+    min-height: 172px;
+    margin-top: 1.8rem;
+    padding: 0.72rem 0.95rem 0.8rem;
+  }
+
+  .groupFooter {
+    height: 34px;
+  }
+
   .paperRow {
-    grid-template-columns: 1fr;
-    gap: 0.35rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.55rem;
+    align-items: center;
+    width: 100%;
+  }
+
+  .left {
+    align-items: start;
+    padding-left: 0;
+  }
+
+  .amount {
+    font-size: 20px;
+    text-align: right;
+  }
+
+  .actionButton {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-self: stretch;
+    margin-top: 0.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 }

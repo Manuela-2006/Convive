@@ -102,14 +102,15 @@ export function AreaPersonalScreen({
             ))}
           </div>
 
-          <Card className={styles.sectionCard}>
+          <Card id="mis-deudas" className={styles.sectionCard}>
             <h2 className={styles.sectionHeader}>Mis deudas</h2>
             <div className={`${styles.rows} ${styles.debtsRows}`}>
               <div className={styles.row}>
                 <div className={styles.person}>
                   <Image src="/images/IconoperfilM.webp" alt="Perfil" width={22} height={22} className={styles.avatar} />
                   <div>
-                    <p className={styles.personLine}>Laura - Compra Mercadona</p>
+                    <p className={styles.personLine}>Laura</p>
+                    <p className={styles.personSub}>Compra Mercadona</p>
                   </div>
                 </div>
                 <p className={styles.amount}>{"23\u20AC"}</p>
@@ -119,8 +120,8 @@ export function AreaPersonalScreen({
                 <div className={styles.person}>
                   <Image src="/images/IconoperfilH.webp" alt="Perfil" width={22} height={22} className={styles.avatar} />
                   <div>
-                    <p className={styles.personLine}>Marc - Factura luz</p>
-                    <p className={styles.personSub}>Pagar antes del 25 de mayo</p>
+                    <p className={styles.personLine}>Marc</p>
+                    <p className={styles.personSub}>Factura de luz</p>
                   </div>
                 </div>
                 <p className={styles.amount}>{"23\u20AC"}</p>
@@ -135,7 +136,10 @@ export function AreaPersonalScreen({
               <div className={styles.row}>
                 <div className={styles.person}>
                   <Image src="/images/IconoperfilM.webp" alt="Perfil" width={22} height={22} className={styles.avatar} />
-                  <p className={styles.personLine}>Laura - Compra IKEA</p>
+                  <div>
+                    <p className={styles.personLine}>Laura</p>
+                    <p className={styles.personSub}>Compra IKEA</p>
+                  </div>
                 </div>
                 <p className={styles.amount}>{"23\u20AC"}</p>
                 <Button className={styles.actionButton}>Verificar pago</Button>
@@ -143,7 +147,10 @@ export function AreaPersonalScreen({
               <div className={styles.row}>
                 <div className={styles.person}>
                   <Image src="/images/IconoperfilH.webp" alt="Perfil" width={22} height={22} className={styles.avatar} />
-                  <p className={styles.personLine}>Marc - Compra papel</p>
+                  <div>
+                    <p className={styles.personLine}>Marc</p>
+                    <p className={styles.personSub}>Compra papel</p>
+                  </div>
                 </div>
                 <p className={styles.amount}>{"23\u20AC"}</p>
                 <Button className={styles.actionButton}>Verificar pago</Button>
@@ -151,7 +158,10 @@ export function AreaPersonalScreen({
               <div className={styles.row}>
                 <div className={styles.person}>
                   <Image src="/images/IconoperfilM.webp" alt="Perfil" width={22} height={22} className={styles.avatar} />
-                  <p className={styles.personLine}>Ana - Compra farmacia</p>
+                  <div>
+                    <p className={styles.personLine}>Ana</p>
+                    <p className={styles.personSub}>Compra farmacia</p>
+                  </div>
                 </div>
                 <p className={styles.amount}>{"23\u20AC"}</p>
                 <Button className={styles.actionButton}>Verificar pago</Button>
@@ -163,26 +173,41 @@ export function AreaPersonalScreen({
             <div className={styles.historyTop}>
               <h2 className={styles.sectionHeader}>Historial</h2>
               <Link href={`${basePath}/area-personal/historial`} className={styles.viewAll}>
-                Ver todo &gt;
+                <span className={styles.viewAllContent}>
+                  VER TODO
+                  <Image
+                    src="/iconos/flechascalendario.svg"
+                    alt=""
+                    width={20}
+                    height={20}
+                    className={styles.viewAllArrow}
+                  />
+                </span>
               </Link>
             </div>
-            <div className={styles.rows}>
-              <div className={styles.row}>
+            <div className={`${styles.rows} ${styles.historyRows}`}>
+              <div className={`${styles.row} ${styles.historyRow}`}>
                 <div className={styles.person}>
                   <Image src="/images/IconoperfilH.webp" alt="Perfil" width={22} height={22} className={styles.avatar} />
                   <div>
                     <p className={styles.personLine}>Pago a Marc</p>
-                    <p className={styles.personSub}>Factura de la luz - {"25\u20AC"}</p>
+                    <p className={styles.personSub}>Factura de la luz</p>
                   </div>
                 </div>
-                <p className={styles.historyAmount} />
-                <Button className={styles.historyButton}>Ver factura</Button>
+                <p className={styles.historyRightAmount}>{"25\u20AC"}</p>
+                <span className={`${styles.actionButton} ${styles.historyRightSpacer}`} aria-hidden="true">
+                  Verificar pago
+                </span>
               </div>
-              <div className={styles.row}>
+              <div className={`${styles.row} ${styles.historyRow}`}>
                 <div className={styles.person}>
                   <Image src="/iconos/Carrodecompra.svg" alt="Compra" width={18} height={18} />
-                  <p className={styles.personLine}>Compra supermercado - {"40\u20AC"}</p>
+                  <p className={styles.personLine}>Compra supermercado</p>
                 </div>
+                <p className={styles.historyRightAmount}>{"40\u20AC"}</p>
+                <span className={`${styles.actionButton} ${styles.historyRightSpacer}`} aria-hidden="true">
+                  Verificar pago
+                </span>
               </div>
             </div>
           </Card>

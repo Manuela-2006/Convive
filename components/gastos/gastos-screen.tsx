@@ -61,7 +61,7 @@ export function GastosScreen({
 
         <div className={styles.content}>
           <Card className={`${styles.maroonSection} ${styles.ticketsSection}`}>
-            <div className={styles.sectionTop}>
+            <div className={`${styles.sectionTop} ${styles.simpleTop}`}>
               <div className={styles.sectionTitleWrap}>
                 <Link
                   href={`${basePath}/gastos/anadir-ticket`}
@@ -79,7 +79,16 @@ export function GastosScreen({
                 <h2 className={styles.sectionTitle}>Tickets de compra</h2>
               </div>
               <Link href={`${basePath}/gastos/tickets`} className={styles.viewAll}>
-                Ver todo &gt;
+                <span className={styles.viewAllContent}>
+                  Ver todo
+                  <Image
+                    src="/iconos/flechascalendario.svg"
+                    alt=""
+                    width={20}
+                    height={20}
+                    className={styles.viewAllArrow}
+                  />
+                </span>
               </Link>
             </div>
             <Card className={`${styles.innerPaper} ${styles.ticketsPaper}`}>
@@ -120,7 +129,16 @@ export function GastosScreen({
             <div className={styles.sectionTop}>
               <h2 className={styles.sectionTitle}>Division de gastos</h2>
               <Link href={`${basePath}/gastos/division`} className={styles.viewAll}>
-                Ver todo &gt;
+                <span className={styles.viewAllContent}>
+                  Ver todo
+                  <Image
+                    src="/iconos/flechascalendario.svg"
+                    alt=""
+                    width={20}
+                    height={20}
+                    className={styles.viewAllArrow}
+                  />
+                </span>
               </Link>
             </div>
             <Card className={`${styles.innerPaper} ${styles.divisionPaper}`}>
@@ -177,7 +195,16 @@ export function GastosScreen({
                 href={`${basePath}/gastos/simplificar`}
                 className={`${styles.viewAll} ${styles.viewAllRed}`}
               >
-                Ver todo &gt;
+                <span className={styles.viewAllContent}>
+                  Ver todo
+                  <Image
+                    src="/iconos/flechascalendario.svg"
+                    alt=""
+                    width={20}
+                    height={20}
+                    className={styles.viewAllArrow}
+                  />
+                </span>
               </Link>
             </div>
 
@@ -202,7 +229,7 @@ export function GastosScreen({
                         {formatCurrency(settlement.amount)}
                       </span>
                       <Image
-                        src="/iconos/flechapagos.svg"
+                        src="/iconos/flechaderecha.svg"
                         alt=""
                         width={18}
                         height={18}
@@ -235,7 +262,7 @@ export function GastosScreen({
 
           {canReviewPayments ? (
             <Card className={styles.simpleCard}>
-              <div className={styles.sectionTop}>
+              <div className={`${styles.sectionTop} ${styles.simpleTop}`}>
                 <div>
                   <h2 className={styles.simpleTitle}>Validaciones</h2>
                   <p className={styles.simpleSub}>
@@ -246,7 +273,16 @@ export function GastosScreen({
                   href={`${basePath}/gastos/division`}
                   className={`${styles.viewAll} ${styles.viewAllRed}`}
                 >
-                  Ver todo &gt;
+                  <span className={styles.viewAllContent}>
+                    Ver todo
+                    <Image
+                      src="/iconos/flechascalendario.svg"
+                      alt=""
+                      width={20}
+                      height={20}
+                      className={styles.viewAllArrow}
+                    />
+                  </span>
                 </Link>
               </div>
 
@@ -268,7 +304,7 @@ export function GastosScreen({
                           {formatCurrency(payment.amount)}
                         </span>
                         <Image
-                          src="/iconos/flechapagos.svg"
+                          src="/iconos/flechaderecha.svg"
                           alt=""
                           width={18}
                           height={18}

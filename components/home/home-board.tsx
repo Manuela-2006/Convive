@@ -37,7 +37,8 @@ export function HomeBoard({
       <section className={styles.boardFrame}>
         <div className={styles.board}>
           <div className={styles.grid}>
-            <article
+            <Link
+              href={`${basePath}/calendario`}
               className={`${styles.tile} ${styles.tileWide} ${styles.tilePayments} ${styles.tileTop}`}
             >
               <h2 className={styles.title}>Pagos del mes</h2>
@@ -48,7 +49,7 @@ export function HomeBoard({
               <p className={styles.meta}>
                 {verifiedPayments} de {totalPayments} pagos verificados
               </p>
-            </article>
+            </Link>
 
             <article className={`${styles.tile} ${styles.tileNarrow} ${styles.tileTop}`}>
               <h2 className={styles.title}>Próximo pago</h2>
@@ -56,11 +57,14 @@ export function HomeBoard({
               <p className={styles.meta}>Alquiler en 4 días</p>
             </article>
 
-            <article className={`${styles.tile} ${styles.tileNarrow}`}>
+            <Link
+              href={`${basePath}/area-personal#mis-deudas`}
+              className={`${styles.tile} ${styles.tileNarrow}`}
+            >
               <h2 className={styles.title}>Deuda total</h2>
               <p className={styles.value}>{totalDebt}€</p>
               <p className={styles.meta}>{pendingPayments} pagos pendientes de realizar</p>
-            </article>
+            </Link>
 
             <article className={`${styles.tile} ${styles.tileWide}`}>
               <h2 className={styles.title}>Actividad reciente</h2>

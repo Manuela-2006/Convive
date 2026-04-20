@@ -217,7 +217,9 @@
   font-family: "Poppins", sans-serif;
   font-size: clamp(1.35rem, 1.65vw, 1.7rem);
   font-weight: 600;
-  margin-right: 0.55rem;
+  min-width: 84px;
+  text-align: right;
+  justify-self: end;
 }
 
 .actionButton {
@@ -236,12 +238,52 @@
 }
 
 .viewAll {
-  font-family: var(--font-montserrat), sans-serif;
+  font-family: "Poppins", sans-serif;
   color: #8b1a2f;
   text-decoration: none;
-  font-size: clamp(0.7rem, 0.85vw, 0.8rem);
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 500;
   text-transform: uppercase;
+}
+
+.viewAllContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+}
+
+.viewAllArrow {
+  width: 20px;
+  height: 20px;
+  transform: rotate(180deg);
+  filter: brightness(0) saturate(100%) invert(15%) sepia(25%) saturate(4849%) hue-rotate(329deg) brightness(84%) contrast(98%);
+}
+
+.historyRow {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+}
+
+.historyRows {
+  gap: 1.3rem;
+}
+
+.historyRightAmount {
+  margin: 0;
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(1.35rem, 1.65vw, 1.7rem);
+  font-weight: 600;
+  line-height: 1;
+  min-width: 84px;
+  text-align: right;
+  margin-right: 0.55rem;
+  justify-self: end;
+}
+
+.historyRightSpacer {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .historyAmount {
@@ -537,9 +579,30 @@
     margin-top: 0.4rem;
   }
 
+  .backLink {
+    justify-self: start;
+    transform: translateX(-0.8rem);
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .summaryTitle {
+    font-size: 20px;
+  }
+
+  .summaryValue {
+    font-size: 20px;
+  }
+
+  .summaryMeta {
+    font-size: 16px;
+  }
+
   .row {
-    grid-template-columns: 1fr;
-    justify-items: start;
-    gap: 0.35rem;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    justify-items: stretch;
+    gap: 0.9rem;
   }
 }

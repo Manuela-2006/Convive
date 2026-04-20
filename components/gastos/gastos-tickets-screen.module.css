@@ -184,7 +184,7 @@
 
 .ticketRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 0.8rem;
   padding-right: 0.3rem;
@@ -207,10 +207,20 @@
 
 .ticketDate {
   margin: 0.05rem 0 0;
-  color: #1f1a17;
+  color: #5a5652;
   font-family: "Poppins", sans-serif;
   font-size: 14px;
   line-height: 1.2;
+}
+
+.ticketAmount {
+  margin: 0;
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  min-width: 72px;
+  text-align: right;
 }
 
 .ticketButton {
@@ -242,8 +252,16 @@
   }
 
   .cardTop {
-    flex-wrap: wrap;
-    align-items: start;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .cardTitle {
+    font-size: 20px;
+  }
+
+  .searchInput {
+    width: 96px;
   }
 
   .listWrap {
@@ -251,15 +269,26 @@
   }
 
   .ticketRow {
-    grid-template-columns: 1fr;
-    gap: 0.35rem;
-    padding-right: 1.6rem;
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.55rem;
+    padding-right: 1rem;
+    align-items: center;
+  }
+
+  .ticketAmount {
+    font-size: 20px;
+    text-align: right;
   }
 
   .ticketButton {
-    justify-self: start;
-    margin-left: 0;
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-self: stretch;
+    margin-top: 0.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 }
 

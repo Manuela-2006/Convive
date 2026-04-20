@@ -99,7 +99,7 @@
   position: relative;
   overflow: hidden;
   padding-top: 1.02rem;
-  height: 250px;
+  height: 292px;
 }
 
 .divisionFooter {
@@ -107,7 +107,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 34px;
+  height: 26px;
   background: #8b1a2f;
   box-shadow: 0 -8px 12px rgba(0, 0, 0, 0.22);
   z-index: 8;
@@ -118,6 +118,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.7rem;
+}
+
+.simpleTop {
+  align-items: flex-start;
+}
+
+.simpleTop .viewAll {
+  margin-top: 0.1rem;
 }
 
 .sectionTitleWrap {
@@ -233,13 +241,13 @@
   overflow: visible;
   width: calc(100% - 14px);
   margin-inline: auto;
-  min-height: 192px;
+  min-height: 214px;
   border-radius: 0;
   border: 1px solid #bf778a;
   box-shadow: none;
   transform: none !important;
   margin-top: 1.8rem;
-  padding: 0.72rem 0.95rem 0.8rem;
+  padding: 0.72rem 0.95rem 1.05rem;
   z-index: 3;
 }
 
@@ -421,9 +429,37 @@
     align-items: start;
   }
 
+  .title {
+    font-size: 22px;
+  }
+
+  .backLink {
+    justify-self: start;
+    transform: translateX(-0.8rem);
+  }
+
   .sectionTop {
-    flex-wrap: wrap;
-    align-items: start;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .simpleTop {
+    align-items: flex-start;
+  }
+
+  .sectionTitle {
+    font-size: 17px;
+    line-height: 1.1;
+  }
+
+  .viewAll {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .plusIcon {
+    width: 20px;
+    height: 20px;
   }
 
   .innerRow,
@@ -432,7 +468,63 @@
     gap: 0.4rem;
   }
 
+  .ticketsPaper .innerRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .ticketsPaper .actionButton {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .divisionPaper .innerRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .divisionPaper .actionButton {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .divisionPaper .innerRow:nth-of-type(n + 2) {
+    display: none;
+  }
+
+  .divisionSection {
+    height: 228px;
+    padding-top: 0.8rem;
+  }
+
+  .divisionFooter {
+    height: 16px;
+  }
+
+  .divisionPaper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 152px;
+    margin-top: 1rem;
+    padding: 0.6rem 0.78rem 0.72rem;
+  }
+
+  .divisionPaper .innerRow:first-of-type {
+    width: min(100%, 290px);
+    justify-self: center;
+    margin-inline: auto;
+    margin-top: 0;
+  }
+
   .amount {
     font-size: 20px;
+  }
+
+  .simpleTitle {
+    font-size: 17px;
+    line-height: 1.1;
   }
 }
