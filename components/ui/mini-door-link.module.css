@@ -78,6 +78,15 @@
   transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.24s ease;
 }
 
+.miniPanelOpen .switchesWrap {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  max-height: 520px;
+  pointer-events: auto;
+  transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.24s ease;
+}
+
 .miniItem {
   display: flex;
   align-items: center;
@@ -156,7 +165,7 @@
   text-decoration: none;
   text-transform: uppercase;
   font-family: "Poppins", sans-serif;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 600;
   line-height: 1.1;
   text-shadow: none;
@@ -232,6 +241,13 @@
   }
 
   .miniLabel {
-    font-size: 7px;
+    font-size: 9px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .miniLabel {
+    font-size: 13px;
+    line-height: 1.2;
   }
 }

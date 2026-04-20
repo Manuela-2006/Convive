@@ -97,7 +97,14 @@ export function LimpiezaScreen({
 
           <div className={styles.floorWrap}>
             <div className={styles.floorImageWrap}>
-              <Image src="/images/limpieza/piso.webp" alt="Plano del piso" fill className={styles.floorImage} />
+              <Image
+                src="/images/limpieza/piso.webp"
+                alt="Plano del piso"
+                fill
+                sizes="(max-width: 900px) 100vw, 55vw"
+                unoptimized
+                className={styles.floorImage}
+              />
               {overlayTasks.map((task, idx) => (
                 <div key={idx} className={styles.overlayTask} style={{ top: task.top, left: task.left }}>
                   <Image src="/images/IconoperfilM.webp" alt="" width={18} height={18} />

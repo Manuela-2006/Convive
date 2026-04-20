@@ -272,3 +272,13 @@
   }
 }
 
+@media (max-width: 640px) {
+  .title {
+    font-size: 22px;
+  }
+
+  .backLink {
+    transform: translateX(-0.7rem);
+  }
+}
+

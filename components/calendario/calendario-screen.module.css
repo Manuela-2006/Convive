@@ -320,3 +320,77 @@
     font-size: 30px;
   }
 }
+
+@media (max-width: 640px) {
+  .title {
+    font-size: 22px;
+  }
+
+  .monthTitle {
+    font-size: 20px;
+  }
+
+  .backLink {
+    transform: translateX(-0.7rem);
+  }
+
+  .calendarHead {
+    width: 100%;
+    grid-template-columns: 24px minmax(0, 1fr) 24px;
+    column-gap: 0.45rem;
+  }
+
+  .calendarWrap :global(.fc .fc-col-header-cell-cushion) {
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .calendarWrap :global(.fc .fc-daygrid-day-frame) {
+    min-height: 84px;
+    height: 84px;
+  }
+
+  .calendarWrap :global(.fc .fc-daygrid-day) {
+    height: 88px;
+  }
+
+  .calendarWrap :global(.fc .fc-daygrid-day-events) {
+    left: 1px;
+    right: 1px;
+    bottom: 3px;
+  }
+
+  .calendarWrap :global(.fc .fc-daygrid-event) {
+    margin: 0 !important;
+    height: 22px;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .calendarWrap :global(.fc .mini-event .fc-event-title),
+  .defaultEventText,
+  .rentEventText {
+    font-size: 10px;
+    line-height: 1.05;
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .calendarWrap :global(.fc .mini-event .fc-event-title) {
+    padding: 0 0.3rem;
+  }
+
+  .defaultEventText {
+    padding: 0 0.2rem;
+    text-align: center;
+  }
+
+  .rentEventText {
+    padding: 0 0.3rem;
+  }
+}

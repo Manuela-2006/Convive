@@ -54,7 +54,21 @@ export function MiniDoorLink({
   const pathname = usePathname();
   const router = useRouter();
   const [pendingHref, setPendingHref] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const visibleItems = MENU_ITEMS.filter((item) => item.key !== currentScreen);
+
+  const handleDoorClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    const isMobile =
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 640px)").matches;
+
+    if (!isMobile) {
+      return;
+    }
+
+    event.preventDefault();
+    setIsOpen((current) => !current);
+  };
 
   const handleMiniPress = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
@@ -66,6 +80,7 @@ export function MiniDoorLink({
     }
 
     event.preventDefault();
+    setIsOpen(false);
     setPendingHref(href);
 
     window.setTimeout(() => {
@@ -74,8 +89,17 @@ export function MiniDoorLink({
   };
 
   return (
-    <aside className={styles.miniPanel} aria-label="Accesos rápidos">
-      <Link href={menuHref} className={styles.miniDoorLink} aria-label="Abrir menú">
+    <aside
+      className={`${styles.miniPanel} ${isOpen ? styles.miniPanelOpen : ""}`}
+      aria-label="Accesos rápidos"
+    >
+      <Link
+        href={menuHref}
+        className={styles.miniDoorLink}
+        aria-label="Abrir menú"
+        aria-expanded={isOpen}
+        onClick={handleDoorClick}
+      >
         <span className={styles.doorCard}>
           <Image
             src="/iconos/Iconopuerta.svg"

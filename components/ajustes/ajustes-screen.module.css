@@ -378,6 +378,10 @@
 }
 
 @media (max-width: 960px) {
+  .panel {
+    width: min(100%, 650px);
+  }
+
   .topGrid {
     grid-template-columns: 1fr;
   }
@@ -395,6 +399,14 @@
 }
 
 @media (max-width: 640px) {
+  .page {
+    align-items: start;
+  }
+
+  .panel {
+    margin-top: 0.4rem;
+  }
+
   .content {
     padding: 0.7rem;
   }
@@ -405,13 +417,42 @@
   }
 
   .backLink {
+    width: 56px;
+    height: 56px;
+    justify-self: start;
+    transform: translateX(-0.8rem);
+  }
+
+  .backIcon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .profileBlock {
+    padding-top: 1.65rem;
+    row-gap: 1.1rem;
+  }
+
+  .avatarBadge {
+    top: -8px;
+    width: 44px;
+    height: 44px;
+    border-width: 6px;
+  }
+
+  .avatarBadge img {
     width: 30px;
     height: 30px;
   }
 
-  .backIcon {
-    width: 22px;
-    height: 22px;
+  .profileName {
+    margin-top: 0.35rem;
+    font-size: 22px;
+    line-height: 1;
   }
 
   .sectionTitle {
@@ -419,8 +460,42 @@
   }
 
   .settingRow {
-    grid-template-columns: 1fr;
-    justify-items: start;
-    gap: 0.3rem;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .appSettings {
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      "notifications contract"
+      "liquidacion liquidacion";
+    justify-content: center;
+    align-items: center;
+    column-gap: 0.3rem;
+    row-gap: 0.95rem;
+  }
+
+  .notifications {
+    grid-area: notifications;
+    justify-self: start;
+  }
+
+  .appButton:first-of-type {
+    grid-area: liquidacion;
+    width: min(100%, 280px);
+    text-align: center;
+    justify-self: center;
+  }
+
+  .appButton:last-of-type {
+    grid-area: contract;
+    width: auto;
+    min-height: 28px;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.78rem;
+    text-align: center;
+    justify-self: start;
+    white-space: nowrap;
   }
 }
