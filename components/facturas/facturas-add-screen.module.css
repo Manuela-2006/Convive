@@ -151,6 +151,10 @@
   gap: 0.3rem;
 }
 
+.fieldGroup {
+  margin-top: 0.8rem;
+}
+
 .manualCategory {
   margin-top: 0.75rem;
   max-width: 320px;
@@ -278,6 +282,41 @@
 
 .calendar {
   margin: 0;
+}
+
+.totalFieldWrap {
+  margin-top: 0.5rem;
+  width: 170px;
+  height: 34px;
+  border: 1.5px solid #8b1a2f;
+  border-radius: 8px;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.6rem;
+  gap: 0.4rem;
+}
+
+.totalInput {
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+}
+
+.totalInput::placeholder {
+  color: #776f69;
+}
+
+.totalCurrency {
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .saveWrap {

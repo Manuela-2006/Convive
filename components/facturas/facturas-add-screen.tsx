@@ -7,7 +7,10 @@ import { useState, useTransition } from "react";
 
 import { createPendingInvoiceExpenseAction } from "../../app/actions/invoice-actions";
 import type { AddInvoiceFormOptions } from "../../lib/dashboard-types";
-import type { TicketScannerData } from "../../lib/ticket-scanner-types";
+import type {
+  TicketScannerCategory,
+  TicketScannerData,
+} from "../../lib/ticket-scanner-types";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import { Card } from "../ui/card";
@@ -22,6 +25,20 @@ type FacturasAddScreenProps = {
   formOptions: AddInvoiceFormOptions;
 };
 
+const scannerCategoryLabels: Record<TicketScannerCategory, string> = {
+  luz: "Luz",
+  agua: "Agua",
+  wifi: "Wifi",
+  gas: "Gas",
+  alquiler: "Alquiler",
+  otro: "Otra factura",
+};
+
+const scannerCategoryFallbacks: Partial<Record<TicketScannerCategory, string[]>> = {
+  gas: ["gas", "suscripciones"],
+  otro: ["otro", "suscripciones"],
+};
+
 function formatDate(date?: Date) {
   if (!date) return "Selecciona una fecha";
   const day = `${date.getDate()}`.padStart(2, "0");
@@ -31,11 +48,27 @@ function formatDate(date?: Date) {
 }
 
 function toIsoDate(date?: Date) {
-  if (!date) return "";
+  if (!date) {
+    return "";
+  }
+
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
   const day = `${date.getDate()}`.padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function normalizeManualCategory(value: string) {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+function normalizeCategoryKey(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-");
 }
 
 function parseScannerDate(value?: string | null): Date | undefined {
@@ -79,18 +112,6 @@ function inferInvoiceDate(periodo?: string | null): Date | undefined {
   return Number.isNaN(inferredDate.getTime()) ? undefined : inferredDate;
 }
 
-function normalizeManualCategory(value: string) {
-  return value.trim().replace(/\s+/g, " ");
-}
-
-function normalizeCategoryLabel(value: string) {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
-}
-
 export function FacturasAddScreen({
   houseCode,
   dashboardPath,
@@ -127,6 +148,28 @@ export function FacturasAddScreen({
     setManualCategoryName("");
   };
 
+  const selectScannedCategory = (category: TicketScannerCategory) => {
+    const categoryKeys = [
+      category,
+      ...(scannerCategoryFallbacks[category] ?? []),
+    ].map(normalizeCategoryKey);
+    const matchedCategory = formOptions.categories.find((option) => {
+      const optionKeys = [
+        normalizeCategoryKey(option.slug),
+        normalizeCategoryKey(option.name),
+      ];
+      return optionKeys.some((key) => categoryKeys.includes(key));
+    });
+
+    if (matchedCategory) {
+      selectCategory(matchedCategory.category_id);
+      return;
+    }
+
+    setSelectedCategoryId(null);
+    setManualCategoryName(scannerCategoryLabels[category]);
+  };
+
   const resetForm = () => {
     setDate(new Date());
     setTitle("");
@@ -142,11 +185,18 @@ export function FacturasAddScreen({
   };
 
   const handleSaveInvoice = () => {
-    const normalizedTitle = title.trim();
+    const selectedCategory = formOptions.categories.find(
+      (category) => category.category_id === selectedCategoryId
+    );
+    const normalizedManualCategory =
+      normalizeManualCategory(manualCategoryName);
+    const normalizedTitle =
+      title.trim() || normalizedManualCategory || selectedCategory?.name || "";
     const invoiceDate = toIsoDate(date);
     const parsedTotalAmount = Number(totalAmount.replace(",", "."));
-    const normalizedManualCategory = normalizeManualCategory(manualCategoryName);
-    const invoiceCategoryId = normalizedManualCategory ? null : selectedCategoryId;
+    const invoiceCategoryId = normalizedManualCategory
+      ? null
+      : selectedCategoryId;
     const customCategoryName = normalizedManualCategory || null;
 
     if (!normalizedTitle) {
@@ -211,30 +261,23 @@ export function FacturasAddScreen({
     }
 
     const parsedDate = parseScannerDate(data.fecha) ?? inferInvoiceDate(data.periodo);
-    setDate(parsedDate ?? new Date());
+    if (parsedDate) {
+      setDate(parsedDate);
+    }
+
+    if (data.categoria) {
+      selectScannedCategory(data.categoria);
+    }
 
     if (typeof data.importe_total === "number" && Number.isFinite(data.importe_total)) {
       setTotalAmount(data.importe_total.toFixed(2));
     }
 
-    if (data.comercio) {
-      setTitle(`Factura ${data.comercio}`);
-    }
-
-    if (data.tipo === "factura" && data.categoria) {
-      const mappedCategoryLabel =
-        data.categoria === "gas" || data.categoria === "otro"
-          ? "suscripciones"
-          : data.categoria;
-      const foundCategory = formOptions.categories.find(
-        (category) =>
-          normalizeCategoryLabel(category.name) ===
-          normalizeCategoryLabel(mappedCategoryLabel)
-      );
-      if (foundCategory) {
-        setSelectedCategoryId(foundCategory.category_id);
-        setManualCategoryName("");
-      }
+    const inferredTitle =
+      data.comercio?.trim() ||
+      (data.categoria ? scannerCategoryLabels[data.categoria] : null);
+    if (inferredTitle) {
+      setTitle(inferredTitle);
     }
 
     setErrorMessage(null);
@@ -273,7 +316,7 @@ export function FacturasAddScreen({
               >
                 <Image src="/iconos/flechaatras.svg" alt="" width={32} height={32} />
               </Link>
-              <h2 className={styles.cardTitle}>Anadir factura</h2>
+              <h2 className={styles.cardTitle}>Añadir factura</h2>
             </div>
 
             <section className={styles.block}>
@@ -284,30 +327,6 @@ export function FacturasAddScreen({
                 minHeight={190}
               />
               {scanMessage ? <p className={styles.scanMessage}>{scanMessage}</p> : null}
-              <div className={styles.fieldsGrid}>
-                <label className={styles.fieldGroup}>
-                  <span className={styles.fieldLabel}>Titulo</span>
-                  <input
-                    className={styles.fieldInput}
-                    value={title}
-                    onChange={(event) => setTitle(event.target.value)}
-                    placeholder="Factura mensual"
-                  />
-                </label>
-                <label className={styles.fieldGroup}>
-                  <span className={styles.fieldLabel}>Importe total</span>
-                  <input
-                    className={styles.fieldInput}
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    inputMode="decimal"
-                    value={totalAmount}
-                    onChange={(event) => setTotalAmount(event.target.value)}
-                    placeholder="0,00"
-                  />
-                </label>
-              </div>
             </section>
 
             <section className={styles.block}>
@@ -331,15 +350,9 @@ export function FacturasAddScreen({
               ) : (
                 <p className={styles.emptyCopy}>No hay categorias configuradas.</p>
               )}
-              <label className={styles.manualCategory}>
-                <span className={styles.fieldLabel}>Categoria manual</span>
-                <input
-                  className={styles.fieldInput}
-                  value={manualCategoryName}
-                  onChange={(event) => setManualCategoryName(event.target.value)}
-                  placeholder="Otra factura"
-                />
-              </label>
+              {!formOptions.categories.length && manualCategoryName ? (
+                <p className={styles.scanMessage}>{manualCategoryName}</p>
+              ) : null}
             </section>
 
             <section className={styles.block}>
@@ -396,17 +409,25 @@ export function FacturasAddScreen({
             </section>
 
             <section className={styles.block}>
-              <h3 className={styles.blockTitle}>Notas</h3>
-              <textarea
-                className={styles.fieldTextarea}
-                value={notes}
-                onChange={(event) => setNotes(event.target.value)}
-                placeholder="Anade un contexto util para el piso"
-                rows={3}
-              />
+              <h3 className={styles.blockTitle}>5 - Total de la factura o ticket</h3>
+              <div className={styles.totalFieldWrap}>
+                <input
+                  className={styles.totalInput}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={totalAmount}
+                  onChange={(event) => setTotalAmount(event.target.value)}
+                  placeholder="0,00"
+                />
+                <span className={styles.totalCurrency}>€</span>
+              </div>
             </section>
 
-            {errorMessage ? <p className={styles.feedbackMessage}>{errorMessage}</p> : null}
+            {errorMessage ? (
+              <p className={styles.feedbackMessage}>{errorMessage}</p>
+            ) : null}
 
             <div className={styles.saveWrap}>
               <Button

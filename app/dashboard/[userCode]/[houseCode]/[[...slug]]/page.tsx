@@ -155,10 +155,51 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
   }
 
   if (sectionPath === "calendario") {
+    const [
+      ticketsHistory,
+      sharedExpensesHistory,
+      invoicesHistory,
+      cleaningDashboard,
+      pendingPaymentConfirmations,
+    ] = await Promise.all([
+      loadHousePurchaseTicketsHistoryWithClient(
+        routeContext.supabase,
+        routeContext.house.public_code,
+        200,
+        0
+      ),
+      loadHouseSharedExpensesHistoryWithClient(
+        routeContext.supabase,
+        routeContext.house.public_code,
+        200,
+        0
+      ),
+      loadHouseInvoiceHistoryWithClient(
+        routeContext.supabase,
+        routeContext.house.public_code,
+        200,
+        0
+      ),
+      loadHouseCleaningDashboardWithClient(
+        routeContext.supabase,
+        routeContext.house.public_code,
+        200
+      ),
+      loadHousePendingPaymentConfirmationsWithClient(
+        routeContext.supabase,
+        routeContext.house.public_code
+      ),
+    ]);
+
     return withMiniDoor(
       <CalendarioScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
+        tickets={ticketsHistory}
+        sharedExpenses={sharedExpensesHistory}
+        invoices={invoicesHistory}
+        cleaningTasks={cleaningDashboard.zones.flatMap((zone) => zone.tasks)}
+        pendingPayments={pendingPaymentConfirmations}
       />,
       routeContext.dashboardPath,
       "calendario"

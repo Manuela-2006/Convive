@@ -43,6 +43,22 @@ function getPublicStorageBaseUrl() {
   return `${supabaseUrl}/storage/v1/object/public`;
 }
 
+function isGroqInvalidApiKeyError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const payload = error as {
+    status?: number;
+    error?: { error?: { code?: string } };
+  };
+
+  return (
+    payload.status === 401 ||
+    payload.error?.error?.code === "invalid_api_key"
+  );
+}
+
 function toSafeFileExtension(fileName?: string, mediaType?: string) {
   const extByMediaType: Record<string, string> = {
     "image/jpeg": "jpg",
@@ -298,6 +314,17 @@ ${text}
     });
   } catch (error) {
     console.error("Error en scan-ticket:", error);
+
+    if (isGroqInvalidApiKeyError(error)) {
+      return Response.json(
+        {
+          success: false,
+          error:
+            "La GROQ_API_KEY no es valida. Revisa .env.local, genera una clave nueva en Groq y reinicia el servidor.",
+        },
+        { status: 401 }
+      );
+    }
 
     const message = error instanceof Error ? error.message : "Error desconocido";
 
