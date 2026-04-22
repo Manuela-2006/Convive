@@ -99,7 +99,7 @@
   min-height: 420px;
   max-height: 580px;
   width: 100%;
-  max-width: 560px;
+  max-width: none;
   justify-self: center;
   overflow-y: hidden;
   overflow-x: hidden;

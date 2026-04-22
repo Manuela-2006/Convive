@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -441,9 +442,9 @@ export function LoginCard({
                 ) : null}
               </div>
 
-              <button type="button" className={styles.forgot} disabled={isPending}>
+              <Link href="/reset-password" className={styles.forgot}>
                 Olvidaste tu contrasena?
-              </button>
+              </Link>
 
               <Button type="submit" className={styles.submit} disabled={isPending}>
                 {isPending ? "Entrando..." : "Entrar"}
