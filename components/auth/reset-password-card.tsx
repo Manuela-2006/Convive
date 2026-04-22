@@ -28,7 +28,7 @@ export function ResetPasswordCard() {
 
     startTransition(async () => {
       const supabase = createSupabaseClient();
-      const redirectTo = `${window.location.origin}/update-password`;
+      const redirectTo = `${window.location.origin}/auth/callback`;
       const { error } = await supabase.auth.resetPasswordForEmail(
         normalizedEmail,
         { redirectTo }
@@ -40,7 +40,7 @@ export function ResetPasswordCard() {
       }
 
       setSuccessMessage(
-        "Te hemos enviado un email con el enlace para recuperar tu contrasena."
+        "Te hemos enviado un email con el enlace para recuperar tu contraseña."
       );
     });
   };
@@ -48,7 +48,7 @@ export function ResetPasswordCard() {
   return (
     <div className={styles.card}>
       <div className={styles.top}>
-        <h2 className={styles.heading}>Recuperar contrasena</h2>
+        <h2 className={styles.heading}>Recuperar contraseña</h2>
         <p className={styles.copy}>
           Escribe tu correo y te enviaremos un enlace para cambiarla.
         </p>
@@ -77,19 +77,18 @@ export function ResetPasswordCard() {
             </div>
           </div>
 
+          <Link href="/login" className={styles.backLink}>
+            Volver al login
+          </Link>
+
           {errorMessage ? <p className={styles.error}>{errorMessage}</p> : null}
           {successMessage ? <p className={styles.success}>{successMessage}</p> : null}
 
           <Button type="button" className={styles.submit} onClick={onSubmit} disabled={isPending}>
             {isPending ? "Enviando..." : "Enviar enlace"}
           </Button>
-
-          <Link href="/login" className={styles.backLink}>
-            Volver al login
-          </Link>
         </div>
       </div>
     </div>
   );
 }
-

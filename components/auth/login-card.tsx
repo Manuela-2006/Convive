@@ -29,7 +29,7 @@ const loginSchema = z.object({
     .email("Introduce un correo valido"),
   password: z
     .string()
-    .min(8, "La contrasena debe tener al menos 8 caracteres"),
+    .min(8, "La contraseña debe tener al menos 8 caracteres"),
 });
 
 const registerSchema = z
@@ -40,14 +40,14 @@ const registerSchema = z
       .email("Introduce un correo valido"),
     password: z
       .string()
-      .min(8, "La contrasena debe tener al menos 8 caracteres"),
+      .min(8, "La contraseña debe tener al menos 8 caracteres"),
     confirmPassword: z
       .string()
       .min(8, "La verificacion debe tener al menos 8 caracteres"),
   })
   .refine((values) => values.password === values.confirmPassword, {
     path: ["confirmPassword"],
-    message: "Las contrasenas no coinciden",
+    message: "Las contraseñas no coinciden",
   });
 
 const createHomeSchema = z.object({
@@ -421,7 +421,7 @@ export function LoginCard({
                 <div className={styles.inputWrap}>
                   <Image
                     src="/iconos/key-svgrepo-com 1.svg"
-                    alt="Icono de contrasena"
+                    alt="Icono de contraseña"
                     width={16}
                     height={16}
                     className={`${styles.icon} ${styles.keyIcon}`}
@@ -429,7 +429,7 @@ export function LoginCard({
                   <Input
                     type="password"
                     className={styles.input}
-                    placeholder="Contrasena"
+                    placeholder="Contraseña"
                     autoComplete="current-password"
                     disabled={isPending}
                     {...loginForm.register("password")}
@@ -443,7 +443,7 @@ export function LoginCard({
               </div>
 
               <Link href="/reset-password" className={styles.forgot}>
-                Olvidaste tu contrasena?
+                Olvidaste tu contraseña?
               </Link>
 
               <Button type="submit" className={styles.submit} disabled={isPending}>
@@ -487,7 +487,7 @@ export function LoginCard({
                 <div className={styles.inputWrap}>
                   <Image
                     src="/iconos/key-svgrepo-com 1.svg"
-                    alt="Icono de contrasena"
+                    alt="Icono de contraseña"
                     width={16}
                     height={16}
                     className={`${styles.icon} ${styles.keyIcon}`}
@@ -495,7 +495,7 @@ export function LoginCard({
                   <Input
                     type="password"
                     className={styles.input}
-                    placeholder="Contrasena"
+                    placeholder="Contraseña"
                     autoComplete="new-password"
                     disabled={isPending}
                     {...registerForm.register("password")}
@@ -512,7 +512,7 @@ export function LoginCard({
                 <div className={styles.inputWrap}>
                   <Image
                     src="/iconos/key-svgrepo-com 1.svg"
-                    alt="Icono de verificar contrasena"
+                    alt="Icono de verificar contraseña"
                     width={16}
                     height={16}
                     className={`${styles.icon} ${styles.keyIcon}`}
@@ -520,7 +520,7 @@ export function LoginCard({
                   <Input
                     type="password"
                     className={styles.input}
-                    placeholder="Verificar contrasena"
+                    placeholder="Verificar contraseña"
                     autoComplete="new-password"
                     disabled={isPending}
                     {...registerForm.register("confirmPassword")}

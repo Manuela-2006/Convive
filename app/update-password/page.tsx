@@ -17,7 +17,7 @@ export default function UpdatePasswordPage() {
           className={styles.logo}
           priority
         />
-        <p className={styles.subtitle}>Actualiza tu contrasena</p>
+        <p className={styles.subtitle}>Actualiza tu contraseña</p>
         <div className={styles.cardWrap}>
           <Suspense fallback={null}>
             <UpdatePasswordCard />

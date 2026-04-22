@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
 import { createClient as createSupabaseClient } from "../../utils/supabase/client";
@@ -12,7 +12,6 @@ import styles from "./update-password-card.module.css";
 
 export function UpdatePasswordCard() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [recoveryReady, setRecoveryReady] = useState(false);
@@ -23,27 +22,28 @@ export function UpdatePasswordCard() {
 
   useEffect(() => {
     let isMounted = true;
-    const initRecovery = async () => {
-      const code = searchParams.get("code");
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error && isMounted) {
-          setErrorMessage(error.message);
-        }
+
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!isMounted) return;
+
+      if (data.session) {
+        setRecoveryReady(true);
+        return;
       }
 
-      const { data } = await supabase.auth.getSession();
-      if (isMounted && data.session) {
-        setRecoveryReady(true);
-      }
+      setErrorMessage(
+        "El enlace de recuperación no es válido o ha caducado. Solicita uno nuevo."
+      );
     };
 
-    void initRecovery();
+    void checkSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === "PASSWORD_RECOVERY" || !!session) {
+      (_event, session) => {
+        if (session) {
           setRecoveryReady(true);
+          setErrorMessage("");
         }
       }
     );
@@ -52,29 +52,29 @@ export function UpdatePasswordCard() {
       isMounted = false;
       authListener.subscription.unsubscribe();
     };
-  }, [searchParams, supabase.auth]);
+  }, [supabase.auth]);
 
   const onSubmit = () => {
     if (!password.trim()) {
-      setErrorMessage("Introduce la nueva contrasena.");
+      setErrorMessage("Introduce la nueva contraseña.");
       setSuccessMessage("");
       return;
     }
 
     if (password.length < 8) {
-      setErrorMessage("La contrasena debe tener al menos 8 caracteres.");
+      setErrorMessage("La contraseña debe tener al menos 8 caracteres.");
       setSuccessMessage("");
       return;
     }
 
     if (password !== confirmPassword) {
-      setErrorMessage("Las contrasenas no coinciden.");
+      setErrorMessage("Las contraseñas no coinciden.");
       setSuccessMessage("");
       return;
     }
 
     if (!recoveryReady) {
-      setErrorMessage("El enlace no es valido o ha caducado.");
+      setErrorMessage("El enlace no es válido o ha caducado.");
       setSuccessMessage("");
       return;
     }
@@ -86,11 +86,13 @@ export function UpdatePasswordCard() {
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
-        setErrorMessage(error.message);
+        setErrorMessage(
+          "No se pudo actualizar la contraseña. Solicita un nuevo enlace e inténtalo otra vez."
+        );
         return;
       }
 
-      setSuccessMessage("Contrasena actualizada correctamente.");
+      setSuccessMessage("Contraseña actualizada correctamente.");
       setTimeout(() => {
         router.push("/login");
       }, 800);
@@ -100,10 +102,8 @@ export function UpdatePasswordCard() {
   return (
     <div className={styles.card}>
       <div className={styles.top}>
-        <h2 className={styles.heading}>Nueva contrasena</h2>
-        <p className={styles.copy}>
-          Elige una contrasena nueva para tu cuenta.
-        </p>
+        <h2 className={styles.heading}>Nueva contraseña</h2>
+        <p className={styles.copy}>Elige una contraseña nueva para tu cuenta.</p>
       </div>
 
       <div className={styles.panel}>
@@ -112,7 +112,7 @@ export function UpdatePasswordCard() {
             <div className={styles.inputWrap}>
               <Image
                 src="/iconos/key-svgrepo-com 1.svg"
-                alt="Icono de contrasena"
+                alt="Icono de contraseña"
                 width={16}
                 height={16}
                 className={`${styles.icon} ${styles.keyIcon}`}
@@ -120,7 +120,7 @@ export function UpdatePasswordCard() {
               <Input
                 type="password"
                 className={styles.input}
-                placeholder="Contrasena nueva"
+                placeholder="Contraseña nueva"
                 autoComplete="new-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
@@ -133,7 +133,7 @@ export function UpdatePasswordCard() {
             <div className={styles.inputWrap}>
               <Image
                 src="/iconos/key-svgrepo-com 1.svg"
-                alt="Icono de verificar contrasena"
+                alt="Icono de verificar contraseña"
                 width={16}
                 height={16}
                 className={`${styles.icon} ${styles.keyIcon}`}
@@ -141,7 +141,7 @@ export function UpdatePasswordCard() {
               <Input
                 type="password"
                 className={styles.input}
-                placeholder="Confirmar contrasena"
+                placeholder="Confirmar contraseña"
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
@@ -150,16 +150,21 @@ export function UpdatePasswordCard() {
             </div>
           </div>
 
-          {errorMessage ? <p className={styles.error}>{errorMessage}</p> : null}
-          {successMessage ? <p className={styles.success}>{successMessage}</p> : null}
-
-          <Button type="button" className={styles.submit} onClick={onSubmit} disabled={isPending}>
-            {isPending ? "Actualizando..." : "Guardar contrasena"}
-          </Button>
-
           <Link href="/login" className={styles.backLink}>
             Volver al login
           </Link>
+
+          {errorMessage ? <p className={styles.error}>{errorMessage}</p> : null}
+          {successMessage ? <p className={styles.success}>{successMessage}</p> : null}
+
+          <Button
+            type="button"
+            className={styles.submit}
+            onClick={onSubmit}
+            disabled={isPending}
+          >
+            {isPending ? "Actualizando..." : "Guardar contraseña"}
+          </Button>
         </div>
       </div>
     </div>
