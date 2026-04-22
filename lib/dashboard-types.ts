@@ -169,3 +169,61 @@ export type AddCleaningTaskFormOptions = {
   zones: AddCleaningZone[];
   members: AddCleaningMember[];
 };
+
+export type PersonalAreaDebtItem = {
+  expense_id: string;
+  payment_id: string | null;
+  person_name: string;
+  title: string;
+  item_date: string;
+  amount: number | string;
+  currency: string;
+  status: string;
+};
+
+export type PersonalAreaReceivableItem = PersonalAreaDebtItem & {
+  can_verify: boolean;
+};
+
+export type PersonalAreaHistoryItem = {
+  item_type: string;
+  item_id: string;
+  title: string;
+  subtitle: string;
+  item_date: string;
+  amount: number | string;
+  currency: string;
+  status: string;
+  icon_type: string;
+};
+
+export type PersonalAreaCalendarEvent = {
+  event_id: string;
+  event_type: string;
+  title: string;
+  event_date: string;
+  amount: number | string;
+  currency: string;
+  person_name: string;
+};
+
+export type PersonalAreaChartItem = {
+  name: string;
+  amount: number | string;
+};
+
+export type PersonalAreaDashboardData = {
+  summary: {
+    my_debts_total: number | string;
+    my_debts_count: number;
+    owed_to_me_total: number | string;
+    owed_to_me_count: number;
+    monthly_spending_total: number | string;
+    previous_month_spending_total: number | string;
+  };
+  debts: PersonalAreaDebtItem[];
+  receivables: PersonalAreaReceivableItem[];
+  history: PersonalAreaHistoryItem[];
+  calendar_events: PersonalAreaCalendarEvent[];
+  chart: PersonalAreaChartItem[];
+};

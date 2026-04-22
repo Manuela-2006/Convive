@@ -20,6 +20,10 @@ import type {
   InvoiceCategorySection,
   InvoicesDashboardData,
   PendingPaymentConfirmation,
+  PersonalAreaDashboardData,
+  PersonalAreaDebtItem,
+  PersonalAreaHistoryItem,
+  PersonalAreaReceivableItem,
   Settlement,
   SharedExpense,
 } from "./dashboard-types";
@@ -37,11 +41,6 @@ type HouseRecord = {
   name: string;
   public_code: string;
   created_by: string;
-};
-
-type HouseMembershipRecord = {
-  role: string;
-  house: HouseRecord | HouseRecord[] | null;
 };
 
 type AuthenticatedDashboardContext = {
@@ -504,14 +503,6 @@ function asArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
 
-function takeSingleRelation<T>(value: T | T[] | null | undefined): T | null {
-  if (Array.isArray(value)) {
-    return value[0] ?? null;
-  }
-
-  return value ?? null;
-}
-
 export function buildDashboardPath(userCode: string, houseCode: string) {
   return `/dashboard/${userCode}/${houseCode}`;
 }
@@ -605,6 +596,42 @@ export function formatMonthLabel(dateValue: string) {
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
+function readProfileRecord(value: unknown) {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const publicCode = readPublicCode(value.public_code);
+  if (!publicCode) {
+    return null;
+  }
+
+  return {
+    id: toStringValue(value.id),
+    email: toNullableStringValue(value.email),
+    full_name: toNullableStringValue(value.full_name),
+    public_code: publicCode,
+  } satisfies ProfileRecord & { public_code: string };
+}
+
+function readHouseRecord(value: unknown) {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const publicCode = readHousePublicCode(value.public_code);
+  if (!publicCode) {
+    return null;
+  }
+
+  return {
+    id: toStringValue(value.id),
+    name: toStringValue(value.name),
+    public_code: publicCode,
+    created_by: toStringValue(value.created_by),
+  } satisfies HouseRecord;
+}
+
 export async function getAuthenticatedProfileContext(): Promise<AuthenticatedDashboardContext> {
   const supabase = await createClient();
   const {
@@ -615,19 +642,16 @@ export async function getAuthenticatedProfileContext(): Promise<AuthenticatedDas
     redirect("/login");
   }
 
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("id, email, full_name, public_code")
-    .eq("id", user.id)
-    .single();
+  const { data, error } = await supabase.rpc("get_authenticated_profile_context");
+  const profile = readProfileRecord(data);
 
-  if (error || !profile?.public_code) {
+  if (error || !profile) {
     notFound();
   }
 
   return {
     supabase,
-    profile: profile as ProfileRecord & { public_code: string },
+    profile,
   };
 }
 
@@ -635,76 +659,64 @@ export async function getAccessibleHouseContext(
   userCode: string,
   houseCode: string
 ): Promise<AccessibleHouseContext> {
-  const context = await getAuthenticatedProfileContext();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (context.profile.public_code !== userCode) {
-    notFound();
+  if (!user) {
+    redirect("/login");
   }
 
-  const { data: membership, error } = await context.supabase
-    .from("house_members")
-    .select(
-      `
-        role,
-        house:houses!inner (
-          id,
-          name,
-          public_code,
-          created_by
-        )
-      `
-    )
-    .eq("profile_id", context.profile.id)
-    .eq("is_active", true)
-    .eq("houses.public_code", houseCode)
-    .limit(1)
-    .maybeSingle();
+  const { data, error } = await supabase.rpc("get_accessible_house_context", {
+    p_user_public_code: userCode,
+    p_house_public_code: houseCode,
+  });
 
-  const house = takeSingleRelation(
-    (membership as HouseMembershipRecord | null)?.house
-  );
+  const profile = isRecord(data) ? readProfileRecord(data.profile) : null;
+  const house = isRecord(data) ? readHouseRecord(data.house) : null;
 
-  if (error || !house?.public_code) {
+  if (error || !profile || !house) {
     notFound();
   }
 
   return {
-    ...context,
+    supabase,
+    profile,
     house,
-    memberRole: (membership as HouseMembershipRecord | null)?.role ?? "member",
+    memberRole: isRecord(data) ? toStringValue(data.member_role, "member") : "member",
     dashboardPath: buildDashboardPath(userCode, house.public_code),
   };
 }
 
 export async function getDefaultDashboardPath() {
-  const { supabase, profile } = await getAuthenticatedProfileContext();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const { data: membership } = await supabase
-    .from("house_members")
-    .select(
-      `
-        joined_at,
-        house:houses!inner (
-          public_code
-        )
-      `
-    )
-    .eq("profile_id", profile.id)
-    .eq("is_active", true)
-    .order("joined_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+  if (!user) {
+    redirect("/login");
+  }
 
-  const house = takeSingleRelation(
-    (membership as { house: { public_code: string } | { public_code: string }[] | null } | null)
-      ?.house
-  );
+  const { data, error } = await supabase.rpc("get_default_dashboard_context");
 
-  if (!house?.public_code) {
+  if (error) {
+    notFound();
+  }
+
+  if (!isRecord(data)) {
     return "/login?flow=join";
   }
 
-  return buildDashboardPath(profile.public_code, house.public_code);
+  const userPublicCode = readPublicCode(data.profile_public_code);
+  const housePublicCode = readHousePublicCode(data.house_public_code);
+
+  if (!userPublicCode || !housePublicCode) {
+    return "/login?flow=join";
+  }
+
+  return buildDashboardPath(userPublicCode, housePublicCode);
 }
 
 export async function loadActiveHouseInviteWithClient(
@@ -1423,73 +1435,263 @@ export async function loadAddExpenseFormOptionsWithClient(
 }
 
 type LoadCurrentUserExpenseStatesInput = {
-  houseId: string;
-  profileId: string;
+  houseCode: string;
   expenseIds: string[];
 };
 
 export async function loadCurrentUserExpenseStatesWithClient(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  { houseId, profileId, expenseIds }: LoadCurrentUserExpenseStatesInput
+  { houseCode, expenseIds }: LoadCurrentUserExpenseStatesInput
 ) {
   if (!expenseIds.length) {
     return [] satisfies CurrentUserExpenseState[];
   }
 
-  const [{ data: participants }, { data: pendingPayments }] = await Promise.all([
-    supabase
-      .from("expense_participants")
-      .select("expense_id, profile_id, share_amount, status")
-      .eq("profile_id", profileId)
-      .in("expense_id", expenseIds),
-    supabase
-      .from("payments")
-      .select("id, related_expense_id, amount, note")
-      .eq("house_id", houseId)
-      .eq("from_profile_id", profileId)
-      .eq("status", "pending")
-      .in("related_expense_id", expenseIds),
-  ]);
+  const { data, error } = await supabase.rpc("get_current_user_expense_states", {
+    p_house_public_code: houseCode,
+    p_expense_ids: expenseIds,
+  });
 
-  const pendingPaymentByExpenseId = new Map(
-    (pendingPayments ?? [])
-      .filter((payment) => payment.related_expense_id)
-      .map((payment) => [
-        String(payment.related_expense_id),
-        {
-          payment_id: String(payment.id),
-          amount:
-            typeof payment.amount === "number" || typeof payment.amount === "string"
-              ? payment.amount
-              : null,
-          note:
-            typeof payment.note === "string" || payment.note === null
-              ? payment.note
-              : null,
-        },
-      ])
-  );
+  if (error) {
+    return [] satisfies CurrentUserExpenseState[];
+  }
 
-  return (participants ?? []).map(
-    (participant) =>
+  return asArray<Record<string, unknown>>(data).map(
+    (state) =>
       ({
-        expense_id: String(participant.expense_id),
-        profile_id: String(participant.profile_id),
-        share_amount:
-          typeof participant.share_amount === "number" ||
-          typeof participant.share_amount === "string"
-            ? participant.share_amount
-            : 0,
-        participant_status: toStringValue(participant.status, "pending"),
-        pending_payment_id:
-          pendingPaymentByExpenseId.get(String(participant.expense_id))
-            ?.payment_id ?? null,
+        expense_id: toStringValue(state.expense_id),
+        profile_id: toStringValue(state.profile_id),
+        share_amount: toNumericLikeValue(state.share_amount),
+        participant_status: toStringValue(state.participant_status, "pending"),
+        pending_payment_id: toNullableStringValue(state.pending_payment_id),
         pending_payment_amount:
-          pendingPaymentByExpenseId.get(String(participant.expense_id))
-            ?.amount ?? null,
-        pending_payment_note:
-          pendingPaymentByExpenseId.get(String(participant.expense_id))
-            ?.note ?? null,
+          state.pending_payment_amount === null ||
+          state.pending_payment_amount === undefined
+            ? null
+            : toNumericLikeValue(state.pending_payment_amount),
+        pending_payment_note: toNullableStringValue(state.pending_payment_note),
       }) satisfies CurrentUserExpenseState
+  );
+}
+
+export async function loadHouseMemberCountWithClient(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  houseCode: string
+) {
+  const { data, error } = await supabase.rpc("get_house_member_count", {
+    p_house_public_code: houseCode,
+  });
+
+  if (error) {
+    return 0;
+  }
+
+  const count = typeof data === "number" ? data : Number(data ?? 0);
+  return Number.isFinite(count) ? count : 0;
+}
+
+function mapPersonalAreaDebtItem(item: Record<string, unknown>) {
+  return {
+    expense_id: toStringValue(item.expense_id),
+    payment_id: toNullableStringValue(item.payment_id),
+    person_name: toStringValue(item.person_name, "Companero"),
+    title: toStringValue(item.title, "Gasto"),
+    item_date: toStringValue(item.item_date),
+    amount: toNumericLikeValue(item.amount),
+    currency: toStringValue(item.currency, "EUR"),
+    status: toStringValue(item.status, "pending"),
+  } satisfies PersonalAreaDebtItem;
+}
+
+function mapPersonalAreaHistoryItem(item: Record<string, unknown>) {
+  return {
+    item_type: toStringValue(item.item_type),
+    item_id: toStringValue(item.item_id),
+    title: toStringValue(item.title, "Movimiento"),
+    subtitle: toStringValue(item.subtitle),
+    item_date: toStringValue(item.item_date),
+    amount: toNumericLikeValue(item.amount),
+    currency: toStringValue(item.currency, "EUR"),
+    status: toStringValue(item.status),
+    icon_type: toStringValue(item.icon_type, "expense"),
+  } satisfies PersonalAreaHistoryItem;
+}
+
+const emptyPersonalAreaDashboard = {
+  summary: {
+    my_debts_total: 0,
+    my_debts_count: 0,
+    owed_to_me_total: 0,
+    owed_to_me_count: 0,
+    monthly_spending_total: 0,
+    previous_month_spending_total: 0,
+  },
+  debts: [],
+  receivables: [],
+  history: [],
+  calendar_events: [],
+  chart: [],
+} satisfies PersonalAreaDashboardData;
+
+function toNumberValue(value: number | string | null | undefined) {
+  const numericValue =
+    typeof value === "number" ? value : Number(String(value ?? 0));
+
+  return Number.isFinite(numericValue) ? numericValue : 0;
+}
+
+function todayDateKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function applySettlementBalances(
+  data: PersonalAreaDashboardData,
+  settlements: Settlement[],
+  currentProfileId: string
+) {
+  const itemDate = todayDateKey();
+  const settlementDebts = settlements
+    .filter((settlement) => settlement.from_profile_id === currentProfileId)
+    .map(
+      (settlement) =>
+        ({
+          expense_id: `settlement-${settlement.to_profile_id}`,
+          payment_id: null,
+          person_name: settlement.to_name,
+          title: "Pago simplificado",
+          item_date: itemDate,
+          amount: settlement.amount,
+          currency: "EUR",
+          status: "settlement",
+        }) satisfies PersonalAreaDebtItem
+    );
+  const settlementReceivables = settlements
+    .filter((settlement) => settlement.to_profile_id === currentProfileId)
+    .map(
+      (settlement) =>
+        ({
+          expense_id: `settlement-${settlement.from_profile_id}`,
+          payment_id: null,
+          person_name: settlement.from_name,
+          title: "Pago simplificado",
+          item_date: itemDate,
+          amount: settlement.amount,
+          currency: "EUR",
+          status: "settlement",
+          can_verify: false,
+        }) satisfies PersonalAreaReceivableItem
+    );
+
+  return {
+    ...data,
+    summary: {
+      ...data.summary,
+      my_debts_total: settlementDebts.reduce(
+        (sum, debt) => sum + toNumberValue(debt.amount),
+        0
+      ),
+      my_debts_count: settlementDebts.length,
+      owed_to_me_total: settlementReceivables.reduce(
+        (sum, receivable) => sum + toNumberValue(receivable.amount),
+        0
+      ),
+      owed_to_me_count: settlementReceivables.length,
+    },
+    debts: settlementDebts,
+    receivables: settlementReceivables,
+    calendar_events: [
+      ...data.calendar_events,
+      ...settlementDebts.map((debt) => ({
+        event_id: `settlement-debt:${debt.expense_id}`,
+        event_type: "deuda",
+        title: debt.title,
+        event_date: debt.item_date,
+        amount: debt.amount,
+        currency: debt.currency,
+        person_name: debt.person_name,
+      })),
+      ...settlementReceivables.map((receivable) => ({
+        event_id: `settlement-receivable:${receivable.expense_id}`,
+        event_type: "me_deben",
+        title: receivable.title,
+        event_date: receivable.item_date,
+        amount: receivable.amount,
+        currency: receivable.currency,
+        person_name: receivable.person_name,
+      })),
+    ],
+  } satisfies PersonalAreaDashboardData;
+}
+
+export async function loadPersonalAreaDashboardWithClient(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  houseCode: string,
+  currentProfileId: string,
+  historyLimit = 20
+) {
+  const [personalResult, expensesDashboard] = await Promise.all([
+    supabase.rpc("get_personal_area_dashboard", {
+      p_house_public_code: houseCode,
+      p_history_limit: historyLimit,
+    }),
+    loadHouseExpensesDashboardWithClient(supabase, houseCode, 5, 5),
+  ]);
+  const { data, error } = personalResult;
+
+  if (error || !isRecord(data)) {
+    return applySettlementBalances(
+      emptyPersonalAreaDashboard,
+      expensesDashboard.settlements,
+      currentProfileId
+    );
+  }
+
+  const summary = isRecord(data.summary) ? data.summary : {};
+
+  const personalData = {
+    summary: {
+      my_debts_total: toNumericLikeValue(summary.my_debts_total),
+      my_debts_count: Number(summary.my_debts_count ?? 0),
+      owed_to_me_total: toNumericLikeValue(summary.owed_to_me_total),
+      owed_to_me_count: Number(summary.owed_to_me_count ?? 0),
+      monthly_spending_total: toNumericLikeValue(summary.monthly_spending_total),
+      previous_month_spending_total: toNumericLikeValue(
+        summary.previous_month_spending_total
+      ),
+    },
+    debts: asArray<Record<string, unknown>>(data.debts).map(
+      mapPersonalAreaDebtItem
+    ),
+    receivables: asArray<Record<string, unknown>>(data.receivables).map(
+      (item) =>
+        ({
+          ...mapPersonalAreaDebtItem(item),
+          can_verify: toBooleanValue(item.can_verify),
+        }) satisfies PersonalAreaReceivableItem
+    ),
+    history: asArray<Record<string, unknown>>(data.history).map(
+      mapPersonalAreaHistoryItem
+    ),
+    calendar_events: asArray<Record<string, unknown>>(data.calendar_events).map(
+      (event) => ({
+        event_id: toStringValue(event.event_id),
+        event_type: toStringValue(event.event_type),
+        title: toStringValue(event.title, "Evento"),
+        event_date: toStringValue(event.event_date),
+        amount: toNumericLikeValue(event.amount),
+        currency: toStringValue(event.currency, "EUR"),
+        person_name: toStringValue(event.person_name),
+      })
+    ),
+    chart: asArray<Record<string, unknown>>(data.chart).map((item) => ({
+      name: toStringValue(item.name, "Otros"),
+      amount: toNumericLikeValue(item.amount),
+    })),
+  } satisfies PersonalAreaDashboardData;
+
+  return applySettlementBalances(
+    personalData,
+    expensesDashboard.settlements,
+    currentProfileId
   );
 }

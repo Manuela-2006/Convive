@@ -40,8 +40,9 @@ import {
   loadOpenHousePurchaseTicketsWithClient,
   loadOpenHouseSharedExpensesWithClient,
   loadHouseSharedExpensesHistoryWithClient,
+  loadHouseMemberCountWithClient,
+  loadPersonalAreaDashboardWithClient,
 } from "../../../../../lib/dashboard";
-import { createClient } from "../../../../../utils/supabase/server";
 
 type HouseRoutePageProps = {
   params: Promise<{
@@ -68,19 +69,6 @@ function withMiniDoor(
   );
 }
 
-async function loadMemberCount(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  houseId: string
-) {
-  const { count } = await supabase
-    .from("house_members")
-    .select("id", { count: "exact", head: true })
-    .eq("house_id", houseId)
-    .eq("is_active", true);
-
-  return count ?? 0;
-}
-
 export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
   const { userCode, houseCode, slug } = await params;
   const routeContext = await getAccessibleHouseContext(userCode, houseCode);
@@ -90,9 +78,9 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
     routeContext.house.created_by === routeContext.profile.id;
 
   if (!sectionPath) {
-    const memberCount = await loadMemberCount(
+    const memberCount = await loadHouseMemberCountWithClient(
       routeContext.supabase,
-      routeContext.house.id
+      routeContext.house.public_code
     );
 
     return (
@@ -115,10 +103,18 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
   }
 
   if (sectionPath === "area-personal") {
+    const personalDashboard = await loadPersonalAreaDashboardWithClient(
+      routeContext.supabase,
+      routeContext.house.public_code,
+      routeContext.profile.id,
+      5
+    );
+
     return withMiniDoor(
       <AreaPersonalScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
+        data={personalDashboard}
       />,
       routeContext.dashboardPath,
       "area-personal"
@@ -126,10 +122,18 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
   }
 
   if (sectionPath === "area-personal/historial") {
+    const personalDashboard = await loadPersonalAreaDashboardWithClient(
+      routeContext.supabase,
+      routeContext.house.public_code,
+      routeContext.profile.id,
+      100
+    );
+
     return withMiniDoor(
       <AreaPersonalHistoryScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
+        entries={personalDashboard.history}
       />,
       routeContext.dashboardPath,
       "area-personal"
@@ -460,8 +464,7 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
   const currentUserExpenseStates =
     sectionPath === "gastos/division"
       ? await loadCurrentUserExpenseStatesWithClient(routeContext.supabase, {
-          houseId: routeContext.house.id,
-          profileId: routeContext.profile.id,
+          houseCode: routeContext.house.public_code,
           expenseIds: sharedExpensesHistory.map((expense) => expense.expense_id),
         })
       : [];

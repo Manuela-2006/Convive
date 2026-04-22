@@ -1,109 +1,70 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
+import { useMemo, useState } from "react";
+import type { PersonalAreaHistoryItem } from "../../lib/dashboard-types";
+import {
+  formatCurrency,
+  formatMonthLabel,
+  formatShortDate,
+} from "../../lib/dashboard-presenters";
 import { Card } from "../ui/card";
 import styles from "./history-screen.module.css";
 
 type AreaPersonalHistoryScreenProps = {
   houseCode: string;
   dashboardPath: string;
+  entries: PersonalAreaHistoryItem[];
 };
 
-type HistoryEntry = {
-  icon: string;
-  title: string;
-  subtitle: string;
-  date: string;
-  amount: string;
-};
+function getHistoryIcon(item: PersonalAreaHistoryItem) {
+  if (item.icon_type === "purchase") {
+    return "/iconos/Carrodecompra.svg";
+  }
 
-type HistoryGroup = {
-  month: string;
-  items: HistoryEntry[];
-};
+  if (item.item_type === "pago_recibido") {
+    return "/images/IconoperfilM.webp";
+  }
 
-const entries: HistoryGroup[] = [
-  {
-    month: "Enero 2026",
-    items: [
-      {
-        icon: "/images/IconoperfilH.webp",
-        title: "Pago a Marc",
-        subtitle: "Factura de la luz",
-        date: "2/01/2026",
-        amount: "25\u20AC",
-      },
-      {
-        icon: "/iconos/Carrodecompra.svg",
-        title: "Compra supermercado",
-        subtitle: "",
-        date: "2/01/2026",
-        amount: "40\u20AC",
-      },
-      {
-        icon: "/images/IconoperfilH.webp",
-        title: "Pago a Marc",
-        subtitle: "Factura de la luz",
-        date: "2/01/2026",
-        amount: "25\u20AC",
-      },
-    ],
-  },
-  {
-    month: "Diciembre 2025",
-    items: [
-      {
-        icon: "/images/IconoperfilH.webp",
-        title: "Pago de Marc",
-        subtitle: "Factura de la luz",
-        date: "2/01/2026",
-        amount: "25\u20AC",
-      },
-      {
-        icon: "/iconos/Carrodecompra.svg",
-        title: "Compra supermercado",
-        subtitle: "",
-        date: "2/01/2026",
-        amount: "40\u20AC",
-      },
-      {
-        icon: "/images/IconoperfilH.webp",
-        title: "Pago a Marc",
-        subtitle: "Factura de la luz",
-        date: "2/01/2026",
-        amount: "25\u20AC",
-      },
-      {
-        icon: "/iconos/Carrodecompra.svg",
-        title: "Compra supermercado",
-        subtitle: "",
-        date: "2/01/2026",
-        amount: "40\u20AC",
-      },
-      {
-        icon: "/images/IconoperfilH.webp",
-        title: "Pago de Marc",
-        subtitle: "Factura de la luz",
-        date: "2/01/2026",
-        amount: "25\u20AC",
-      },
-      {
-        icon: "/iconos/Carrodecompra.svg",
-        title: "Compra supermercado",
-        subtitle: "",
-        date: "2/01/2026",
-        amount: "40\u20AC",
-      },
-    ],
-  },
-];
+  return "/images/IconoperfilH.webp";
+}
+
+function matchesSearch(item: PersonalAreaHistoryItem, searchTerm: string) {
+  const haystack = [
+    item.title,
+    item.subtitle,
+    item.item_type,
+    item.status,
+    item.amount,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(searchTerm);
+}
 
 export function AreaPersonalHistoryScreen({
   houseCode,
   dashboardPath,
+  entries,
 }: AreaPersonalHistoryScreenProps) {
   const basePath = dashboardPath;
+  const [searchValue, setSearchValue] = useState("");
+  const searchTerm = searchValue.trim().toLowerCase();
+  const groupedEntries = useMemo(() => {
+    const filteredEntries = searchTerm
+      ? entries.filter((item) => matchesSearch(item, searchTerm))
+      : entries;
+    const groups = new Map<string, PersonalAreaHistoryItem[]>();
+
+    for (const item of filteredEntries) {
+      const key = formatMonthLabel(item.item_date);
+      groups.set(key, [...(groups.get(key) ?? []), item]);
+    }
+
+    return [...groups.entries()].map(([month, items]) => ({ month, items }));
+  }, [entries, searchTerm]);
 
   return (
     <main className={styles.page}>
@@ -135,33 +96,46 @@ export function AreaPersonalHistoryScreen({
                 <h2 className={styles.cardTitle}>Historial</h2>
               </div>
               <div className={styles.searchWrap}>
-                <input className={styles.searchInput} placeholder="Buscar" />
+                <input
+                  className={styles.searchInput}
+                  placeholder="Buscar"
+                  value={searchValue}
+                  onChange={(event) => setSearchValue(event.target.value)}
+                />
                 <Image src="/iconos/Lupa.svg" alt="" width={14} height={14} />
               </div>
             </div>
 
             <div className={styles.listWrap}>
-              {entries.map((group) => (
-                <section key={group.month} className={styles.monthBlock}>
-                  <h3 className={styles.monthTitle}>{group.month}</h3>
-                  <div className={styles.monthRows}>
-                    {group.items.map((item, index) => (
-                      <div className={styles.row} key={`${group.month}-${index}`}>
-                        <div className={styles.left}>
-                          <Image src={item.icon} alt="" width={20} height={20} />
-                          <div>
-                            <p className={styles.mainText}>{item.title}</p>
-                            {item.subtitle ? <p className={styles.subText}>{item.subtitle}</p> : null}
-                            <p className={styles.dateText}>{item.date}</p>
+              {groupedEntries.length ? (
+                groupedEntries.map((group) => (
+                  <section key={group.month} className={styles.monthBlock}>
+                    <h3 className={styles.monthTitle}>{group.month}</h3>
+                    <div className={styles.monthRows}>
+                      {group.items.map((item) => (
+                        <div className={styles.row} key={`${item.item_type}-${item.item_id}`}>
+                          <div className={styles.left}>
+                            <Image src={getHistoryIcon(item)} alt="" width={20} height={20} />
+                            <div>
+                              <p className={styles.mainText}>{item.title}</p>
+                              {item.subtitle ? <p className={styles.subText}>{item.subtitle}</p> : null}
+                              <p className={styles.dateText}>
+                                {formatShortDate(item.item_date)}
+                              </p>
+                            </div>
                           </div>
-                        </div>
 
-                        <p className={styles.amount}>{item.amount}</p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              ))}
+                          <p className={styles.amount}>
+                            {formatCurrency(item.amount, item.currency)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ))
+              ) : (
+                <p className={styles.emptyState}>No hay movimientos personales.</p>
+              )}
             </div>
           </Card>
         </div>

@@ -6,6 +6,7 @@ import {
   getDefaultDashboardPath,
   getJoinHouseErrorMessage,
   readHousePublicCode,
+  readPublicCode,
 } from "../../lib/dashboard";
 import { createClient } from "../../utils/supabase/server";
 
@@ -69,23 +70,25 @@ export async function signInAndJoinHouseWithEmail({
   const supabase = await createClient();
   const inviteCode = code.trim();
 
-  const { data: signInData, error: signInError } =
-    await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
   if (signInError) {
     return { error: signInError.message };
   }
 
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("public_code")
-    .eq("id", signInData.user.id)
-    .single();
+  const { data: profile, error: profileError } = await supabase.rpc(
+    "get_authenticated_profile_context"
+  );
 
-  if (profileError || !profile?.public_code) {
+  const profilePublicCode =
+    profile && typeof profile === "object" && !Array.isArray(profile)
+      ? readPublicCode((profile as { public_code?: unknown }).public_code)
+      : null;
+
+  if (profileError || !profilePublicCode) {
     return { error: "No he podido cargar tu perfil." };
   }
 
@@ -108,7 +111,7 @@ export async function signInAndJoinHouseWithEmail({
 
   return {
     success: true,
-    dashboardPath: buildDashboardPath(profile.public_code, housePublicCode),
+    dashboardPath: buildDashboardPath(profilePublicCode, housePublicCode),
   };
 }
 

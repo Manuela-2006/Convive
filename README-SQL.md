@@ -3090,6 +3090,253 @@ grant execute on function public.get_active_house_invite_code(text) to authentic
 
 
 -- =========================================================
+-- RPC CONTEXTO Y LECTURAS CENTRALIZADAS
+-- Sustituye lecturas directas desde Next.js a profiles,
+-- house_members, expense_participants y payments.
+-- =========================================================
+
+create or replace function public.get_authenticated_profile_context()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_profile jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  select jsonb_build_object(
+    'id', p.id,
+    'email', p.email,
+    'full_name', p.full_name,
+    'public_code', p.public_code
+  )
+  into v_profile
+  from public.profiles p
+  where p.id = auth.uid()
+  limit 1;
+
+  if v_profile is null or nullif(trim(v_profile ->> 'public_code'), '') is null then
+    raise exception 'Perfil no encontrado';
+  end if;
+
+  return v_profile;
+end;
+$$;
+
+grant execute on function public.get_authenticated_profile_context() to authenticated;
+
+
+create or replace function public.get_accessible_house_context(
+  p_user_public_code text,
+  p_house_public_code text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_profile public.profiles%rowtype;
+  v_context jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  select *
+  into v_profile
+  from public.profiles p
+  where p.id = auth.uid()
+  limit 1;
+
+  if v_profile.id is null or nullif(trim(v_profile.public_code), '') is null then
+    raise exception 'Perfil no encontrado';
+  end if;
+
+  if v_profile.public_code <> trim(p_user_public_code) then
+    raise exception 'Usuario no encontrado';
+  end if;
+
+  select jsonb_build_object(
+    'profile', jsonb_build_object(
+      'id', v_profile.id,
+      'email', v_profile.email,
+      'full_name', v_profile.full_name,
+      'public_code', v_profile.public_code
+    ),
+    'house', jsonb_build_object(
+      'id', h.id,
+      'name', h.name,
+      'public_code', h.public_code,
+      'created_by', h.created_by
+    ),
+    'member_role', coalesce(hm.role, 'member')
+  )
+  into v_context
+  from public.house_members hm
+  join public.houses h on h.id = hm.house_id
+  where hm.profile_id = auth.uid()
+    and hm.is_active = true
+    and h.public_code = trim(p_house_public_code)
+    and h.status = 'active'
+  limit 1;
+
+  if v_context is null then
+    raise exception 'Piso no encontrado o sin acceso';
+  end if;
+
+  return v_context;
+end;
+$$;
+
+grant execute on function public.get_accessible_house_context(text, text) to authenticated;
+
+
+create or replace function public.get_default_dashboard_context()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_profile public.profiles%rowtype;
+  v_context jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  select *
+  into v_profile
+  from public.profiles p
+  where p.id = auth.uid()
+  limit 1;
+
+  if v_profile.id is null or nullif(trim(v_profile.public_code), '') is null then
+    raise exception 'Perfil no encontrado';
+  end if;
+
+  select jsonb_build_object(
+    'profile_public_code', v_profile.public_code,
+    'house_public_code', h.public_code
+  )
+  into v_context
+  from public.house_members hm
+  join public.houses h on h.id = hm.house_id
+  where hm.profile_id = auth.uid()
+    and hm.is_active = true
+    and h.status = 'active'
+  order by hm.joined_at asc
+  limit 1;
+
+  return v_context;
+end;
+$$;
+
+grant execute on function public.get_default_dashboard_context() to authenticated;
+
+
+create or replace function public.get_current_user_expense_states(
+  p_house_public_code text,
+  p_expense_ids uuid[]
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+  v_states jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  if p_expense_ids is null or cardinality(p_expense_ids) = 0 then
+    return '[]'::jsonb;
+  end if;
+
+  v_house_id := public.get_accessible_house_id(p_house_public_code);
+
+  with requested_expenses as (
+    select distinct unnest(p_expense_ids) as expense_id
+  )
+  select coalesce(
+    jsonb_agg(
+      jsonb_build_object(
+        'expense_id', ep.expense_id,
+        'profile_id', ep.profile_id,
+        'share_amount', ep.share_amount,
+        'participant_status', ep.status,
+        'pending_payment_id', pending_payment.id,
+        'pending_payment_amount', pending_payment.amount,
+        'pending_payment_note', pending_payment.note
+      )
+      order by ep.expense_id
+    ),
+    '[]'::jsonb
+  )
+  into v_states
+  from public.expense_participants ep
+  join requested_expenses re on re.expense_id = ep.expense_id
+  join public.shared_expenses se on se.id = ep.expense_id
+  left join lateral (
+    select p.id, p.amount, p.note
+    from public.payments p
+    where p.house_id = v_house_id
+      and p.from_profile_id = auth.uid()
+      and p.status = 'pending'
+      and p.related_expense_id = ep.expense_id
+    order by p.created_at desc
+    limit 1
+  ) pending_payment on true
+  where se.house_id = v_house_id
+    and ep.profile_id = auth.uid();
+
+  return v_states;
+end;
+$$;
+
+grant execute on function public.get_current_user_expense_states(text, uuid[]) to authenticated;
+
+
+create or replace function public.get_house_member_count(
+  p_house_public_code text
+)
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+  v_member_count int;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_house_id := public.get_accessible_house_id(p_house_public_code);
+
+  select count(*)::int
+  into v_member_count
+  from public.house_members hm
+  where hm.house_id = v_house_id
+    and hm.is_active = true;
+
+  return coalesce(v_member_count, 0);
+end;
+$$;
+
+grant execute on function public.get_house_member_count(text) to authenticated;
+
+
+-- =========================================================
 -- 8) REGENERAR CÓDIGO DE INVITACIÓN
 -- Solo admin/creador
 -- Desactiva el anterior y crea uno nuevo
@@ -4306,6 +4553,279 @@ end;
 $$;
 
 grant execute on function public.get_house_expenses_dashboard(text, int, int) to authenticated;
+
+
+-- =========================================================
+-- AREA PERSONAL
+-- Datos personales del usuario actual dentro de un piso.
+-- Reutiliza la misma regla de acceso y estados de gastos/pagos.
+-- =========================================================
+
+create or replace function public.get_personal_area_dashboard(
+  p_house_public_code text,
+  p_history_limit int default 20
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+  v_month_start date := date_trunc('month', current_date)::date;
+  v_next_month_start date := (date_trunc('month', current_date) + interval '1 month')::date;
+  v_previous_month_start date := (date_trunc('month', current_date) - interval '1 month')::date;
+  v_result jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_house_id := public.get_accessible_house_id(p_house_public_code);
+
+  with debts as (
+    select
+      se.id as expense_id,
+      pending_payment.id as payment_id,
+      public.profile_display_name(se.paid_by_profile_id) as person_name,
+      se.title,
+      se.expense_date as item_date,
+      ep.share_amount as amount,
+      se.currency,
+      case
+        when pending_payment.id is null then 'pending'
+        else 'pending_confirmation'
+      end as status
+    from public.shared_expenses se
+    join public.expense_participants ep
+      on ep.expense_id = se.id
+     and ep.profile_id = auth.uid()
+     and ep.is_waived = false
+     and ep.status = 'pending'
+    left join lateral (
+      select p.id
+      from public.payments p
+      where p.house_id = v_house_id
+        and p.related_expense_id = se.id
+        and p.from_profile_id = auth.uid()
+        and p.status = 'pending'
+      order by p.created_at desc
+      limit 1
+    ) pending_payment on true
+    where se.house_id = v_house_id
+      and se.status = 'active'
+      and coalesce(se.settlement_status, 'open') <> 'settled'
+      and se.paid_by_profile_id <> auth.uid()
+  ),
+  receivables as (
+    select
+      se.id as expense_id,
+      pending_payment.id as payment_id,
+      public.profile_display_name(ep.profile_id) as person_name,
+      se.title,
+      coalesce(pending_payment.payment_date, se.expense_date) as item_date,
+      coalesce(pending_payment.amount, ep.share_amount) as amount,
+      se.currency,
+      case
+        when pending_payment.id is null then 'pending'
+        else pending_payment.status
+      end as status,
+      (
+        pending_payment.id is not null
+        and public.can_review_expense_payment(v_house_id, se.id)
+      ) as can_verify
+    from public.shared_expenses se
+    join public.expense_participants ep
+      on ep.expense_id = se.id
+     and ep.profile_id <> auth.uid()
+     and ep.is_waived = false
+     and ep.status = 'pending'
+    left join lateral (
+      select p.id, p.amount, p.payment_date, p.status
+      from public.payments p
+      where p.house_id = v_house_id
+        and p.related_expense_id = se.id
+        and p.from_profile_id = ep.profile_id
+        and p.to_profile_id = auth.uid()
+        and p.status = 'pending'
+      order by p.created_at desc
+      limit 1
+    ) pending_payment on true
+    where se.house_id = v_house_id
+      and se.status = 'active'
+      and coalesce(se.settlement_status, 'open') <> 'settled'
+      and se.paid_by_profile_id = auth.uid()
+  ),
+  month_expenses as (
+    select
+      se.id as expense_id,
+      se.title,
+      se.expense_type,
+      se.expense_date,
+      ep.share_amount,
+      se.currency,
+      coalesce(ic.category_key, '') as category_key,
+      coalesce(ic.name, '') as category_name,
+      se.source_ticket_id
+    from public.shared_expenses se
+    join public.expense_participants ep
+      on ep.expense_id = se.id
+     and ep.profile_id = auth.uid()
+     and ep.is_waived = false
+    left join public.invoice_categories ic
+      on ic.id = se.invoice_category_id
+    where se.house_id = v_house_id
+      and se.status = 'active'
+      and se.expense_date >= v_month_start
+      and se.expense_date < v_next_month_start
+  ),
+  previous_month_expenses as (
+    select ep.share_amount
+    from public.shared_expenses se
+    join public.expense_participants ep
+      on ep.expense_id = se.id
+     and ep.profile_id = auth.uid()
+     and ep.is_waived = false
+    where se.house_id = v_house_id
+      and se.status = 'active'
+      and se.expense_date >= v_previous_month_start
+      and se.expense_date < v_month_start
+  ),
+  chart_rows as (
+    select
+      case
+        when expense_type = 'invoice'
+          and (
+            lower(category_key) in ('rent', 'alquiler')
+            or lower(category_name) like '%alquiler%'
+          )
+          then 'Alquiler'
+        when expense_type = 'invoice' then 'Facturas'
+        when source_ticket_id is not null or expense_type in ('ticket', 'shared_purchase') then 'Compras'
+        else 'Otros'
+      end as name,
+      sum(share_amount) as amount
+    from month_expenses
+    group by 1
+  ),
+  personal_history as (
+    select
+      'gasto'::text as item_type,
+      se.id as item_id,
+      se.title,
+      case
+        when se.paid_by_profile_id = auth.uid() then 'Pagado por ti'
+        else 'Pagado por ' || public.profile_display_name(se.paid_by_profile_id)
+      end as subtitle,
+      se.expense_date as item_date,
+      coalesce(ep.share_amount, se.total_amount) as amount,
+      se.currency,
+      coalesce(ep.status, se.settlement_status, 'open') as status,
+      case
+        when se.source_ticket_id is not null then 'purchase'
+        when se.expense_type = 'invoice' then 'invoice'
+        else 'expense'
+      end as icon_type
+    from public.shared_expenses se
+    left join public.expense_participants ep
+      on ep.expense_id = se.id
+     and ep.profile_id = auth.uid()
+     and ep.is_waived = false
+    where se.house_id = v_house_id
+      and se.status = 'active'
+      and (ep.profile_id = auth.uid() or se.paid_by_profile_id = auth.uid())
+
+    union all
+
+    select
+      case
+        when p.from_profile_id = auth.uid() then 'pago_enviado'
+        else 'pago_recibido'
+      end as item_type,
+      p.id as item_id,
+      coalesce(se.title, 'Pago') as title,
+      case
+        when p.from_profile_id = auth.uid()
+          then 'Pago a ' || public.profile_display_name(p.to_profile_id)
+        else 'Pago de ' || public.profile_display_name(p.from_profile_id)
+      end as subtitle,
+      p.payment_date as item_date,
+      p.amount,
+      coalesce(se.currency, 'EUR') as currency,
+      p.status,
+      'payment'::text as icon_type
+    from public.payments p
+    left join public.shared_expenses se
+      on se.id = p.related_expense_id
+    where p.house_id = v_house_id
+      and (p.from_profile_id = auth.uid() or p.to_profile_id = auth.uid())
+  ),
+  calendar_rows as (
+    select
+      'debt:' || expense_id::text as event_id,
+      'deuda'::text as event_type,
+      title,
+      item_date as event_date,
+      amount,
+      currency,
+      person_name
+    from debts
+
+    union all
+
+    select
+      'receivable:' || expense_id::text || ':' || person_name as event_id,
+      'me_deben'::text as event_type,
+      title,
+      item_date as event_date,
+      amount,
+      currency,
+      person_name
+    from receivables
+  )
+  select jsonb_build_object(
+    'summary', jsonb_build_object(
+      'my_debts_total', coalesce((select sum(amount) from debts), 0),
+      'my_debts_count', coalesce((select count(*) from debts), 0),
+      'owed_to_me_total', coalesce((select sum(amount) from receivables), 0),
+      'owed_to_me_count', coalesce((select count(*) from receivables), 0),
+      'monthly_spending_total', coalesce((select sum(share_amount) from month_expenses), 0),
+      'previous_month_spending_total', coalesce((select sum(share_amount) from previous_month_expenses), 0)
+    ),
+    'debts', coalesce((
+      select jsonb_agg(to_jsonb(d) order by d.item_date desc, d.title)
+      from debts d
+    ), '[]'::jsonb),
+    'receivables', coalesce((
+      select jsonb_agg(to_jsonb(r) order by r.item_date desc, r.title, r.person_name)
+      from receivables r
+    ), '[]'::jsonb),
+    'history', coalesce((
+      select jsonb_agg(to_jsonb(h) order by h.item_date desc, h.title)
+      from (
+        select *
+        from personal_history
+        order by item_date desc, title
+        limit greatest(p_history_limit, 1)
+      ) h
+    ), '[]'::jsonb),
+    'calendar_events', coalesce((
+      select jsonb_agg(to_jsonb(c) order by c.event_date, c.title)
+      from calendar_rows c
+    ), '[]'::jsonb),
+    'chart', coalesce((
+      select jsonb_agg(to_jsonb(cr) order by cr.name)
+      from chart_rows cr
+      where cr.amount > 0
+    ), '[]'::jsonb)
+  )
+  into v_result;
+
+  return v_result;
+end;
+$$;
+
+grant execute on function public.get_personal_area_dashboard(text, int) to authenticated;
 
 drop function if exists public.get_add_invoice_form_options(text);
 drop function if exists public.get_house_invoices_dashboard(text, integer);

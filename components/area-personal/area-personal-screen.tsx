@@ -1,10 +1,20 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useMemo, useState, useTransition } from "react";
 import Calendar from "react-calendar";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import {
+  adminConfirmPaymentAction,
+  requestExpensePaymentConfirmationAction,
+} from "../../app/actions/expense-actions";
+import type {
+  PersonalAreaCalendarEvent,
+  PersonalAreaDashboardData,
+} from "../../lib/dashboard-types";
+import { formatCurrency } from "../../lib/dashboard-presenters";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -13,19 +23,8 @@ import styles from "./area-personal-screen.module.css";
 type AreaPersonalScreenProps = {
   houseCode: string;
   dashboardPath: string;
+  data: PersonalAreaDashboardData;
 };
-
-const summaryCards = [
-  { title: "Mis deudas", value: "250\u20AC", meta: "3 pagos pendientes" },
-  { title: "Me deben", value: "974\u20AC", meta: "1 pagos pendientes" },
-  { title: "Gastos del mes", value: "250\u20AC", meta: "+8% que el mes anterior" },
-];
-
-const pieData = [
-  { name: "Alquiler", value: 45, color: "#F0EAE4" },
-  { name: "Facturas", value: 30, color: "#C47A93" },
-  { name: "Compras", value: 25, color: "#8B1A2F" },
-];
 
 const MONTH_NAMES = [
   "Enero",
@@ -42,34 +41,167 @@ const MONTH_NAMES = [
   "Diciembre",
 ];
 
-const highlightedRange: [Date, Date] = [new Date(2026, 5, 9), new Date(2026, 5, 13)];
-const upcomingPaymentDate = new Date(2026, 6, 5);
+const chartColors = ["#F0EAE4", "#C47A93", "#8B1A2F", "#D7B9C3"];
 
-function isSameDay(left: Date, right: Date) {
-  return (
-    left.getDate() === right.getDate() &&
-    left.getMonth() === right.getMonth() &&
-    left.getFullYear() === right.getFullYear()
-  );
+function toNumber(value: number | string | null | undefined) {
+  const numericValue =
+    typeof value === "number" ? value : Number(String(value ?? 0));
+
+  return Number.isFinite(numericValue) ? numericValue : 0;
+}
+
+function toDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatMonthlyMeta(current: number, previous: number) {
+  if (previous <= 0) {
+    return current > 0 ? "Sin mes anterior" : "Sin gastos este mes";
+  }
+
+  const percent = Math.round(((current - previous) / previous) * 100);
+  if (percent === 0) {
+    return "Igual que el mes anterior";
+  }
+
+  return `${percent > 0 ? "+" : ""}${percent}% que el mes anterior`;
+}
+
+function buildChartData(data: PersonalAreaDashboardData) {
+  const total = data.chart.reduce((sum, item) => sum + toNumber(item.amount), 0);
+
+  return data.chart.map((item, index) => ({
+    name: item.name,
+    amount: toNumber(item.amount),
+    value: total > 0 ? Math.round((toNumber(item.amount) / total) * 100) : 0,
+    color: chartColors[index % chartColors.length],
+  }));
+}
+
+function iconForEvent(event: PersonalAreaCalendarEvent) {
+  return event.event_type === "me_deben"
+    ? "/images/IconoperfilM.webp"
+    : "/images/IconoperfilH.webp";
 }
 
 export function AreaPersonalScreen({
   houseCode,
   dashboardPath,
+  data,
 }: AreaPersonalScreenProps) {
-  const [activeMonth, setActiveMonth] = useState(new Date(2026, 5, 1));
-  const [isPaymentPopoverOpen, setIsPaymentPopoverOpen] = useState(false);
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [activeMonth, setActiveMonth] = useState(new Date());
+  const [activeCalendarDate, setActiveCalendarDate] = useState<string | null>(null);
   const basePath = dashboardPath;
 
+  const monthlyTotal = toNumber(data.summary.monthly_spending_total);
+  const previousMonthlyTotal = toNumber(
+    data.summary.previous_month_spending_total
+  );
+  const summaryCards = [
+    {
+      title: "Mis deudas",
+      value: formatCurrency(data.summary.my_debts_total),
+      meta: `${data.summary.my_debts_count} pagos pendientes`,
+    },
+    {
+      title: "Me deben",
+      value: formatCurrency(data.summary.owed_to_me_total),
+      meta: `${data.summary.owed_to_me_count} pagos pendientes`,
+    },
+    {
+      title: "Gastos del mes",
+      value: formatCurrency(data.summary.monthly_spending_total),
+      meta: formatMonthlyMeta(monthlyTotal, previousMonthlyTotal),
+    },
+  ];
+  const chartData = useMemo(() => buildChartData(data), [data]);
+  const calendarEventsByDate = useMemo(() => {
+    const eventsByDate = new Map<string, PersonalAreaCalendarEvent[]>();
+
+    for (const event of data.calendar_events) {
+      if (!event.event_date) continue;
+      eventsByDate.set(event.event_date, [
+        ...(eventsByDate.get(event.event_date) ?? []),
+        event,
+      ]);
+    }
+
+    return eventsByDate;
+  }, [data.calendar_events]);
+  const calendarLabel = `${MONTH_NAMES[activeMonth.getMonth()]} / ${activeMonth.getFullYear()}`;
+  const previewHistory = data.history.slice(0, 2);
+
+  const runAction = (action: () => Promise<boolean>) => {
+    setFeedbackMessage(null);
+    startTransition(async () => {
+      const shouldRefresh = await action();
+      if (shouldRefresh) {
+        router.refresh();
+      }
+    });
+  };
+
+  const handleRequestPaymentConfirmation = (expenseId: string) => {
+    runAction(async () => {
+      const result = await requestExpensePaymentConfirmationAction({
+        houseCode,
+        dashboardPath: basePath,
+        expenseId,
+      });
+
+      if (result.success) {
+        setFeedbackMessage(
+          result.data.status === "completed_self"
+            ? "Tu parte ha quedado marcada como pagada."
+            : "Tu pago ha quedado pendiente de revision."
+        );
+        return true;
+      }
+
+      if ("error" in result) {
+        setFeedbackMessage(result.error);
+      }
+      return false;
+    });
+  };
+
+  const handleVerifyPayment = (paymentId: string) => {
+    runAction(async () => {
+      const result = await adminConfirmPaymentAction({
+        houseCode,
+        dashboardPath: basePath,
+        paymentId,
+      });
+
+      if (result.success) {
+        setFeedbackMessage("Pago verificado correctamente.");
+        return true;
+      }
+
+      if ("error" in result) {
+        setFeedbackMessage(result.error);
+      }
+      return false;
+    });
+  };
+
   const goPrevMonth = () => {
-    setActiveMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1));
+    setActiveMonth(
+      (current) => new Date(current.getFullYear(), current.getMonth() - 1, 1)
+    );
   };
 
   const goNextMonth = () => {
-    setActiveMonth((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1));
+    setActiveMonth(
+      (current) => new Date(current.getFullYear(), current.getMonth() + 1, 1)
+    );
   };
-
-  const calendarLabel = `${MONTH_NAMES[activeMonth.getMonth()]} / ${activeMonth.getFullYear()}`;
 
   return (
     <main className={styles.page}>
@@ -102,70 +234,113 @@ export function AreaPersonalScreen({
             ))}
           </div>
 
+          {feedbackMessage ? (
+            <p className={styles.feedbackMessage}>{feedbackMessage}</p>
+          ) : null}
+
           <Card id="mis-deudas" className={styles.sectionCard}>
             <h2 className={styles.sectionHeader}>Mis deudas</h2>
             <div className={`${styles.rows} ${styles.debtsRows}`}>
-              <div className={styles.row}>
-                <div className={styles.person}>
-                  <Image src="/images/IconoperfilM.webp" alt="Perfil" width={22} height={22} className={styles.avatar} />
-                  <div>
-                    <p className={styles.personLine}>Laura</p>
-                    <p className={styles.personSub}>Compra Mercadona</p>
-                  </div>
-                </div>
-                <p className={styles.amount}>{"23\u20AC"}</p>
-                <Button className={styles.actionButton}>Confirmar pago</Button>
-              </div>
-              <div className={styles.row}>
-                <div className={styles.person}>
-                  <Image src="/images/IconoperfilH.webp" alt="Perfil" width={22} height={22} className={styles.avatar} />
-                  <div>
-                    <p className={styles.personLine}>Marc</p>
-                    <p className={styles.personSub}>Factura de luz</p>
-                  </div>
-                </div>
-                <p className={styles.amount}>{"23\u20AC"}</p>
-                <Button className={styles.actionButton}>Confirmar pago</Button>
-              </div>
+              {data.debts.length ? (
+                data.debts.map((debt) => {
+                  const hasPendingConfirmation =
+                    debt.status === "pending_confirmation" || debt.payment_id;
+                  const isSettlement = debt.status === "settlement";
+
+                  return (
+                    <div className={styles.row} key={debt.expense_id}>
+                      <div className={styles.person}>
+                        <Image
+                          src="/images/IconoperfilM.webp"
+                          alt="Perfil"
+                          width={22}
+                          height={22}
+                          className={styles.avatar}
+                        />
+                        <div>
+                          <p className={styles.personLine}>{debt.person_name}</p>
+                          <p className={styles.personSub}>{debt.title}</p>
+                        </div>
+                      </div>
+                      <p className={styles.amount}>
+                        {formatCurrency(debt.amount, debt.currency)}
+                      </p>
+                      {isSettlement ? (
+                        <Link
+                          className={styles.actionButton}
+                          href={`${basePath}/gastos/simplificar/pago-simplificado`}
+                        >
+                          Optimizar
+                        </Link>
+                      ) : (
+                        <Button
+                          className={styles.actionButton}
+                          disabled={isPending || Boolean(hasPendingConfirmation)}
+                          onClick={() =>
+                            !hasPendingConfirmation
+                              ? handleRequestPaymentConfirmation(debt.expense_id)
+                              : undefined
+                          }
+                        >
+                          {hasPendingConfirmation ? "Pendiente" : "Confirmar pago"}
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <p className={styles.emptyState}>No tienes deudas pendientes.</p>
+              )}
             </div>
           </Card>
 
           <Card className={styles.sectionCard}>
             <h2 className={styles.sectionHeader}>Me deben</h2>
             <div className={`${styles.rows} ${styles.debtsRows}`}>
-              <div className={styles.row}>
-                <div className={styles.person}>
-                  <Image src="/images/IconoperfilM.webp" alt="Perfil" width={22} height={22} className={styles.avatar} />
-                  <div>
-                    <p className={styles.personLine}>Laura</p>
-                    <p className={styles.personSub}>Compra IKEA</p>
+              {data.receivables.length ? (
+                data.receivables.map((receivable) => (
+                  <div
+                    className={styles.row}
+                    key={`${receivable.expense_id}-${receivable.person_name}`}
+                  >
+                    <div className={styles.person}>
+                      <Image
+                        src="/images/IconoperfilH.webp"
+                        alt="Perfil"
+                        width={22}
+                        height={22}
+                        className={styles.avatar}
+                      />
+                      <div>
+                        <p className={styles.personLine}>
+                          {receivable.person_name}
+                        </p>
+                        <p className={styles.personSub}>{receivable.title}</p>
+                      </div>
+                    </div>
+                    <p className={styles.amount}>
+                      {formatCurrency(receivable.amount, receivable.currency)}
+                    </p>
+                    {receivable.payment_id && receivable.can_verify ? (
+                      <Button
+                        className={styles.actionButton}
+                        disabled={isPending}
+                        onClick={() =>
+                          receivable.payment_id
+                            ? handleVerifyPayment(receivable.payment_id)
+                            : undefined
+                        }
+                      >
+                        Verificar pago
+                      </Button>
+                    ) : (
+                      <span className={styles.statusBadge}>Pendiente</span>
+                    )}
                   </div>
-                </div>
-                <p className={styles.amount}>{"23\u20AC"}</p>
-                <Button className={styles.actionButton}>Verificar pago</Button>
-              </div>
-              <div className={styles.row}>
-                <div className={styles.person}>
-                  <Image src="/images/IconoperfilH.webp" alt="Perfil" width={22} height={22} className={styles.avatar} />
-                  <div>
-                    <p className={styles.personLine}>Marc</p>
-                    <p className={styles.personSub}>Compra papel</p>
-                  </div>
-                </div>
-                <p className={styles.amount}>{"23\u20AC"}</p>
-                <Button className={styles.actionButton}>Verificar pago</Button>
-              </div>
-              <div className={styles.row}>
-                <div className={styles.person}>
-                  <Image src="/images/IconoperfilM.webp" alt="Perfil" width={22} height={22} className={styles.avatar} />
-                  <div>
-                    <p className={styles.personLine}>Ana</p>
-                    <p className={styles.personSub}>Compra farmacia</p>
-                  </div>
-                </div>
-                <p className={styles.amount}>{"23\u20AC"}</p>
-                <Button className={styles.actionButton}>Verificar pago</Button>
-              </div>
+                ))
+              ) : (
+                <p className={styles.emptyState}>No hay importes pendientes a tu favor.</p>
+              )}
             </div>
           </Card>
 
@@ -186,29 +361,33 @@ export function AreaPersonalScreen({
               </Link>
             </div>
             <div className={`${styles.rows} ${styles.historyRows}`}>
-              <div className={`${styles.row} ${styles.historyRow}`}>
-                <div className={styles.person}>
-                  <Image src="/images/IconoperfilH.webp" alt="Perfil" width={22} height={22} className={styles.avatar} />
-                  <div>
-                    <p className={styles.personLine}>Pago a Marc</p>
-                    <p className={styles.personSub}>Factura de la luz</p>
+              {previewHistory.length ? (
+                previewHistory.map((item) => (
+                  <div className={`${styles.row} ${styles.historyRow}`} key={`${item.item_type}-${item.item_id}`}>
+                    <div className={styles.person}>
+                      <Image
+                        src={item.icon_type === "purchase" ? "/iconos/Carrodecompra.svg" : "/images/IconoperfilH.webp"}
+                        alt=""
+                        width={22}
+                        height={22}
+                        className={item.icon_type === "purchase" ? undefined : styles.avatar}
+                      />
+                      <div>
+                        <p className={styles.personLine}>{item.title}</p>
+                        <p className={styles.personSub}>{item.subtitle}</p>
+                      </div>
+                    </div>
+                    <p className={styles.historyRightAmount}>
+                      {formatCurrency(item.amount, item.currency)}
+                    </p>
+                    <span className={`${styles.actionButton} ${styles.historyRightSpacer}`} aria-hidden="true">
+                      Verificar pago
+                    </span>
                   </div>
-                </div>
-                <p className={styles.historyRightAmount}>{"25\u20AC"}</p>
-                <span className={`${styles.actionButton} ${styles.historyRightSpacer}`} aria-hidden="true">
-                  Verificar pago
-                </span>
-              </div>
-              <div className={`${styles.row} ${styles.historyRow}`}>
-                <div className={styles.person}>
-                  <Image src="/iconos/Carrodecompra.svg" alt="Compra" width={18} height={18} />
-                  <p className={styles.personLine}>Compra supermercado</p>
-                </div>
-                <p className={styles.historyRightAmount}>{"40\u20AC"}</p>
-                <span className={`${styles.actionButton} ${styles.historyRightSpacer}`} aria-hidden="true">
-                  Verificar pago
-                </span>
-              </div>
+                ))
+              ) : (
+                <p className={styles.emptyState}>No hay movimientos personales.</p>
+              )}
             </div>
           </Card>
 
@@ -231,45 +410,62 @@ export function AreaPersonalScreen({
               <div className={styles.calendar}>
                 <Calendar
                   activeStartDate={activeMonth}
-                  value={highlightedRange}
-                  selectRange
+                  value={null}
                   view="month"
                   showNavigation={false}
                   locale="en-US"
                   tileClassName={({ date, view }) => {
-                    if (view === "month" && isSameDay(date, upcomingPaymentDate)) {
+                    if (view === "month" && calendarEventsByDate.has(toDateKey(date))) {
                       return "payment-day";
                     }
                     return undefined;
                   }}
                   tileContent={({ date, view }) => {
-                    if (view === "month" && isSameDay(date, upcomingPaymentDate)) {
-                      return (
-                        <Popover open={isPaymentPopoverOpen} onOpenChange={setIsPaymentPopoverOpen}>
-                          <PopoverTrigger asChild>
-                            <span
-                              className={styles.paymentAnchor}
-                              onMouseEnter={() => setIsPaymentPopoverOpen(true)}
-                              onMouseLeave={() => setIsPaymentPopoverOpen(false)}
-                              onFocus={() => setIsPaymentPopoverOpen(true)}
-                              onBlur={() => setIsPaymentPopoverOpen(false)}
-                              aria-label="Ver próximo pago"
-                            />
-                          </PopoverTrigger>
-                          <PopoverContent
-                            side="top"
-                            align="center"
-                            sideOffset={8}
-                            className={styles.paymentPopoverContent}
-                            onMouseEnter={() => setIsPaymentPopoverOpen(true)}
-                            onMouseLeave={() => setIsPaymentPopoverOpen(false)}
-                          >
-                            Próximo pago: Factura de luz
-                          </PopoverContent>
-                        </Popover>
-                      );
+                    const dateKey = toDateKey(date);
+                    const events = calendarEventsByDate.get(dateKey) ?? [];
+                    if (view !== "month" || !events.length) {
+                      return null;
                     }
-                    return null;
+
+                    const firstEvent = events[0];
+                    return (
+                      <Popover
+                        open={activeCalendarDate === dateKey}
+                        onOpenChange={(open) =>
+                          setActiveCalendarDate(open ? dateKey : null)
+                        }
+                      >
+                        <PopoverTrigger asChild>
+                          <span
+                            className={styles.paymentAnchor}
+                            onMouseEnter={() => setActiveCalendarDate(dateKey)}
+                            onMouseLeave={() => setActiveCalendarDate(null)}
+                            onFocus={() => setActiveCalendarDate(dateKey)}
+                            onBlur={() => setActiveCalendarDate(null)}
+                            aria-label="Ver evento personal"
+                          />
+                        </PopoverTrigger>
+                        <PopoverContent
+                          side="top"
+                          align="center"
+                          sideOffset={8}
+                          className={styles.paymentPopoverContent}
+                          onMouseEnter={() => setActiveCalendarDate(dateKey)}
+                          onMouseLeave={() => setActiveCalendarDate(null)}
+                        >
+                          <span className={styles.popoverLine}>
+                            <Image
+                              src={iconForEvent(firstEvent)}
+                              alt=""
+                              width={14}
+                              height={14}
+                            />
+                            {firstEvent.title} ·{" "}
+                            {formatCurrency(firstEvent.amount, firstEvent.currency)}
+                          </span>
+                        </PopoverContent>
+                      </Popover>
+                    );
                   }}
                   onActiveStartDateChange={({ activeStartDate }) => {
                     if (activeStartDate) {
@@ -286,43 +482,54 @@ export function AreaPersonalScreen({
             <Card className={styles.bottomCardMaroon}>
               <h2 className={styles.pieTitle}>Resumen visual</h2>
               <div className={styles.pieWrap}>
-                <div className={styles.pieChartWrap}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={84}
-                        innerRadius={0}
-                      >
-                        {pieData.map((entry) => (
-                          <Cell key={entry.name} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        formatter={(value) => `${value}%`}
-                        itemStyle={{ color: "#000000" }}
-                        labelStyle={{ color: "#000000" }}
-                        contentStyle={{ borderRadius: "10px" }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
+                {chartData.length ? (
+                  <>
+                    <div className={styles.pieChartWrap}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={chartData}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={84}
+                            innerRadius={0}
+                          >
+                            {chartData.map((entry) => (
+                              <Cell key={entry.name} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            formatter={(_, name) => {
+                              const entry = chartData.find((item) => item.name === name);
+                              return entry
+                                ? formatCurrency(entry.amount)
+                                : formatCurrency(0);
+                            }}
+                            itemStyle={{ color: "#000000" }}
+                            labelStyle={{ color: "#000000" }}
+                            contentStyle={{ borderRadius: "10px" }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
 
-                <ul className={styles.pieLegend}>
-                  {pieData.map((entry) => (
-                    <li key={entry.name} className={styles.legendItem}>
-                      <span
-                        className={`${styles.dot} ${entry.name === "Compras" ? styles.dotOutlined : ""}`}
-                        style={entry.name === "Compras" ? undefined : { background: entry.color }}
-                      />
-                      {entry.name}
-                    </li>
-                  ))}
-                </ul>
+                    <ul className={styles.pieLegend}>
+                      {chartData.map((entry) => (
+                        <li key={entry.name} className={styles.legendItem}>
+                          <span
+                            className={`${styles.dot} ${entry.name === "Compras" ? styles.dotOutlined : ""}`}
+                            style={entry.name === "Compras" ? undefined : { background: entry.color }}
+                          />
+                          {entry.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <p className={styles.emptyStateDark}>Sin gastos personales este mes.</p>
+                )}
               </div>
             </Card>
           </div>
@@ -331,9 +538,3 @@ export function AreaPersonalScreen({
     </main>
   );
 }
-
-
-
-
-
-

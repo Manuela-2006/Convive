@@ -57,6 +57,8 @@ function revalidateExpensePaths(dashboardPath: string) {
     `${dashboardPath}/gastos/division`,
     `${dashboardPath}/gastos/simplificar`,
     `${dashboardPath}/gastos/simplificar/pago-simplificado`,
+    `${dashboardPath}/area-personal`,
+    `${dashboardPath}/area-personal/historial`,
   ];
 
   for (const path of paths) {
