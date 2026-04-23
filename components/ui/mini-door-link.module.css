@@ -48,7 +48,7 @@
 }
 
 .switchesWrap {
-  width: 150px;
+  width: 220px;
   display: grid;
   grid-template-columns: 1fr;
   gap: 5px;
@@ -92,7 +92,7 @@
   align-items: center;
   gap: 9px;
   text-decoration: none;
-  width: 132px;
+  width: 100%;
   min-height: 30px;
   padding: 0;
   border-radius: 0;
@@ -102,6 +102,7 @@
 }
 
 .miniSwitch {
+  flex: 0 0 27px;
   width: 27px;
   height: 32px;
   border-radius: 4px;
@@ -160,6 +161,7 @@
 
 
 .miniLabel {
+  flex: 1;
   pointer-events: auto;
   color: #111111;
   text-decoration: none;
@@ -168,6 +170,7 @@
   font-size: 10px;
   font-weight: 600;
   line-height: 1.1;
+  white-space: nowrap;
   text-shadow: none;
   background: transparent;
   border: none;
@@ -209,7 +212,7 @@
 
   .miniItem {
     gap: 8px;
-    width: 122px;
+    width: 100%;
     min-height: 27px;
     padding: 0;
   }
