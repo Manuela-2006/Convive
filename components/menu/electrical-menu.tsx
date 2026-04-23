@@ -53,6 +53,7 @@ export function ElectricalMenu({
   const router = useRouter();
   const [isDoorOpen, setIsDoorOpen] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleSwitchPress = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
@@ -118,11 +119,13 @@ export function ElectricalMenu({
                 ))}
 
                 {group.title === "Configuración" ? (
-                  <form action={signOutAction} className={styles.logoutItem}>
-                    <button type="submit" className={styles.logoutButton}>
+                  <form action={signOutAction} className={styles.logoutItem} onSubmit={() => setIsLoggingOut(true)}>
+                    <button type="submit" className={styles.logoutButton} disabled={isLoggingOut}>
                       <div className={styles.logoutSwitchShell}>
                         <div className={styles.logoutSwitchBar}>
-                          <span className={styles.logoutSwitchMark} />
+                          <span
+                            className={`${styles.logoutSwitchMark} ${isLoggingOut ? styles.logoutSwitchMarkPressed : ""}`}
+                          />
                         </div>
                       </div>
                       <p className={styles.switchLabel}>Cerrar sesión</p>
