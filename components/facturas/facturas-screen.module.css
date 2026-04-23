@@ -269,6 +269,7 @@
 
 .paper .emptyState {
   color: #1f1a17;
+  padding-left: 0.45rem;
 }
 
 .feedbackMessage {
