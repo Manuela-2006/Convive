@@ -28,6 +28,7 @@ import { ElectricalMenu } from "../../../../../components/menu/electrical-menu";
 import { MiniDoorLink, type MenuKey } from "../../../../../components/ui/mini-door-link";
 import {
   getAccessibleHouseContext,
+  loadProfileSettingsWithClient,
 } from "../../../../backend/endpoints/auth/queries";
 import {
   loadActiveHouseInviteWithClient,
@@ -250,11 +251,17 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
   }
 
   if (sectionPath === "ajustes") {
+    const profileSettings = await loadProfileSettingsWithClient(
+      routeContext.supabase,
+      routeContext.house.public_code
+    );
+
     return withMiniDoor(
       <AjustesScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
         isAdmin={isHouseAdmin}
+        settings={profileSettings}
       />,
       routeContext.dashboardPath,
       "ajustes"

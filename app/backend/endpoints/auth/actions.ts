@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import {
@@ -16,6 +17,41 @@ type AuthPayload = {
   email: string;
   password: string;
 };
+
+type UpdateProfileSettingsInput = {
+  houseCode: string;
+  dashboardPath: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password?: string;
+  avatarUrl?: string | null;
+};
+
+type UpdateHouseMemberSettingsInput = {
+  houseCode: string;
+  dashboardPath: string;
+  roomLabel: string;
+  roomSize: string;
+  stayStartDate: string;
+  stayEndDate?: string | null;
+};
+
+type RemoveHouseMemberInput = {
+  houseCode: string;
+  dashboardPath: string;
+  profileId: string;
+};
+
+type ActionResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+function revalidateProfilePaths(dashboardPath: string) {
+  revalidatePath(dashboardPath);
+  revalidatePath(`${dashboardPath}/ajustes`);
+  revalidatePath(`${dashboardPath}/area-grupal`);
+}
 
 export async function signUpWithEmail({ email, password }: AuthPayload) {
   const supabase = await createClient();
@@ -191,4 +227,156 @@ export async function joinHouseAndReturnDashboardPathAction(formData: {
   return {
     dashboardPath: buildDashboardPath(profile.public_code, housePublicCode),
   };
+}
+
+export async function updateProfileSettingsAction(
+  input: UpdateProfileSettingsInput
+): Promise<ActionResult<{ email: string | null; fullName: string; avatarUrl: string | null }>> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { success: false, error: "No autenticado." };
+    }
+
+    const firstName = input.firstName.trim();
+    const lastName = input.lastName.trim();
+    const fullName = [firstName, lastName].filter(Boolean).join(" ").trim();
+    const email = input.email.trim().toLowerCase();
+    const password = input.password?.trim() ?? "";
+    const avatarUrl = input.avatarUrl?.trim() ? input.avatarUrl.trim() : null;
+
+    if (!firstName || !lastName) {
+      return { success: false, error: "Nombre y apellidos son obligatorios." };
+    }
+
+    if (!email) {
+      return { success: false, error: "El email es obligatorio." };
+    }
+
+    if (password && password.length < 6) {
+      return {
+        success: false,
+        error: "La contraseña debe tener al menos 6 caracteres.",
+      };
+    }
+
+    const authAttributes: {
+      email?: string;
+      password?: string;
+      data: { full_name: string; avatar_url: string | null };
+    } = {
+      data: {
+        full_name: fullName,
+        avatar_url: avatarUrl,
+      },
+    };
+
+    if (email !== user.email) {
+      authAttributes.email = email;
+    }
+
+    if (password) {
+      authAttributes.password = password;
+    }
+
+    const { data: authData, error: authError } =
+      await supabase.auth.updateUser(authAttributes);
+
+    if (authError) {
+      return { success: false, error: authError.message };
+    }
+
+    const effectiveEmail = authData.user?.email ?? user.email ?? email;
+    const { error: rpcError } = await supabase.rpc("update_own_profile_settings", {
+      p_full_name: fullName,
+      p_email: effectiveEmail,
+      p_avatar_url: avatarUrl,
+    });
+
+    if (rpcError) {
+      return { success: false, error: rpcError.message };
+    }
+
+    revalidateProfilePaths(input.dashboardPath);
+
+    return {
+      success: true,
+      data: {
+        email: effectiveEmail,
+        fullName,
+        avatarUrl,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "No se pudo guardar el perfil.",
+    };
+  }
+}
+
+export async function updateHouseMemberSettingsAction(
+  input: UpdateHouseMemberSettingsInput
+): Promise<ActionResult<{ saved: true }>> {
+  try {
+    const { supabase } = await getAuthenticatedProfileContext();
+
+    const { error } = await supabase.rpc("update_own_house_member_settings", {
+      p_house_public_code: input.houseCode,
+      p_room_label: input.roomLabel.trim() || null,
+      p_room_size: input.roomSize.trim() || null,
+      p_stay_start_date: input.stayStartDate || null,
+      p_stay_end_date: input.stayEndDate || null,
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidateProfilePaths(input.dashboardPath);
+
+    return { success: true, data: { saved: true } };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "No se pudo guardar la configuración del piso.",
+    };
+  }
+}
+
+export async function removeHouseMemberAction(
+  input: RemoveHouseMemberInput
+): Promise<ActionResult<{ removed: true }>> {
+  try {
+    const { supabase } = await getAuthenticatedProfileContext();
+
+    const { error } = await supabase.rpc("remove_house_member", {
+      p_house_public_code: input.houseCode,
+      p_profile_id: input.profileId,
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidateProfilePaths(input.dashboardPath);
+
+    return { success: true, data: { removed: true } };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "No se pudo eliminar el participante.",
+    };
+  }
 }

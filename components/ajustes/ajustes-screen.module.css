@@ -152,6 +152,51 @@
   padding: 0 0.45rem;
 }
 
+.inlineInput,
+.settingInput,
+.memberSelect {
+  min-width: 0;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #3d3733;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.fieldLabel {
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.66rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.saveButton,
+.houseSaveButton {
+  margin-top: 0.7rem;
+  min-height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: #be6f8b;
+  color: #f0eae4;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  padding: 0.35rem 0.85rem;
+}
+
+.saveButton:disabled,
+.houseSaveButton:disabled {
+  opacity: 0.7;
+}
+
+.saveButton {
+  justify-self: center;
+  display: block;
+  margin-inline: auto;
+}
+
 .avatarBadge {
   position: absolute;
   top: -12px;
@@ -269,7 +314,7 @@
   border: 1px solid #be6f8b;
   background: #f2eeeb;
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: minmax(100px, 0.45fr) minmax(0, 1fr);
   align-items: center;
   gap: 0.45rem;
   padding: 0.35rem 0.45rem;
@@ -297,6 +342,37 @@
   font-style: normal;
   font-weight: 400;
   padding: 0.35rem 0.95rem;
+}
+
+.stayInputs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.45rem;
+}
+
+.settingHint,
+.feedbackMessage {
+  margin: 0.45rem 0 0;
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.houseSaveButton {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  margin-inline: auto;
+}
+
+.memberSelect {
+  margin-top: 0.85rem;
+  border: 1px solid #be6f8b;
+  border-radius: 8px;
+  background: #f2eeeb;
+  padding: 0.45rem 0.55rem;
 }
 
 .settingLabel,

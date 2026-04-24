@@ -6574,3 +6574,240 @@ end;
 $$;
 
 grant execute on function public.get_house_purchase_tickets(text, int) to authenticated;
+
+-- =========================================================
+-- PERFIL - DATOS REALES Y CONFIGURACION POR PISO
+-- Añadido incremental. No sustituye bloques anteriores.
+
+-- =========================================================
+
+alter table public.house_members
+add column if not exists room_label text,
+add column if not exists room_size text,
+add column if not exists stay_start_date date,
+add column if not exists stay_end_date date;
+
+
+create or replace function public.get_profile_settings(
+  p_house_public_code text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+  v_is_admin boolean;
+  v_result jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_house_id := public.get_accessible_house_id(p_house_public_code);
+  v_is_admin := public.is_house_admin(v_house_id);
+
+  select jsonb_build_object(
+    'profile', jsonb_build_object(
+      'id', p.id,
+      'email', p.email,
+      'full_name', p.full_name,
+      'avatar_url', p.avatar_url,
+      'public_code', p.public_code
+    ),
+    'house_member', jsonb_build_object(
+      'role', hm.role,
+      'room_label', hm.room_label,
+      'room_size', hm.room_size,
+      'stay_start_date', hm.stay_start_date,
+      'stay_end_date', hm.stay_end_date
+    ),
+    'can_remove_members', v_is_admin,
+    'removable_members', case
+      when v_is_admin then coalesce((
+        select jsonb_agg(
+          jsonb_build_object(
+            'profile_id', member.profile_id,
+            'display_name', public.profile_display_name(member.profile_id),
+            'role', member.role
+          )
+          order by public.profile_display_name(member.profile_id)
+        )
+        from public.house_members member
+        where member.house_id = v_house_id
+          and member.is_active = true
+      ), '[]'::jsonb)
+      else '[]'::jsonb
+    end
+  )
+  into v_result
+  from public.profiles p
+  join public.house_members hm
+    on hm.profile_id = p.id
+   and hm.house_id = v_house_id
+   and hm.is_active = true
+  where p.id = auth.uid()
+  limit 1;
+
+  if v_result is null then
+    raise exception 'Perfil no encontrado';
+  end if;
+
+  return v_result;
+end;
+$$;
+
+grant execute on function public.get_profile_settings(text) to authenticated;
+
+
+create or replace function public.update_own_profile_settings(
+  p_full_name text,
+  p_email text,
+  p_avatar_url text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  update public.profiles
+  set
+    full_name = nullif(trim(p_full_name), ''),
+    email = nullif(trim(p_email), ''),
+    avatar_url = nullif(trim(coalesce(p_avatar_url, '')), '')
+  where id = auth.uid();
+
+  if not found then
+    raise exception 'Perfil no encontrado';
+  end if;
+
+  return jsonb_build_object('status', 'updated');
+end;
+$$;
+
+grant execute on function public.update_own_profile_settings(text, text, text) to authenticated;
+
+
+create or replace function public.update_own_house_member_settings(
+  p_house_public_code text,
+  p_room_label text default null,
+  p_room_size text default null,
+  p_stay_start_date date default null,
+  p_stay_end_date date default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_house_id := public.get_accessible_house_id(p_house_public_code);
+
+  if p_stay_start_date is not null
+     and p_stay_end_date is not null
+     and p_stay_end_date < p_stay_start_date then
+    raise exception 'La fecha de fin no puede ser anterior al inicio';
+  end if;
+
+  update public.house_members
+  set
+    room_label = nullif(trim(coalesce(p_room_label, '')), ''),
+    room_size = nullif(trim(coalesce(p_room_size, '')), ''),
+    stay_start_date = p_stay_start_date,
+    stay_end_date = p_stay_end_date
+  where house_id = v_house_id
+    and profile_id = auth.uid()
+    and is_active = true;
+
+  if not found then
+    raise exception 'Participante no encontrado';
+  end if;
+
+  return jsonb_build_object('status', 'updated');
+end;
+$$;
+
+grant execute on function public.update_own_house_member_settings(
+  text,
+  text,
+  text,
+  date,
+  date
+) to authenticated;
+
+
+create or replace function public.remove_house_member(
+  p_house_public_code text,
+  p_profile_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+  v_target public.house_members%rowtype;
+  v_active_admin_count int;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_house_id := public.get_accessible_house_id(p_house_public_code);
+
+  if not public.is_house_admin(v_house_id) then
+    raise exception 'Solo un admin puede eliminar participantes';
+  end if;
+
+  select *
+  into v_target
+  from public.house_members hm
+  where hm.house_id = v_house_id
+    and hm.profile_id = p_profile_id
+    and hm.is_active = true
+  limit 1;
+
+  if v_target.id is null then
+    raise exception 'Participante no encontrado';
+  end if;
+
+  if v_target.role = 'admin' then
+    select count(*)::int
+    into v_active_admin_count
+    from public.house_members hm
+    where hm.house_id = v_house_id
+      and hm.is_active = true
+      and hm.role = 'admin';
+
+    if v_active_admin_count <= 1 then
+      raise exception 'No se puede eliminar el unico admin activo del piso';
+    end if;
+  end if;
+
+  update public.house_members
+  set
+    is_active = false,
+    left_at = now()
+  where id = v_target.id;
+
+  return jsonb_build_object(
+    'status', 'removed',
+    'profile_id', p_profile_id
+  );
+end;
+$$;
+
+grant execute on function public.remove_house_member(text, uuid) to authenticated;

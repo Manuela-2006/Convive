@@ -285,3 +285,28 @@ export type AreaGrupalDashboardData = {
   distribution: GroupExpenseDistributionItem[];
   comparisons: GroupExpenseComparisonItem[];
 };
+
+export type ProfileSettingsMemberOption = {
+  profile_id: string;
+  display_name: string;
+  role: string;
+};
+
+export type ProfileSettingsData = {
+  profile: {
+    id: string;
+    email: string | null;
+    full_name: string | null;
+    avatar_url: string | null;
+    public_code: string;
+  };
+  house_member: {
+    role: string;
+    room_label: string | null;
+    room_size: string | null;
+    stay_start_date: string | null;
+    stay_end_date: string | null;
+  };
+  can_remove_members: boolean;
+  removable_members: ProfileSettingsMemberOption[];
+};

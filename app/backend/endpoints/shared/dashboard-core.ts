@@ -24,6 +24,8 @@ import type {
   PersonalAreaDebtItem,
   PersonalAreaHistoryItem,
   PersonalAreaReceivableItem,
+  ProfileSettingsData,
+  ProfileSettingsMemberOption,
   Settlement,
   SharedExpense,
 } from "./dashboard-types";
@@ -33,6 +35,7 @@ type ProfileRecord = {
   id: string;
   email: string | null;
   full_name: string | null;
+  avatar_url: string | null;
   public_code: string | null;
 };
 
@@ -610,6 +613,7 @@ function readProfileRecord(value: unknown) {
     id: toStringValue(value.id),
     email: toNullableStringValue(value.email),
     full_name: toNullableStringValue(value.full_name),
+    avatar_url: toNullableStringValue(value.avatar_url),
     public_code: publicCode,
   } satisfies ProfileRecord & { public_code: string };
 }
@@ -687,6 +691,50 @@ export async function getAccessibleHouseContext(
     memberRole: isRecord(data) ? toStringValue(data.member_role, "member") : "member",
     dashboardPath: buildDashboardPath(userCode, house.public_code),
   };
+}
+
+export async function loadProfileSettingsWithClient(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  houseCode: string
+) {
+  const { data, error } = await supabase.rpc("get_profile_settings", {
+    p_house_public_code: houseCode,
+  });
+
+  if (error || !isRecord(data)) {
+    notFound();
+  }
+
+  const profile = isRecord(data.profile) ? data.profile : {};
+  const houseMember = isRecord(data.house_member) ? data.house_member : {};
+
+  return {
+    profile: {
+      id: toStringValue(profile.id),
+      email: toNullableStringValue(profile.email),
+      full_name: toNullableStringValue(profile.full_name),
+      avatar_url: toNullableStringValue(profile.avatar_url),
+      public_code: toStringValue(profile.public_code),
+    },
+    house_member: {
+      role: toStringValue(houseMember.role, "member"),
+      room_label: toNullableStringValue(houseMember.room_label),
+      room_size: toNullableStringValue(houseMember.room_size),
+      stay_start_date: toNullableStringValue(houseMember.stay_start_date),
+      stay_end_date: toNullableStringValue(houseMember.stay_end_date),
+    },
+    can_remove_members: data.can_remove_members === true,
+    removable_members: asArray<Record<string, unknown>>(
+      data.removable_members
+    ).map(
+      (member) =>
+        ({
+          profile_id: toStringValue(member.profile_id),
+          display_name: toStringValue(member.display_name),
+          role: toStringValue(member.role, "member"),
+        }) satisfies ProfileSettingsMemberOption
+    ),
+  } satisfies ProfileSettingsData;
 }
 
 export async function getDefaultDashboardPath() {
