@@ -499,6 +499,27 @@ function renderCalendarEventContent(arg: EventContentArg) {
   return <span className={styles.defaultEventText}>{arg.event.title}</span>;
 }
 
+function BackArrowIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 80 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M23.3333 40H56.6666M23.3333 40L36.6666 26.6666M23.3333 40L36.6666 53.3333"
+        stroke="currentColor"
+        strokeWidth="2.626"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function CalendarioScreen({
   houseCode,
   dashboardPath,
@@ -535,8 +556,18 @@ export function CalendarioScreen({
         className:
           item.type === "factura" &&
           normalizeText(item.category ?? "") === "alquiler"
-            ? ["rent-event", `event-${item.visualStatus}`]
-            : ["mini-event", `event-${item.visualStatus}`],
+            ? [
+                "rent-event",
+                `event-${item.visualStatus}`,
+                `type-${item.type}`,
+                item.type === "factura" ? "kind-factura" : "kind-regular",
+              ]
+            : [
+                "mini-event",
+                `event-${item.visualStatus}`,
+                `type-${item.type}`,
+                item.type === "factura" ? "kind-factura" : "kind-regular",
+              ],
         extendedProps: { item },
       })),
     [calendarItems]
@@ -568,7 +599,7 @@ export function CalendarioScreen({
       <section className={styles.panel}>
         <header className={styles.header}>
           <Link href={`${basePath}/menu`} className={styles.backLink}>
-            <Image src="/iconos/flechaatras.svg" alt="Volver" width={20} height={20} className={styles.backIcon} />
+            <BackArrowIcon className={styles.backIcon} />
           </Link>
           <div className={styles.headerCenter}>
             <h1 className={styles.title}>Calendario</h1>
@@ -617,7 +648,7 @@ export function CalendarioScreen({
                 eventContent={renderCalendarEventContent}
                 eventClick={onEventClick}
                 datesSet={onDatesSet}
-                dayMaxEvents={3}
+                dayMaxEvents={false}
                 moreLinkContent={(arg) => `+${arg.num}`}
                 dayHeaderContent={(arg) => weekdayMap[arg.date.getDay()]}
                 dayCellContent={(arg) => <span className={styles.dayNumber}>{arg.dayNumberText.replace(/\D/g, "")}</span>}
@@ -638,24 +669,30 @@ export function CalendarioScreen({
           onClick={() => setSelectedItem(null)}
         >
           <section
-            className={styles.modal}
+            className={`${styles.modal} ${
+              selectedItem.type === "factura"
+                ? styles.modalFactura
+                : styles.modalRegular
+            }`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="calendar-event-title"
             onClick={(event) => event.stopPropagation()}
           >
-            <button
-              type="button"
-              className={styles.modalClose}
-              onClick={() => setSelectedItem(null)}
-              aria-label="Cerrar"
-            >
-              x
-            </button>
+            <div className={styles.modalHeader}>
+              <button
+                type="button"
+                className={styles.modalClose}
+                onClick={() => setSelectedItem(null)}
+                aria-label="Volver"
+              >
+                <BackArrowIcon className={styles.modalBackIcon} />
+              </button>
+              <h2 id="calendar-event-title" className={styles.modalTitle}>
+                {selectedItem.title}
+              </h2>
+            </div>
             <p className={styles.modalType}>{typeLabels[selectedItem.type]}</p>
-            <h2 id="calendar-event-title" className={styles.modalTitle}>
-              {selectedItem.title}
-            </h2>
             <dl className={styles.modalDetails}>
               <div>
                 <dt>Fecha</dt>

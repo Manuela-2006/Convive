@@ -11,8 +11,8 @@
 }
 
 .panel {
-  width: calc(100% * 8 / 12);
-  max-width: 980px;
+  width: calc(100% * 10 / 12);
+  max-width: 1280px;
   min-height: calc(100svh - 1rem);
   background: rgba(240, 234, 228, 0.5);
   border-radius: 10px;
@@ -42,6 +42,7 @@
 .backIcon {
   width: 44px;
   height: 44px;
+  color: #f0eae4;
 }
 
 .headerCenter {
@@ -67,17 +68,18 @@
 }
 
 .content {
-  width: 96%;
+  width: 98%;
   margin: 0 auto;
-  padding: 1.4rem 0.9rem 2rem;
+  padding: 1.5rem 1rem 2.2rem;
   background: transparent;
 }
 
 .calendarCard {
   background: #f0eae4;
   border-radius: 10px;
-  padding: 1.35rem 0.85rem 0.95rem;
+  padding: 1.5rem 1rem 1.2rem;
   width: 100%;
+  min-height: 82svh;
   margin-inline: 0;
 }
 
@@ -133,7 +135,7 @@
 .calendarWrap {
   border-radius: 8px;
   overflow: visible;
-  width: calc(100% - 1rem);
+  width: calc(100% - 0.25rem);
   margin-inline: auto;
 }
 
@@ -194,25 +196,42 @@
 .calendarWrap :global(.fc .fc-daygrid-day-frame) {
   background: #be6f8b;
   border-radius: 6px;
-  min-height: 92px;
-  height: 92px;
-  margin: 2px;
+  min-height: 118px;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  margin: 3px;
   position: relative;
 }
 
 .calendarWrap :global(.fc .fc-daygrid-day) {
-  height: 96px;
+  height: auto;
 }
 
 .calendarWrap :global(.fc .fc-daygrid-day-events) {
   position: absolute;
-  left: 2px;
-  right: 2px;
-  top: 30px;
-  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  top: 28px;
+  bottom: 3px;
   margin-top: 0;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #8b1a2f transparent;
+}
+
+.calendarWrap :global(.fc .fc-daygrid-day-events::-webkit-scrollbar) {
+  width: 6px;
+}
+
+.calendarWrap :global(.fc .fc-daygrid-day-events::-webkit-scrollbar-track) {
+  background: transparent;
+}
+
+.calendarWrap :global(.fc .fc-daygrid-day-events::-webkit-scrollbar-thumb) {
+  background: #8b1a2f;
+  border-radius: 999px;
 }
 
 .calendarWrap :global(.fc .fc-day-other) {
@@ -250,10 +269,23 @@
   border: none;
   border-radius: 7px;
   margin: 0.16rem 0.3rem 0;
-  height: 20px;
+  min-height: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   cursor: pointer;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.calendarWrap :global(.fc .fc-daygrid-event .fc-event-main),
+.calendarWrap :global(.fc .fc-daygrid-event .fc-event-main-frame) {
+  height: 100%;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
 }
 
 .calendarWrap :global(.fc .mini-event) {
@@ -281,6 +313,14 @@
   font-weight: 500;
   padding: 0 0.6rem 0 0.35rem;
   line-height: 1.1;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
 }
 
 .calendarWrap :global(.fc .event-pending .fc-event-title) {
@@ -329,7 +369,7 @@
 .rentEventContent {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
   min-width: 0;
   height: 100%;
@@ -340,11 +380,13 @@
   font-weight: 500;
   line-height: 1.1;
   display: block;
+  width: 100%;
   max-width: 100%;
+  min-width: 0;
   overflow: hidden;
-  text-overflow: clip;
+  text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: center;
+  text-align: left;
   padding: 0 0.35rem;
 }
 
@@ -353,7 +395,14 @@
   font-weight: 500;
   line-height: 1.1;
   display: block;
-  padding-left: 0.35rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0 0.35rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
 }
 
 .calendarWrap :global(.fc .event-pending) .rentEventText,
@@ -364,6 +413,75 @@
 .calendarWrap :global(.fc .event-completed) .rentEventText,
 .calendarWrap :global(.fc .event-completed) .defaultEventText {
   color: #1f1a17;
+}
+
+/* Colores por tipo (forzados para no ser pisados por estados pending/completed) */
+.calendarWrap :global(.fc .type-ticket.mini-event),
+.calendarWrap :global(.fc .type-gasto.mini-event),
+.calendarWrap :global(.fc .type-pago.mini-event),
+.calendarWrap :global(.fc .type-limpieza.mini-event) {
+  background: #f0eae4 !important;
+  border: 2px solid #b85c6e !important;
+  color: #1f1a17 !important;
+}
+
+.calendarWrap :global(.fc .type-ticket.mini-event .fc-event-title),
+.calendarWrap :global(.fc .type-ticket .defaultEventText),
+.calendarWrap :global(.fc .type-ticket .rentEventText),
+.calendarWrap :global(.fc .type-gasto.mini-event .fc-event-title),
+.calendarWrap :global(.fc .type-gasto .defaultEventText),
+.calendarWrap :global(.fc .type-gasto .rentEventText),
+.calendarWrap :global(.fc .type-pago.mini-event .fc-event-title),
+.calendarWrap :global(.fc .type-pago .defaultEventText),
+.calendarWrap :global(.fc .type-pago .rentEventText),
+.calendarWrap :global(.fc .type-limpieza.mini-event .fc-event-title),
+.calendarWrap :global(.fc .type-limpieza .defaultEventText),
+.calendarWrap :global(.fc .type-limpieza .rentEventText) {
+  color: #1f1a17 !important;
+}
+
+.calendarWrap :global(.fc .type-factura.mini-event),
+.calendarWrap :global(.fc .type-factura.rent-event) {
+  background: #f0eae4 !important;
+  border: 2px solid #8b1a2f !important;
+  color: #1f1a17 !important;
+}
+
+.calendarWrap :global(.fc .type-factura.mini-event .fc-event-title),
+.calendarWrap :global(.fc .type-factura .defaultEventText),
+.calendarWrap :global(.fc .type-factura .rentEventText) {
+  color: #1f1a17 !important;
+}
+
+/* Reglas finales por tipo visual (no dependen de estado) */
+.calendarWrap :global(.fc .kind-regular) {
+  background: #f0eae4 !important;
+  border: 2px solid #b85c6e !important;
+  color: #1f1a17 !important;
+}
+
+.calendarWrap :global(.fc .kind-factura) {
+  background: #f0eae4 !important;
+  border: 2px solid #8b1a2f !important;
+  color: #1f1a17 !important;
+}
+
+.calendarWrap :global(.fc .kind-regular .fc-event-title),
+.calendarWrap :global(.fc .kind-regular .defaultEventText),
+.calendarWrap :global(.fc .kind-regular .rentEventText),
+.calendarWrap :global(.fc .kind-factura .fc-event-title),
+.calendarWrap :global(.fc .kind-factura .defaultEventText),
+.calendarWrap :global(.fc .kind-factura .rentEventText) {
+  color: #1f1a17 !important;
+}
+
+.calendarWrap :global(.fc .kind-regular .fc-event-main),
+.calendarWrap :global(.fc .kind-factura .fc-event-main),
+.calendarWrap :global(.fc .kind-regular .fc-event-main-frame),
+.calendarWrap :global(.fc .kind-factura .fc-event-main-frame),
+.calendarWrap :global(.fc .kind-regular *),
+.calendarWrap :global(.fc .kind-factura *) {
+  color: #1f1a17 !important;
 }
 
 .emptyText {
@@ -389,43 +507,71 @@
   width: min(100%, 390px);
   border-radius: 8px;
   background: #f0eae4;
-  border: 2px solid #8b1a2f;
+  border: 2px solid #b85c6e;
   box-shadow: 0 18px 34px rgba(0, 0, 0, 0.28);
-  padding: 1.1rem 1.15rem 1rem;
+  padding: 1.15rem 1.15rem 1rem;
+}
+
+.modalRegular {
+  border-color: #b85c6e;
+}
+
+.modalFactura {
+  border-color: #8b1a2f;
+}
+
+.modalHeader {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+  margin-left: 0;
+  padding-right: 6.25rem;
+  justify-content: flex-start;
 }
 
 .modalClose {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.65rem;
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
   border: none;
-  border-radius: 50%;
-  background: #8b1a2f;
-  color: #f0eae4;
-  font-family: "Poppins", sans-serif;
-  font-size: 16px;
-  line-height: 1;
+  background: transparent;
   cursor: pointer;
+  margin-left: -10px;
+}
+
+.modalBackIcon {
+  width: 30px;
+  height: 30px;
+  color: #8b1a2f;
 }
 
 .modalType {
-  margin: 0 2.2rem 0.35rem 0;
+  position: absolute;
+  top: 1.1rem;
+  right: 1.15rem;
+  margin: 0;
   color: #8b1a2f;
   font-family: "Poppins", sans-serif;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
+  text-align: right;
 }
 
 .modalTitle {
-  margin: 0 2.2rem 0.85rem 0;
+  margin: 0;
   color: #1f1a17;
   font-family: var(--font-montserrat), sans-serif;
   font-size: 21px;
   font-weight: 800;
   line-height: 1.15;
+  text-align: left;
+  justify-self: start;
 }
 
 .modalDetails {
@@ -458,7 +604,7 @@
 
 @media (max-width: 900px) {
   .panel {
-    width: min(100%, 650px);
+    width: min(100%, 840px);
   }
 
   .monthTitle {
@@ -467,12 +613,19 @@
 }
 
 @media (max-width: 640px) {
+  .calendarWrap {
+    --mobile-day-gap: 4px;
+  }
   .title {
     font-size: 22px;
   }
 
   .monthTitle {
     font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
   }
 
   .backLink {
@@ -480,9 +633,54 @@
   }
 
   .calendarHead {
-    width: 100%;
+    width: min(100%, 360px);
     grid-template-columns: 24px minmax(0, 1fr) 24px;
     column-gap: 0.45rem;
+    min-height: 34px;
+    align-items: center;
+    margin-inline: auto;
+  }
+
+  .navBtn {
+    width: 24px;
+    height: 24px;
+    align-self: center;
+  }
+
+  .panel {
+    width: min(100%, 1000px);
+  }
+
+  .content {
+    width: 99%;
+    padding: 1.2rem 0.55rem 1.8rem;
+  }
+
+  .calendarCard {
+    min-height: auto;
+    padding: 1.1rem 0.6rem 0.9rem;
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: thin;
+    scrollbar-color: #8b1a2f transparent;
+  }
+
+  .calendarCard::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .calendarCard::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .calendarCard::-webkit-scrollbar-thumb {
+    background: #8b1a2f;
+    border-radius: 999px;
+  }
+
+  .calendarWrap {
+    width: 840px;
+    min-width: 840px;
   }
 
   .calendarWrap :global(.fc .fc-col-header-cell-cushion) {
@@ -491,24 +689,35 @@
   }
 
   .calendarWrap :global(.fc .fc-daygrid-day-frame) {
-    min-height: 84px;
-    height: 84px;
+    min-height: 124px;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    margin: 0;
+    width: 100%;
   }
 
   .calendarWrap :global(.fc .fc-daygrid-day) {
-    height: 88px;
+    padding: var(--mobile-day-gap);
+    box-sizing: border-box;
+  }
+
+  .calendarWrap :global(.fc .fc-daygrid-day) {
+    height: auto;
   }
 
   .calendarWrap :global(.fc .fc-daygrid-day-events) {
-    left: 1px;
-    right: 1px;
-    top: 28px;
-    bottom: 3px;
+    left: 4px;
+    right: 4px;
+    top: 26px;
+    bottom: 6px;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .calendarWrap :global(.fc .fc-daygrid-event) {
-    margin: 0 !important;
-    height: 18px;
+    margin: 1px 0 !important;
+    min-height: 20px;
+    height: 20px;
     min-width: 0;
     max-width: 100%;
     overflow: hidden;
@@ -533,7 +742,7 @@
 
   .defaultEventText {
     padding: 0 0.2rem;
-    text-align: center;
+    text-align: left;
   }
 
   .rentEventText {
