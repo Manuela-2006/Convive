@@ -156,6 +156,20 @@
   padding: 0.65rem 0.75rem;
 }
 
+.shoppingCard {
+  max-height: 200px;
+  height: auto;
+}
+
+.shoppingCard {
+  display: flex;
+  flex-direction: column;
+}
+
+.fundsCard {
+  height: auto;
+}
+
 .whiteTitle {
   margin: 0;
   color: #8b1a2f;
@@ -191,9 +205,34 @@
   margin-top: 0.45rem;
   display: grid;
   gap: 0.28rem;
-  max-height: 142px;
+  flex: 1;
+  min-height: 0;
+  max-height: 128px;
   overflow-y: auto;
   padding-right: 0.2rem;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.shoppingList:hover {
+  scrollbar-color: #8b1a2f transparent;
+}
+
+.shoppingList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.shoppingList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shoppingList::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 999px;
+}
+
+.shoppingList:hover::-webkit-scrollbar-thumb {
+  background: #8b1a2f;
 }
 
 .shoppingItem {
@@ -509,6 +548,15 @@
 
   .gridTwo {
     grid-template-columns: 1fr;
+  }
+
+  .shoppingCard,
+  .fundsCard {
+    height: auto;
+  }
+
+  .shoppingList {
+    max-height: 162px;
   }
 }
 

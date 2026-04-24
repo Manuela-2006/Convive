@@ -280,7 +280,7 @@ export function AreaGrupalScreen({
           {errorMessage ? <p className={styles.feedbackMessage}>{errorMessage}</p> : null}
 
           <div className={styles.gridTwo}>
-            <Card className={styles.whiteCard}>
+            <Card className={`${styles.whiteCard} ${styles.shoppingCard}`}>
               <div className={styles.listHeader}>
                 <h3 className={styles.whiteTitle}>Lista de la compra</h3>
                 <button
@@ -349,7 +349,7 @@ export function AreaGrupalScreen({
               </div>
             </Card>
 
-            <Card className={styles.whiteCard}>
+            <Card className={`${styles.whiteCard} ${styles.fundsCard}`}>
               <h3 className={styles.whiteTitle}>Fondos compartidos</h3>
               <div className={styles.moneyRows}>
                 <p>

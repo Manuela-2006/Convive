@@ -157,9 +157,13 @@
   padding-right: 0;
   gap: 0.32rem;
   scrollbar-width: thin;
-  scrollbar-color: #8b1a2f transparent;
+  scrollbar-color: transparent transparent;
   scrollbar-gutter: stable;
   margin-right: -0.08rem;
+}
+
+.debtsRows:hover {
+  scrollbar-color: #8b1a2f transparent;
 }
 
 .debtsRows .row {
@@ -176,8 +180,12 @@
 }
 
 .debtsRows::-webkit-scrollbar-thumb {
-  background: #8b1a2f;
+  background: transparent;
   border-radius: 999px;
+}
+
+.debtsRows:hover::-webkit-scrollbar-thumb {
+  background: #8b1a2f;
 }
 
 .debtsRows::-webkit-scrollbar-button {
