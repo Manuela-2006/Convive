@@ -188,11 +188,16 @@
 
 .clearListButton {
   border: none;
-  background: transparent;
-  color: #8b1a2f;
+  border-radius: 10px;
+  background: #be6f8b;
+  color: #f0eae4;
+  min-height: 30px;
+  padding: 0.35rem 0.75rem;
   font-family: "Poppins", sans-serif;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: normal;
+  white-space: nowrap;
   cursor: pointer;
 }
 
