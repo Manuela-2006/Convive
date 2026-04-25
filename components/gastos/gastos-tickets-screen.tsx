@@ -145,21 +145,19 @@ export function GastosTicketsScreen({
                             <p className={styles.ticketAmount}>
                               {formatCurrency(ticket.total_amount, ticket.currency)}
                             </p>
-                            {ticket.ticket_file_path ? (
-                              <SecureDocumentViewer
-                                label="Ver ticket"
-                                title="Ticket"
-                                buttonClassName={styles.ticketButton}
-                                loadSignedUrl={() =>
-                                  getTicketDocumentSignedUrlAction({
-                                    houseCode,
-                                    ticketId: ticket.ticket_id,
-                                  })
-                                }
-                              />
-                            ) : (
-                              <span className={styles.ticketButton}>Ver ticket</span>
-                            )}
+                            <SecureDocumentViewer
+                              label="Ver ticket"
+                              title="Ticket"
+                              buttonClassName={styles.ticketButton}
+                              documentAvailable={!!ticket.ticket_file_path}
+                              emptyMessage="No hay ticket subido para este gasto."
+                              loadSignedUrl={() =>
+                                getTicketDocumentSignedUrlAction({
+                                  houseCode,
+                                  ticketId: ticket.ticket_id,
+                                })
+                              }
+                            />
                           </div>
                         );
                       })}

@@ -188,23 +188,19 @@ export function FacturasHistoryScreen({
                                 invoice.currency
                               )}
                             </p>
-                            {invoice.invoice_file_path ? (
-                              <SecureDocumentViewer
-                                label="Ver factura"
-                                title="Factura"
-                                buttonClassName={`convive-button ${styles.actionButton}`}
-                                loadSignedUrl={() =>
-                                  getInvoiceDocumentSignedUrlAction({
-                                    houseCode,
-                                    expenseId: invoice.expense_id,
-                                  })
-                                }
-                              />
-                            ) : (
-                              <Button className={styles.actionButton} disabled>
-                                Ver factura
-                              </Button>
-                            )}
+                            <SecureDocumentViewer
+                              label="Ver factura"
+                              title="Factura"
+                              buttonClassName={`convive-button ${styles.actionButton}`}
+                              documentAvailable={!!invoice.invoice_file_path}
+                              emptyMessage="No hay factura subida para este gasto."
+                              loadSignedUrl={() =>
+                                getInvoiceDocumentSignedUrlAction({
+                                  houseCode,
+                                  expenseId: invoice.expense_id,
+                                })
+                              }
+                            />
                             {canMarkPaid ? (
                               <Button
                                 className={styles.actionButton}

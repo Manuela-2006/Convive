@@ -8,16 +8,18 @@
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(20, 18, 16, 0.72);
+  background: rgba(20, 18, 16, 0.78);
+  pointer-events: auto;
 }
 
 .modal {
   width: min(900px, 100%);
+  min-height: 240px;
   max-height: min(86vh, 900px);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.24);
@@ -59,9 +61,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 220px;
   max-height: calc(86vh - 64px);
   padding: 16px;
   overflow: auto;
+  background: #fffaf2;
 }
 
 .image {
@@ -71,6 +75,23 @@
   height: auto;
   max-height: calc(86vh - 96px);
   object-fit: contain;
+}
+
+.emptyWrap {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: #fffaf2;
+}
+
+.emptyMessage {
+  margin: 0;
+  color: #4a2a23;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 @media (max-width: 640px) {
