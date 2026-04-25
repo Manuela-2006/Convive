@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { getTicketDocumentSignedUrlAction } from "../../app/backend/endpoints/gastos/actions";
 import { Card } from "../ui/card";
 import type {
   ExpenseTicket,
@@ -12,8 +13,8 @@ import type {
 import {
   formatCurrency,
   formatShortDate,
-  resolveTicketFileUrl,
 } from "../../lib/dashboard-presenters";
+import { SecureDocumentViewer } from "../ui/secure-document-viewer";
 import {
   Tooltip,
   TooltipContent,
@@ -107,8 +108,6 @@ export function GastosScreen({
             <Card className={`${styles.innerPaper} ${styles.ticketsPaper}`}>
               {visibleTickets.length ? (
                 visibleTickets.map((ticket) => {
-                  const ticketFileUrl = resolveTicketFileUrl(ticket.ticket_file_path);
-
                   return (
                     <div key={ticket.ticket_id} className={styles.innerRow}>
                       <div className={styles.leftInfo}>
@@ -126,23 +125,19 @@ export function GastosScreen({
                       <p className={styles.amount}>
                         {formatCurrency(ticket.total_amount, ticket.currency)}
                       </p>
-                      {ticketFileUrl ? (
-                        <a
-                          href={ticketFileUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className={`convive-button ${styles.actionButton}`}
-                        >
-                          Ver ticket
-                        </a>
-                      ) : (
-                        <Link
-                          href={`${basePath}/gastos/tickets`}
-                          className={`convive-button ${styles.actionButton}`}
-                        >
-                          Ver ticket
-                        </Link>
-                      )}
+                      <SecureDocumentViewer
+                        label="Ver ticket"
+                        title="Ticket"
+                        buttonClassName={`convive-button ${styles.actionButton}`}
+                        documentAvailable={!!ticket.ticket_file_path}
+                        emptyMessage="No hay ticket subido para este gasto."
+                        loadSignedUrl={() =>
+                          getTicketDocumentSignedUrlAction({
+                            houseCode,
+                            ticketId: ticket.ticket_id,
+                          })
+                        }
+                      />
                     </div>
                   );
                 })

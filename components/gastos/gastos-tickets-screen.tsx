@@ -3,14 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { getTicketDocumentSignedUrlAction } from "../../app/backend/endpoints/gastos/actions";
 import { Card } from "../ui/card";
 import type { ExpenseTicket } from "../../lib/dashboard-types";
 import {
   formatCurrency,
   formatMonthLabel,
   formatShortDate,
-  resolveTicketFileUrl,
 } from "../../lib/dashboard-presenters";
+import { SecureDocumentViewer } from "../ui/secure-document-viewer";
 import styles from "./gastos-tickets-screen.module.css";
 
 type GastosTicketsScreenProps = {
@@ -122,8 +123,6 @@ export function GastosTicketsScreen({
                     <h3 className={styles.monthTitle}>{group.month}</h3>
                     <div className={styles.monthRows}>
                       {group.rows.map((ticket) => {
-                        const ticketFileUrl = resolveTicketFileUrl(ticket.ticket_file_path);
-
                         return (
                           <div className={styles.ticketRow} key={ticket.ticket_id}>
                             <div className={styles.ticketLeft}>
@@ -146,18 +145,19 @@ export function GastosTicketsScreen({
                             <p className={styles.ticketAmount}>
                               {formatCurrency(ticket.total_amount, ticket.currency)}
                             </p>
-                            {ticketFileUrl ? (
-                              <a
-                                href={ticketFileUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className={styles.ticketButton}
-                              >
-                                Ver ticket
-                              </a>
-                            ) : (
-                              <span className={styles.ticketButton}>Ver ticket</span>
-                            )}
+                            <SecureDocumentViewer
+                              label="Ver ticket"
+                              title="Ticket"
+                              buttonClassName={styles.ticketButton}
+                              documentAvailable={!!ticket.ticket_file_path}
+                              emptyMessage="No hay ticket subido para este gasto."
+                              loadSignedUrl={() =>
+                                getTicketDocumentSignedUrlAction({
+                                  houseCode,
+                                  ticketId: ticket.ticket_id,
+                                })
+                              }
+                            />
                           </div>
                         );
                       })}

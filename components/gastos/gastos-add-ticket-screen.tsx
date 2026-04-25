@@ -7,6 +7,7 @@ import { useState, useTransition } from "react";
 
 import { createPendingTicketExpenseAction } from "../../app/backend/endpoints/gastos/actions";
 import type { AddExpenseFormOptions } from "../../lib/dashboard-types";
+import { fileToDocumentUploadPayload } from "../../lib/document-upload-client";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import { Card } from "../ui/card";
@@ -138,6 +139,7 @@ export function GastosAddTicketScreen({
   const [detectedItemNames, setDetectedItemNames] = useState<string[]>([]);
   const [selectedItemNames, setSelectedItemNames] = useState<string[]>([]);
   const [manualItemName, setManualItemName] = useState("");
+  const [selectedDocumentFile, setSelectedDocumentFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
 
@@ -192,6 +194,7 @@ export function GastosAddTicketScreen({
     setDetectedItemNames([]);
     setSelectedItemNames([]);
     setManualItemName("");
+    setSelectedDocumentFile(null);
     setErrorMessage(null);
     setScanMessage(null);
   };
@@ -235,6 +238,19 @@ export function GastosAddTicketScreen({
     setErrorMessage(null);
 
     startTransition(async () => {
+      let document = null;
+
+      if (selectedDocumentFile) {
+        try {
+          document = await fileToDocumentUploadPayload(selectedDocumentFile);
+        } catch (error) {
+          setErrorMessage(
+            error instanceof Error ? error.message : "No se pudo preparar el archivo."
+          );
+          return;
+        }
+      }
+
       const result = await createPendingTicketExpenseAction({
         houseCode,
         dashboardPath: basePath,
@@ -247,6 +263,7 @@ export function GastosAddTicketScreen({
         participantProfileIds: selectedParticipantIds,
         notes,
         paidByProfileId,
+        document,
       });
 
       if (result.success) {
@@ -360,6 +377,7 @@ export function GastosAddTicketScreen({
               <h3 className={styles.blockTitle}>1 - Completa los datos del ticket</h3>
               <TicketUploader
                 onScanComplete={handleScanComplete}
+                onFileSelected={setSelectedDocumentFile}
                 className={styles.uploadBox}
                 minHeight={190}
                 scanMode="vision"

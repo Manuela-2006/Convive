@@ -305,12 +305,9 @@ export function AreaGrupalScreen({
                           <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogTitle>Eliminar participante</AlertDialogTitle>
-                              <AlertDialogDescription className={styles.removeDescription}>
-                                Esta acción sacará a{" "}
-                                <span className={styles.removeMemberName}>
-                                  {member.display_name}
-                                </span>{" "}
-                                del piso sin borrar su historial. ¿Quieres continuar?
+                              <AlertDialogDescription>
+                                Esta acción sacará a {member.display_name} del piso sin borrar
+                                su historial. ¿Quieres continuar?
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

@@ -4,7 +4,10 @@ import { useState } from "react";
 import Tesseract from "tesseract.js";
 
 import type { TicketScannerData } from "../lib/ticket-scanner-types";
-import { SCANNER_ALLOWED_MEDIA_TYPES } from "../lib/ticket-scanner-types";
+import {
+  DOCUMENT_MAX_FILE_SIZE_BYTES,
+  SCANNER_ALLOWED_MEDIA_TYPES,
+} from "../lib/ticket-scanner-types";
 
 type UseTicketScannerReturn = {
   scanning: boolean;
@@ -14,8 +17,6 @@ type UseTicketScannerReturn = {
 };
 
 export type TicketScanMode = "ocr" | "vision";
-
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 type UseTicketScannerOptions = {
   scanMode?: TicketScanMode;
@@ -53,15 +54,15 @@ export function useTicketScanner({
     try {
       const allowedTypes = new Set<string>(SCANNER_ALLOWED_MEDIA_TYPES);
       if (!allowedTypes.has(file.type)) {
-        throw new Error("Formato no soportado. Usa JPG, PNG, WEBP o PDF.");
+        throw new Error("Formato no soportado. Usa JPG, PNG o WEBP.");
       }
 
-      if (file.size > MAX_FILE_SIZE_BYTES) {
+      if (file.size > DOCUMENT_MAX_FILE_SIZE_BYTES) {
         throw new Error("El archivo es demasiado grande. Maximo 10MB.");
       }
 
       const shouldUseVisionDirect =
-        scanMode === "vision" && file.type !== "application/pdf";
+        scanMode === "vision";
       let extractedText = "";
 
       if (!shouldUseVisionDirect) {

@@ -7,6 +7,7 @@ import { useState, useTransition } from "react";
 
 import { createPendingInvoiceExpenseAction } from "../../app/backend/endpoints/facturas/actions";
 import type { AddInvoiceFormOptions } from "../../lib/dashboard-types";
+import { fileToDocumentUploadPayload } from "../../lib/document-upload-client";
 import type {
   TicketScannerCategory,
   TicketScannerData,
@@ -130,6 +131,7 @@ export function FacturasAddScreen({
   const [selectedParticipantIds, setSelectedParticipantIds] = useState<string[]>(
     formOptions.members.map((member) => member.profile_id)
   );
+  const [selectedDocumentFile, setSelectedDocumentFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
   const basePath = dashboardPath;
@@ -180,6 +182,7 @@ export function FacturasAddScreen({
     setSelectedParticipantIds(
       formOptions.members.map((member) => member.profile_id)
     );
+    setSelectedDocumentFile(null);
     setErrorMessage(null);
     setScanMessage(null);
   };
@@ -227,6 +230,19 @@ export function FacturasAddScreen({
     setErrorMessage(null);
 
     startTransition(async () => {
+      let document = null;
+
+      if (selectedDocumentFile) {
+        try {
+          document = await fileToDocumentUploadPayload(selectedDocumentFile);
+        } catch (error) {
+          setErrorMessage(
+            error instanceof Error ? error.message : "No se pudo preparar el archivo."
+          );
+          return;
+        }
+      }
+
       const result = await createPendingInvoiceExpenseAction({
         houseCode,
         dashboardPath: basePath,
@@ -239,6 +255,7 @@ export function FacturasAddScreen({
         notes: notes.trim() ? notes : null,
         paidByProfileId: null,
         invoiceFilePath: null,
+        document,
       });
 
       if (result.success) {
@@ -323,6 +340,7 @@ export function FacturasAddScreen({
               <h3 className={styles.blockTitle}>1 - Adjunta la factura</h3>
               <TicketUploader
                 onScanComplete={handleScanComplete}
+                onFileSelected={setSelectedDocumentFile}
                 className={styles.uploadBox}
                 minHeight={190}
               />

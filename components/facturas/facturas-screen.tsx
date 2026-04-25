@@ -5,7 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { adminMarkInvoicePaidAction } from "../../app/backend/endpoints/facturas/actions";
+import {
+  adminMarkInvoicePaidAction,
+  getInvoiceDocumentSignedUrlAction,
+} from "../../app/backend/endpoints/facturas/actions";
 import {
   formatCurrency,
   formatShortDate,
@@ -13,6 +16,7 @@ import {
 import type { InvoiceCategorySection } from "../../lib/dashboard-types";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
+import { SecureDocumentViewer } from "../ui/secure-document-viewer";
 import {
   Tooltip,
   TooltipContent,
@@ -27,18 +31,6 @@ type FacturasScreenProps = {
   sections?: InvoiceCategorySection[];
   canMarkInvoicesPaid?: boolean;
 };
-
-function resolveInvoiceHref(filePath: string | null) {
-  if (!filePath) {
-    return null;
-  }
-
-  if (filePath.startsWith("http") || filePath.startsWith("/")) {
-    return filePath;
-  }
-
-  return null;
-}
 
 export function FacturasScreen({
   houseCode,
@@ -154,9 +146,6 @@ export function FacturasScreen({
                 >
                   {section.invoices.length ? (
                     section.invoices.map((invoice) => {
-                      const invoiceHref = resolveInvoiceHref(
-                        invoice.invoice_file_path
-                      );
                       const canMarkPaid =
                         canMarkInvoicesPaid && invoice.can_mark_paid;
 
@@ -182,20 +171,19 @@ export function FacturasScreen({
                               invoice.currency
                             )}
                           </p>
-                          {invoiceHref ? (
-                            <Link
-                              href={invoiceHref}
-                              className={`convive-button ${styles.actionButton}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              Ver factura
-                            </Link>
-                          ) : (
-                            <Button className={styles.actionButton} disabled>
-                              Ver factura
-                            </Button>
-                          )}
+                          <SecureDocumentViewer
+                            label="Ver factura"
+                            title="Factura"
+                            buttonClassName={`convive-button ${styles.actionButton}`}
+                            documentAvailable={!!invoice.invoice_file_path}
+                            emptyMessage="No hay factura subida para este gasto."
+                            loadSignedUrl={() =>
+                              getInvoiceDocumentSignedUrlAction({
+                                houseCode,
+                                expenseId: invoice.expense_id,
+                              })
+                            }
+                          />
                           {canMarkPaid ? (
                             <Button
                               className={styles.actionButton}

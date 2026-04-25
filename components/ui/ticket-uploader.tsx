@@ -5,10 +5,15 @@ import { useRef, useState } from "react";
 
 import { useTicketScanner, type TicketScanMode } from "../../hooks/use-ticket-scanner";
 import type { TicketScannerData } from "../../lib/ticket-scanner-types";
+import {
+  DOCUMENT_MAX_FILE_SIZE_BYTES,
+  SCANNER_ALLOWED_MEDIA_TYPES,
+} from "../../lib/ticket-scanner-types";
 import styles from "./ticket-uploader.module.css";
 
 type TicketUploaderProps = {
   onScanComplete: (data: TicketScannerData) => void;
+  onFileSelected?: (file: File | null) => void;
   className?: string;
   iconSrc?: string;
   iconAlt?: string;
@@ -18,6 +23,7 @@ type TicketUploaderProps = {
 
 export function TicketUploader({
   onScanComplete,
+  onFileSelected,
   className,
   iconSrc = "/iconos/Escanearimagen.svg",
   iconAlt = "Subir archivo",
@@ -30,12 +36,17 @@ export function TicketUploader({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File) => {
-    if (file.type !== "application/pdf") {
-      const previewUrl = URL.createObjectURL(file);
-      setPreview(previewUrl);
-    } else {
+    const allowedTypes = new Set<string>(SCANNER_ALLOWED_MEDIA_TYPES);
+    if (!allowedTypes.has(file.type) || file.size > DOCUMENT_MAX_FILE_SIZE_BYTES) {
+      onFileSelected?.(null);
       setPreview(null);
+      await scanFile(file);
+      return;
     }
+
+    onFileSelected?.(file);
+    const previewUrl = URL.createObjectURL(file);
+    setPreview(previewUrl);
 
     const data = await scanFile(file);
     if (data) {
@@ -92,7 +103,7 @@ export function TicketUploader({
             ) : (
               <>
                 <p className={styles.dropTitle}>Sube o arrastra ticket/factura</p>
-                <p className={styles.dropMeta}>JPG, PNG, WEBP o PDF · Max 10MB</p>
+                <p className={styles.dropMeta}>JPG, PNG o WEBP - Max 10MB</p>
               </>
             )}
           </div>
@@ -106,6 +117,7 @@ export function TicketUploader({
               className={styles.previewClose}
               onClick={() => {
                 setPreview(null);
+                onFileSelected?.(null);
                 if (inputRef.current) {
                   inputRef.current.value = "";
                 }
@@ -130,7 +142,7 @@ export function TicketUploader({
                 : "Extrayendo texto del documento..."
               : progress < 90
                 ? "Interpretando datos con IA..."
-                : "Guardando imagen..."}
+                : "Preparando documento..."}
           </p>
         </div>
       ) : null}
@@ -140,7 +152,7 @@ export function TicketUploader({
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
+        accept="image/jpeg,image/jpg,image/png,image/webp"
         style={{ display: "none" }}
         onChange={(event) => {
           const file = event.target.files?.[0];
