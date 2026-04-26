@@ -21,7 +21,6 @@ type AuthPayload = {
 type SignUpPayload = AuthPayload & {
   firstName: string;
   lastName: string;
-  monthlyRent: string;
 };
 
 type UpdateProfileSettingsInput = {
@@ -68,15 +67,13 @@ export async function signUpWithEmail({
   password,
   firstName,
   lastName,
-  monthlyRent,
 }: SignUpPayload) {
   const supabase = await createClient();
   const trimmedFirstName = firstName.trim();
   const trimmedLastName = lastName.trim();
-  const trimmedMonthlyRent = monthlyRent.trim();
 
-  if (!trimmedFirstName || !trimmedLastName || !trimmedMonthlyRent) {
-    return { error: "Nombre, apellidos y alquiler mensual son obligatorios." };
+  if (!trimmedFirstName || !trimmedLastName) {
+    return { error: "Nombre y apellidos son obligatorios." };
   }
 
   const fullName = `${trimmedFirstName} ${trimmedLastName}`.trim();
@@ -87,7 +84,6 @@ export async function signUpWithEmail({
     options: {
       data: {
         full_name: fullName,
-        monthly_rent: trimmedMonthlyRent,
       },
     },
   });

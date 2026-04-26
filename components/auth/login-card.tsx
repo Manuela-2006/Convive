@@ -36,10 +36,6 @@ const registerSchema = z
   .object({
     firstName: z.string().trim().min(1, "El nombre es obligatorio"),
     lastName: z.string().trim().min(1, "Los apellidos son obligatorios"),
-    monthlyRent: z
-      .string()
-      .trim()
-      .min(1, "El alquiler mensual es obligatorio"),
     email: z
       .string()
       .min(1, "El correo es obligatorio")
@@ -109,7 +105,6 @@ export function LoginCard({
     defaultValues: {
       firstName: "",
       lastName: "",
-      monthlyRent: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -191,7 +186,6 @@ export function LoginCard({
       const result = await signUpWithEmail({
         firstName: values.firstName,
         lastName: values.lastName,
-        monthlyRent: values.monthlyRent,
         email: values.email,
         password: values.password,
       });
@@ -404,24 +398,6 @@ export function LoginCard({
               onSubmit={loginForm.handleSubmit(onLoginSubmit)}
               noValidate
             >
-              <div className={styles.field}>
-                <div className={styles.inputWrap}>
-                  <Input
-                    type="text"
-                    inputMode="decimal"
-                    className={styles.input}
-                    placeholder="Alquiler mensual"
-                    disabled={isPending}
-                    {...registerForm.register("monthlyRent")}
-                  />
-                </div>
-                {registerForm.formState.errors.monthlyRent ? (
-                  <p className={styles.error}>
-                    {registerForm.formState.errors.monthlyRent.message}
-                  </p>
-                ) : null}
-              </div>
-
               <div className={styles.field}>
                 <div className={styles.inputWrap}>
                   <Image
