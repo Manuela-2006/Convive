@@ -15,6 +15,52 @@ function asNumber(value: number | string) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function normalizeText(value: string | null | undefined) {
+  return (value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function resolveComparadorCategoria(rawCategoria: string | null | undefined) {
+  const categoria = normalizeText(rawCategoria);
+
+  if (!categoria) {
+    return "otro" as const;
+  }
+
+  if (
+    categoria === "luz" ||
+    categoria === "electricity" ||
+    categoria === "electricidad" ||
+    categoria === "power" ||
+    categoria.includes("luz") ||
+    categoria.includes("elect")
+  ) {
+    return "luz" as const;
+  }
+
+  if (
+    categoria === "agua" ||
+    categoria === "water" ||
+    categoria.includes("agua")
+  ) {
+    return "agua" as const;
+  }
+
+  if (
+    categoria === "wifi" ||
+    categoria === "internet" ||
+    categoria.includes("wifi") ||
+    categoria.includes("internet")
+  ) {
+    return "wifi" as const;
+  }
+
+  return "otro" as const;
+}
+
 export async function getFacturasActivasByPiso(
   houseCode: string
 ): Promise<FacturaEscenario[]> {
@@ -37,7 +83,6 @@ export async function getFacturasByCategoria(
 ): Promise<FacturaEscenario[]> {
   const facturas = await getFacturasActivasByPiso(houseCode);
   return facturas
-    .filter((item) => item.categoria.toLowerCase() === categoria)
+    .filter((item) => resolveComparadorCategoria(item.categoria) === categoria)
     .slice(0, 6);
 }
-

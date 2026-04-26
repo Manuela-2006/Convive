@@ -112,6 +112,19 @@
   line-height: 1;
 }
 
+.buttonWithIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.buttonInlineIcon {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  filter: brightness(0) saturate(100%) invert(100%);
+}
+
 .helperText {
   margin-top: 0.55rem;
   font-size: 13px;
@@ -133,13 +146,92 @@
 
 .simulationText {
   margin: 0;
-  white-space: pre-wrap;
   font-family: "Poppins", sans-serif;
   font-size: 13px;
   color: #2d2a28;
   line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
   max-height: 260px;
   overflow: auto;
+  padding-right: 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: #8b1a2f transparent;
+}
+
+.simulationText::-webkit-scrollbar {
+  width: 12px;
+}
+
+.simulationText::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.simulationText::-webkit-scrollbar-thumb {
+  background: #8b1a2f;
+  border-radius: 999px;
+  border: none;
+}
+
+.simulationText::-webkit-scrollbar-thumb:hover {
+  background: #741528;
+}
+
+.simulationText::-webkit-scrollbar-button {
+  background-color: #8b1a2f;
+  height: 10px;
+}
+
+.simulationTitleLine {
+  margin: 0.2rem 0 0;
+  font-family: "Montserrat", var(--font-montserrat), "Poppins", sans-serif !important;
+  font-size: 16px;
+  font-weight: 500 !important;
+  color: #8b1a2f;
+  line-height: 1.35;
+}
+
+.simulationLine {
+  margin: 0.14rem 0 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #2d2a28;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.simulationInlineBold {
+  font-weight: 600;
+}
+
+.simulationBulletWithIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.simulationBulletIcon {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  filter: brightness(0) saturate(100%) invert(16%) sepia(45%) saturate(2868%) hue-rotate(330deg) brightness(89%) contrast(93%);
+}
+
+.simulationPlusLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.simulationPlusSign {
+  color: #b85c6e;
+  font-weight: 700;
+}
+
+.simulationLineSpacer {
+  height: 0.5rem;
 }
 
 .maroonCard {
@@ -229,7 +321,7 @@
 .compareRow strong {
   color: #8b1a2f;
   font-family: "Poppins", sans-serif;
-  font-size: 38px;
+  font-size: 20px;
   line-height: 1;
 }
 
@@ -248,16 +340,26 @@
   align-items: start;
 }
 
+.vendorLeft div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.04rem;
+}
+
 .vendorLeft p {
   margin: 0;
   color: #1f1a17;
   font-family: "Poppins", sans-serif;
   font-size: 13px;
+  line-height: 1.15;
 }
 
 .vendorLeft small {
+  display: block;
+  margin: 0;
   color: #5a5652;
   font-size: 10px;
+  line-height: 1.1;
 }
 
 .priceRight {
@@ -284,6 +386,100 @@
   opacity: 0.9;
 }
 
+.cambioModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.46);
+  padding: 1rem;
+}
+
+.cambioModal {
+  width: min(100%, 660px);
+  border-radius: 12px;
+  border: 1px solid rgba(139, 26, 47, 0.28);
+  background: #f0ebe6;
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.28);
+  padding: 1rem;
+}
+
+.cambioModalTitle {
+  margin: 0;
+  color: #8b1a2f;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.cambioModalText {
+  margin: 0.45rem 0 0;
+  color: #2d2a28;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.cambioModalTextarea {
+  width: 100%;
+  margin-top: 0.6rem;
+  border-radius: 8px;
+  border: 1.5px solid rgba(139, 26, 47, 0.45);
+  background: #f8f3ef;
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  padding: 0.65rem 0.75rem;
+  resize: vertical;
+  min-height: 110px;
+}
+
+.cambioModalTextarea:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.cambioModalActions {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.cambioModalButtonGhost,
+.cambioModalButtonPrimary {
+  border-radius: 8px;
+  padding: 0.45rem 0.8rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.cambioModalButtonGhost {
+  background: transparent;
+  color: #8b1a2f;
+  border: 1.5px solid rgba(139, 26, 47, 0.6);
+}
+
+.cambioModalButtonGhost:hover {
+  background: rgba(139, 26, 47, 0.08);
+}
+
+.cambioModalButtonPrimary {
+  background: #be6f8b;
+  color: #f0eae4;
+  border: 1.5px solid #be6f8b;
+}
+
+.cambioModalButtonPrimary:hover {
+  background: #b85c6e;
+  border-color: #b85c6e;
+}
+
 @media (max-width: 900px) {
   .panel {
     width: min(100%, 650px);
@@ -291,5 +487,17 @@
 
   .compareGrid {
     grid-template-columns: 1fr;
+  }
+
+  .cambioModal {
+    padding: 0.9rem;
+  }
+
+  .cambioModalTitle {
+    font-size: 24px;
+  }
+
+  .cambioModalTextarea {
+    min-height: 98px;
   }
 }

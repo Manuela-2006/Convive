@@ -403,6 +403,92 @@ function groupInvoicesByCategory(invoices: Invoice[]) {
   return orderInvoiceSections([...sectionsByCategory.values()]);
 }
 
+function canonicalInvoiceCategoryKey(section: {
+  category_id?: string | null;
+  category_name?: string | null;
+  category_slug?: string | null;
+}) {
+  const name = slugifyInvoiceCategory(section.category_name || "");
+  const slug = slugifyInvoiceCategory(section.category_slug || "");
+  const combined = `${name} ${slug}`;
+
+  if (combined.includes("alquiler")) return "alquiler";
+  if (combined.includes("suscrip") || combined.includes("subscription")) return "suscripciones";
+  if (combined.includes("wifi") || combined.includes("internet")) return "wifi";
+  if (combined.includes("agua") || combined.includes("water")) return "agua";
+  if (combined.includes("luz") || combined.includes("elect")) return "luz";
+
+  if (
+    slug &&
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(slug)
+  ) {
+    return slug;
+  }
+
+  if (name) {
+    return name;
+  }
+
+  return slugifyInvoiceCategory(section.category_id || "sin-categoria");
+}
+
+function dedupeInvoiceSections(sections: InvoiceCategorySection[]) {
+  const byCategory = new Map<string, InvoiceCategorySection>();
+
+  for (const section of sections) {
+    const key = canonicalInvoiceCategoryKey(section);
+    const existing = byCategory.get(key);
+
+    if (!existing) {
+      const seen = new Set<string>();
+      const uniqueInvoices = section.invoices.filter((invoice) => {
+        if (seen.has(invoice.expense_id)) return false;
+        seen.add(invoice.expense_id);
+        return true;
+      });
+
+      byCategory.set(key, {
+        ...section,
+        category_slug: key,
+        invoices: uniqueInvoices,
+      });
+      continue;
+    }
+
+    const seen = new Set(existing.invoices.map((invoice) => invoice.expense_id));
+    const mergedInvoices = [...existing.invoices];
+
+    for (const invoice of section.invoices) {
+      if (seen.has(invoice.expense_id)) continue;
+      seen.add(invoice.expense_id);
+      mergedInvoices.push(invoice);
+    }
+
+    byCategory.set(key, {
+      ...existing,
+      invoices: mergedInvoices,
+    });
+  }
+
+  return orderInvoiceSections(Array.from(byCategory.values()));
+}
+
+function dedupeInvoiceCategories(categories: AddInvoiceCategory[]) {
+  const byCategory = new Map<string, AddInvoiceCategory>();
+
+  for (const category of categories) {
+    const key = canonicalInvoiceCategoryKey({
+      category_id: category.category_id,
+      category_name: category.name,
+      category_slug: category.slug,
+    });
+    if (byCategory.has(key)) continue;
+    byCategory.set(key, { ...category, slug: key });
+  }
+
+  return Array.from(byCategory.values());
+}
+
 function readInvoiceSection(
   section: Record<string, unknown>,
   options: { onlyOpen?: boolean } = {}
@@ -975,7 +1061,7 @@ export async function loadHouseInvoicesDashboardWithClient(
 
   if (isRecord(data) && Array.isArray(data.sections)) {
     return {
-      sections: orderInvoiceSections(
+      sections: dedupeInvoiceSections(
         asArray<Record<string, unknown>>(data.sections).map((section) =>
           readInvoiceSection(section, { onlyOpen: true })
         )
@@ -996,7 +1082,7 @@ export async function loadHouseInvoicesDashboardWithClient(
 
     if (categorySections.length) {
       return {
-        sections: orderInvoiceSections(categorySections),
+        sections: dedupeInvoiceSections(categorySections),
       } satisfies InvoicesDashboardData;
     }
   }
@@ -1013,15 +1099,17 @@ export async function loadHouseInvoicesDashboardWithClient(
 
     if (sectionRows.length === rows.length && sectionRows.length > 0) {
       return {
-        sections: orderInvoiceSections(
+        sections: dedupeInvoiceSections(
           sectionRows.map((section) => readInvoiceSection(section, { onlyOpen: true }))
         ),
       } satisfies InvoicesDashboardData;
     }
 
     return {
-      sections: groupInvoicesByCategory(
+      sections: dedupeInvoiceSections(
+        groupInvoicesByCategory(
         rows.map((invoice) => mapInvoice(invoice)).filter(isOpenInvoice)
+        )
       ),
     } satisfies InvoicesDashboardData;
   }
@@ -1058,7 +1146,7 @@ export async function loadHouseInvoicesDashboardWithClient(
     }
 
     return {
-      sections: orderInvoiceSections(sections),
+      sections: dedupeInvoiceSections(sections),
     } satisfies InvoicesDashboardData;
   }
 
@@ -1404,13 +1492,15 @@ export async function loadAddInvoiceFormOptionsWithClient(
   }
 
   return {
-    categories: [
-      ...asArray<Record<string, unknown>>(
-        data.categories ?? data.invoice_categories
-      ),
-      ...asArray<Record<string, unknown>>(data.global_categories),
-      ...asArray<Record<string, unknown>>(data.custom_categories),
-    ].map(mapInvoiceCategory),
+    categories: dedupeInvoiceCategories(
+      [
+        ...asArray<Record<string, unknown>>(
+          data.categories ?? data.invoice_categories
+        ),
+        ...asArray<Record<string, unknown>>(data.global_categories),
+        ...asArray<Record<string, unknown>>(data.custom_categories),
+      ].map(mapInvoiceCategory)
+    ),
     members: asArray<Record<string, unknown>>(
       data.members ?? data.house_members
     ).map(mapInvoiceMember),

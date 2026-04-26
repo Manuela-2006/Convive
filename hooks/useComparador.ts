@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 type CategoriaComparador = "luz" | "agua" | "wifi";
 
@@ -28,35 +28,38 @@ export function useComparador(pisoId: string) {
   const [data, setData] = useState<ComparadorData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const comparar = async (categoria: CategoriaComparador) => {
-    setLoading(true);
-    setError(null);
-    setData(null);
+  const comparar = useCallback(
+    async (categoria: CategoriaComparador) => {
+      setLoading(true);
+      setError(null);
+      setData(null);
 
-    try {
-      const res = await fetch("/api/comparar-gastos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pisoId, categoria }),
-      });
+      try {
+        const res = await fetch("/api/comparar-gastos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pisoId, categoria }),
+        });
 
-      const payload = (await res.json()) as {
-        success: boolean;
-        data?: ComparadorData;
-        error?: string;
-      };
+        const payload = (await res.json()) as {
+          success: boolean;
+          data?: ComparadorData;
+          error?: string;
+        };
 
-      if (!res.ok || !payload.success) {
-        throw new Error(payload.error || "No se pudo generar la comparativa");
+        if (!res.ok || !payload.success) {
+          throw new Error(payload.error || "No se pudo generar la comparativa");
+        }
+
+        setData(payload.data ?? null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Error desconocido");
+      } finally {
+        setLoading(false);
       }
-
-      setData(payload.data ?? null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [pisoId]
+  );
 
   return { loading, data, error, comparar };
 }

@@ -3,10 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { createPendingInvoiceExpenseAction } from "../../app/backend/endpoints/facturas/actions";
-import type { AddInvoiceFormOptions } from "../../lib/dashboard-types";
+import type { AddInvoiceCategory, AddInvoiceFormOptions } from "../../lib/dashboard-types";
 import { fileToDocumentUploadPayload } from "../../lib/document-upload-client";
 import type {
   TicketScannerCategory,
@@ -72,6 +72,18 @@ function normalizeCategoryKey(value: string) {
     .replace(/\s+/g, "-");
 }
 
+function dedupeInvoiceCategories(categories: AddInvoiceCategory[]) {
+  const byKey = new Map<string, AddInvoiceCategory>();
+
+  for (const category of categories) {
+    const key = normalizeCategoryKey(category.slug || category.name || category.category_id);
+    if (!key || byKey.has(key)) continue;
+    byKey.set(key, category);
+  }
+
+  return Array.from(byKey.values());
+}
+
 function parseScannerDate(value?: string | null): Date | undefined {
   if (!value) return undefined;
   const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(value.trim());
@@ -119,13 +131,17 @@ export function FacturasAddScreen({
   formOptions,
 }: FacturasAddScreenProps) {
   const router = useRouter();
+  const uniqueCategories = useMemo(
+    () => dedupeInvoiceCategories(formOptions.categories),
+    [formOptions.categories]
+  );
   const [isPending, startTransition] = useTransition();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [title, setTitle] = useState("");
   const [totalAmount, setTotalAmount] = useState("");
   const [notes, setNotes] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    formOptions.categories[0]?.category_id ?? null
+    uniqueCategories[0]?.category_id ?? null
   );
   const [manualCategoryName, setManualCategoryName] = useState("");
   const [selectedParticipantIds, setSelectedParticipantIds] = useState<string[]>(
@@ -136,6 +152,15 @@ export function FacturasAddScreen({
   const [scanMessage, setScanMessage] = useState<string | null>(null);
   const basePath = dashboardPath;
   const hasMembers = formOptions.members.length > 0;
+
+  useEffect(() => {
+    setSelectedCategoryId((current) => {
+      if (current && uniqueCategories.some((category) => category.category_id === current)) {
+        return current;
+      }
+      return uniqueCategories[0]?.category_id ?? null;
+    });
+  }, [uniqueCategories]);
 
   const toggleParticipant = (profileId: string) => {
     setSelectedParticipantIds((current) =>
@@ -155,7 +180,7 @@ export function FacturasAddScreen({
       category,
       ...(scannerCategoryFallbacks[category] ?? []),
     ].map(normalizeCategoryKey);
-    const matchedCategory = formOptions.categories.find((option) => {
+    const matchedCategory = uniqueCategories.find((option) => {
       const optionKeys = [
         normalizeCategoryKey(option.slug),
         normalizeCategoryKey(option.name),
@@ -177,7 +202,7 @@ export function FacturasAddScreen({
     setTitle("");
     setTotalAmount("");
     setNotes("");
-    setSelectedCategoryId(formOptions.categories[0]?.category_id ?? null);
+    setSelectedCategoryId(uniqueCategories[0]?.category_id ?? null);
     setManualCategoryName("");
     setSelectedParticipantIds(
       formOptions.members.map((member) => member.profile_id)
@@ -188,7 +213,7 @@ export function FacturasAddScreen({
   };
 
   const handleSaveInvoice = () => {
-    const selectedCategory = formOptions.categories.find(
+    const selectedCategory = uniqueCategories.find(
       (category) => category.category_id === selectedCategoryId
     );
     const normalizedManualCategory =
@@ -349,9 +374,9 @@ export function FacturasAddScreen({
 
             <section className={styles.block}>
               <h3 className={styles.blockTitle}>2 - Elige que tipo de factura es</h3>
-              {formOptions.categories.length ? (
+              {uniqueCategories.length ? (
                 <div className={styles.typesRow}>
-                  {formOptions.categories.map((category) => (
+                  {uniqueCategories.map((category) => (
                     <label key={category.category_id} className={styles.typeItem}>
                       <Checkbox
                         className={styles.checkbox}
@@ -368,7 +393,7 @@ export function FacturasAddScreen({
               ) : (
                 <p className={styles.emptyCopy}>No hay categorias configuradas.</p>
               )}
-              {!formOptions.categories.length && manualCategoryName ? (
+              {!uniqueCategories.length && manualCategoryName ? (
                 <p className={styles.scanMessage}>{manualCategoryName}</p>
               ) : null}
             </section>

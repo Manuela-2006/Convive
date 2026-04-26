@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 
 import {
   adminMarkInvoicePaidAction,
@@ -43,6 +43,80 @@ export function FacturasScreen({
   const [pendingExpenseId, setPendingExpenseId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const basePath = dashboardPath;
+
+  const canonicalCategoryKey = (section: InvoiceCategorySection) => {
+    const normalizedName = `${section.category_name || ""}`
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const normalizedSlug = `${section.category_slug || ""}`
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const combined = `${normalizedName} ${normalizedSlug}`;
+
+    if (combined.includes("alquiler")) return "alquiler";
+    if (combined.includes("suscrip") || combined.includes("subscription")) return "suscripciones";
+    if (combined.includes("wifi") || combined.includes("internet")) return "wifi";
+    if (combined.includes("agua") || combined.includes("water")) return "agua";
+    if (combined.includes("luz") || combined.includes("elect")) return "luz";
+    if (
+      normalizedSlug &&
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        normalizedSlug
+      )
+    ) {
+      return normalizedSlug;
+    }
+    return normalizedName || normalizedSlug || "sin-categoria";
+  };
+
+  const uniqueSections = useMemo(() => {
+    const byCategory = new Map<string, InvoiceCategorySection>();
+
+    for (const section of sections) {
+      const key = canonicalCategoryKey(section);
+      const existing = byCategory.get(key);
+
+      if (!existing) {
+        const seenInvoices = new Set<string>();
+        const uniqueInvoices = section.invoices.filter((invoice) => {
+          if (seenInvoices.has(invoice.expense_id)) return false;
+          seenInvoices.add(invoice.expense_id);
+          return true;
+        });
+
+        byCategory.set(key, {
+          ...section,
+          category_slug: key,
+          invoices: uniqueInvoices,
+        });
+        continue;
+      }
+
+      const seenInvoices = new Set(existing.invoices.map((invoice) => invoice.expense_id));
+      const mergedInvoices = [...existing.invoices];
+      for (const invoice of section.invoices) {
+        if (seenInvoices.has(invoice.expense_id)) continue;
+        seenInvoices.add(invoice.expense_id);
+        mergedInvoices.push(invoice);
+      }
+
+      byCategory.set(key, {
+        ...existing,
+        category_slug: key,
+        invoices: mergedInvoices,
+      });
+    }
+
+    return Array.from(byCategory.values());
+  }, [sections]);
 
   const handleMarkPaid = (expenseId: string) => {
     setErrorMessage(null);
@@ -112,10 +186,10 @@ export function FacturasScreen({
             <p className={styles.feedbackMessage}>{errorMessage}</p>
           ) : null}
 
-          {sections.length ? (
-            sections.map((section) => (
+          {uniqueSections.length ? (
+            uniqueSections.map((section) => (
               <Card
-                key={section.category_id ?? section.category_slug}
+                key={`${section.category_slug}-${section.category_id ?? "sin-id"}`}
                 className={styles.group}
               >
                 <div className={styles.groupTop}>
