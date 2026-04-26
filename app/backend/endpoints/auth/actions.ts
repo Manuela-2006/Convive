@@ -397,7 +397,14 @@ export async function removeHouseMemberAction(
   input: RemoveHouseMemberInput
 ): Promise<ActionResult<{ removed: true }>> {
   try {
-    const { supabase } = await getAuthenticatedProfileContext();
+    const { supabase, profile } = await getAuthenticatedProfileContext();
+
+    if (input.profileId === profile.id) {
+      return {
+        success: false,
+        error: "No puedes sacarte a ti mismo del piso desde esta accion.",
+      };
+    }
 
     const { error } = await supabase.rpc("remove_house_member", {
       p_house_public_code: input.houseCode,
@@ -417,7 +424,7 @@ export async function removeHouseMemberAction(
       error:
         error instanceof Error
           ? error.message
-          : "No se pudo eliminar el participante.",
+          : "No se pudo sacar al participante del piso.",
     };
   }
 }

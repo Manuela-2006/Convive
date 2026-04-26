@@ -7515,3 +7515,105 @@ grant execute on function public.create_pending_invoice_expense(
   text,
   uuid
 ) to authenticated;
+
+
+-- =========================================================
+-- AREA GRUPAL - SACAR PARTICIPANTE DEL PISO SIN BORRAR USUARIO
+-- Endurece la RPC existente:
+-- - no borra profiles ni auth.users
+-- - solo marca house_members como inactivo y registra left_at
+-- - solo un admin activo puede sacar a otro miembro
+-- - no permite autosalida desde esta accion
+-- - no permite sacar al creador del piso
+-- - no permite dejar el piso sin admin activo
+-- =========================================================
+
+create or replace function public.remove_house_member(
+  p_house_public_code text,
+  p_profile_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+  v_created_by uuid;
+  v_target public.house_members%rowtype;
+  v_active_admin_count int;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  select h.id, h.created_by
+  into v_house_id, v_created_by
+  from public.houses h
+  where h.public_code = trim(p_house_public_code)
+    and h.status = 'active'
+  limit 1;
+
+  if v_house_id is null then
+    raise exception 'Piso no encontrado';
+  end if;
+
+  if not exists (
+    select 1
+    from public.house_members hm
+    where hm.house_id = v_house_id
+      and hm.profile_id = auth.uid()
+      and hm.is_active = true
+      and hm.role = 'admin'
+  ) then
+    raise exception 'Solo un admin activo puede sacar participantes';
+  end if;
+
+  if p_profile_id = auth.uid() then
+    raise exception 'No puedes sacarte a ti mismo del piso desde esta accion';
+  end if;
+
+  if p_profile_id = v_created_by then
+    raise exception 'No se puede sacar al creador del piso';
+  end if;
+
+  select *
+  into v_target
+  from public.house_members hm
+  where hm.house_id = v_house_id
+    and hm.profile_id = p_profile_id
+    and hm.is_active = true
+  limit 1;
+
+  if v_target.id is null then
+    raise exception 'Participante no encontrado';
+  end if;
+
+  if v_target.role = 'admin' then
+    select count(*)::int
+    into v_active_admin_count
+    from public.house_members hm
+    where hm.house_id = v_house_id
+      and hm.is_active = true
+      and hm.role = 'admin';
+
+    if v_active_admin_count <= 1 then
+      raise exception 'No se puede sacar al unico admin activo del piso';
+    end if;
+  end if;
+
+  update public.house_members
+  set
+    is_active = false,
+    left_at = now()
+  where id = v_target.id;
+
+  return jsonb_build_object(
+    'status', 'removed_from_house',
+    'profile_id', p_profile_id,
+    'house_id', v_house_id
+  );
+end;
+$$;
+
+grant execute on function public.remove_house_member(text, uuid) to authenticated;

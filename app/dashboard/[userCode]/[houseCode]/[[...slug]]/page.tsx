@@ -192,6 +192,9 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
         dashboardPath={routeContext.dashboardPath}
         inviteCode={houseInvite.inviteCode}
         canManageInvites={houseInvite.canManageInvites}
+        canRemoveMembers={isHouseAdmin}
+        currentProfileId={routeContext.profile.id}
+        houseCreatedBy={routeContext.house.created_by}
         data={groupDashboard}
       />,
       routeContext.dashboardPath,

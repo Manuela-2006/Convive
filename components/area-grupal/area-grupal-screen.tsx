@@ -50,6 +50,9 @@ type AreaGrupalScreenProps = {
   dashboardPath: string;
   inviteCode: string | null;
   canManageInvites: boolean;
+  canRemoveMembers: boolean;
+  currentProfileId: string;
+  houseCreatedBy: string;
   data: AreaGrupalDashboardData;
 };
 
@@ -94,6 +97,9 @@ export function AreaGrupalScreen({
   dashboardPath,
   inviteCode,
   canManageInvites,
+  canRemoveMembers,
+  currentProfileId,
+  houseCreatedBy,
   data,
 }: AreaGrupalScreenProps) {
   const router = useRouter();
@@ -119,6 +125,21 @@ export function AreaGrupalScreen({
     ...item,
     color: PIE_COLORS[index % PIE_COLORS.length],
   }));
+  const activeAdminCount = data.members.filter(
+    (member) => member.role === "admin"
+  ).length;
+
+  const canRemoveMember = (member: AreaGrupalDashboardData["members"][number]) => {
+    if (!canRemoveMembers || member.profile_id === currentProfileId) {
+      return false;
+    }
+
+    if (member.profile_id === houseCreatedBy) {
+      return false;
+    }
+
+    return member.role !== "admin" || activeAdminCount > 1;
+  };
 
   const runAction = (action: () => Promise<void>) => {
     setErrorMessage(null);
@@ -291,7 +312,7 @@ export function AreaGrupalScreen({
                         height={28}
                       />
                       <span>{member.display_name}</span>
-                      {canManageInvites ? (
+                      {canRemoveMember(member) ? (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <button
