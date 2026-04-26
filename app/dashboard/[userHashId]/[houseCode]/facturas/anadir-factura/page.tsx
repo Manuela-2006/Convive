@@ -7,14 +7,14 @@ import { loadAddInvoiceFormOptionsWithClient } from "../../../../../backend/endp
 
 type FacturasAddPageProps = {
   params: Promise<{
-    userCode: string;
+    userHashId: string;
     houseCode: string;
   }>;
 };
 
 export default async function FacturasAddPage({ params }: FacturasAddPageProps) {
-  const { userCode, houseCode } = await params;
-  const routeContext = await getAccessibleHouseContext(userCode, houseCode);
+  const { userHashId, houseCode } = await params;
+  const routeContext = await getAccessibleHouseContext(userHashId, houseCode);
   const formOptions = await loadAddInvoiceFormOptionsWithClient(
     routeContext.supabase,
     routeContext.house.public_code

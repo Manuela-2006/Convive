@@ -60,7 +60,7 @@ import {
 
 type HouseRoutePageProps = {
   params: Promise<{
-    userCode: string;
+    userHashId: string;
     houseCode: string;
     slug?: string[];
   }>;
@@ -84,8 +84,8 @@ function withMiniDoor(
 }
 
 export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
-  const { userCode, houseCode, slug } = await params;
-  const routeContext = await getAccessibleHouseContext(userCode, houseCode);
+  const { userHashId, houseCode, slug } = await params;
+  const routeContext = await getAccessibleHouseContext(userHashId, houseCode);
   const sectionPath = (slug ?? []).join("/");
   const isHouseAdmin =
     routeContext.memberRole === "admin" ||

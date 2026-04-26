@@ -59,7 +59,7 @@ export async function createPendingInvoiceExpenseAction(
   try {
     const { supabase, profile } = await getAuthenticatedProfileContext();
     const houseContextResult = await supabase.rpc("get_accessible_house_context", {
-      p_user_public_code: profile.public_code,
+      p_user_hash_id: profile.user_hash_id,
       p_house_public_code: input.houseCode,
     });
     const houseId = readHouseId(houseContextResult.data);
@@ -150,7 +150,7 @@ export async function getInvoiceDocumentSignedUrlAction(
   try {
     const { supabase, profile } = await getAuthenticatedProfileContext();
     const houseContextResult = await supabase.rpc("get_accessible_house_context", {
-      p_user_public_code: profile.public_code,
+      p_user_hash_id: profile.user_hash_id,
       p_house_public_code: input.houseCode,
     });
     const houseId = readHouseId(houseContextResult.data);

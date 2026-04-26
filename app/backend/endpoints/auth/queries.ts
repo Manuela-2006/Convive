@@ -1,6 +1,6 @@
 export {
   getAccessibleHouseContext,
   getAuthenticatedProfileContext,
-  getAuthenticatedProfilePublicCode,
+  getAuthenticatedProfileHashId,
   loadProfileSettingsWithClient,
 } from "../shared/dashboard-core";

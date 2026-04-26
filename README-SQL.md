@@ -7617,3 +7617,320 @@ end;
 $$;
 
 grant execute on function public.remove_house_member(text, uuid) to authenticated;
+
+
+-- =========================================================
+-- MIGRACION USUARIOS - profiles.public_code -> profiles.user_hash_id
+-- Identificador opaco, estable y seguro para URL.
+-- houses.public_code se mantiene sin cambios.
+-- =========================================================
+
+create extension if not exists pgcrypto with schema extensions;
+
+alter table public.profiles
+add column if not exists user_hash_id text;
+
+create unique index if not exists profiles_user_hash_id_uidx
+on public.profiles (user_hash_id);
+
+create or replace function public.generate_user_hash_id()
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_hash_id text;
+begin
+  loop
+    v_hash_id := 'usr_' || rtrim(
+      translate(encode(extensions.gen_random_bytes(24), 'base64'), '+/', '-_'),
+      '='
+    );
+
+    exit when not exists (
+      select 1
+      from public.profiles p
+      where p.user_hash_id = v_hash_id
+    );
+  end loop;
+
+  return v_hash_id;
+end;
+$$;
+
+grant execute on function public.generate_user_hash_id() to authenticated;
+
+do $$
+declare
+  r record;
+  v_hash_id text;
+begin
+  for r in
+    select id
+    from public.profiles
+    where user_hash_id is null
+       or length(trim(user_hash_id)) = 0
+  loop
+    v_hash_id := public.generate_user_hash_id();
+
+    update public.profiles
+    set user_hash_id = v_hash_id
+    where id = r.id;
+  end loop;
+end $$;
+
+alter table public.profiles
+alter column user_hash_id set not null;
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (id, email, full_name, user_hash_id)
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data ->> 'full_name', ''),
+    public.generate_user_hash_id()
+  )
+  on conflict (id) do update
+  set
+    email = excluded.email,
+    full_name = coalesce(excluded.full_name, public.profiles.full_name),
+    user_hash_id = coalesce(public.profiles.user_hash_id, excluded.user_hash_id);
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute function public.handle_new_user();
+
+create or replace function public.get_authenticated_profile_context()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_profile jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  select jsonb_build_object(
+    'id', p.id,
+    'email', p.email,
+    'full_name', p.full_name,
+    'avatar_url', p.avatar_url,
+    'user_hash_id', p.user_hash_id
+  )
+  into v_profile
+  from public.profiles p
+  where p.id = auth.uid()
+  limit 1;
+
+  if v_profile is null or nullif(trim(v_profile ->> 'user_hash_id'), '') is null then
+    raise exception 'Perfil no encontrado';
+  end if;
+
+  return v_profile;
+end;
+$$;
+
+grant execute on function public.get_authenticated_profile_context() to authenticated;
+
+drop function if exists public.get_accessible_house_context(text, text);
+
+create function public.get_accessible_house_context(
+  p_user_hash_id text,
+  p_house_public_code text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_profile public.profiles%rowtype;
+  v_context jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  select *
+  into v_profile
+  from public.profiles p
+  where p.id = auth.uid()
+  limit 1;
+
+  if v_profile.id is null or nullif(trim(v_profile.user_hash_id), '') is null then
+    raise exception 'Perfil no encontrado';
+  end if;
+
+  if v_profile.user_hash_id <> trim(p_user_hash_id) then
+    raise exception 'Usuario no encontrado';
+  end if;
+
+  select jsonb_build_object(
+    'profile', jsonb_build_object(
+      'id', v_profile.id,
+      'email', v_profile.email,
+      'full_name', v_profile.full_name,
+      'avatar_url', v_profile.avatar_url,
+      'user_hash_id', v_profile.user_hash_id
+    ),
+    'house', jsonb_build_object(
+      'id', h.id,
+      'name', h.name,
+      'public_code', h.public_code,
+      'created_by', h.created_by
+    ),
+    'member_role', coalesce(hm.role, 'member')
+  )
+  into v_context
+  from public.house_members hm
+  join public.houses h on h.id = hm.house_id
+  where hm.profile_id = auth.uid()
+    and hm.is_active = true
+    and h.public_code = trim(p_house_public_code)
+    and h.status = 'active'
+  limit 1;
+
+  if v_context is null then
+    raise exception 'Piso no encontrado o sin acceso';
+  end if;
+
+  return v_context;
+end;
+$$;
+
+grant execute on function public.get_accessible_house_context(text, text) to authenticated;
+
+create or replace function public.get_default_dashboard_context()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_profile public.profiles%rowtype;
+  v_context jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  select *
+  into v_profile
+  from public.profiles p
+  where p.id = auth.uid()
+  limit 1;
+
+  if v_profile.id is null or nullif(trim(v_profile.user_hash_id), '') is null then
+    raise exception 'Perfil no encontrado';
+  end if;
+
+  select jsonb_build_object(
+    'user_hash_id', v_profile.user_hash_id,
+    'house_public_code', h.public_code
+  )
+  into v_context
+  from public.house_members hm
+  join public.houses h on h.id = hm.house_id
+  where hm.profile_id = auth.uid()
+    and hm.is_active = true
+    and h.status = 'active'
+  order by hm.joined_at asc
+  limit 1;
+
+  return v_context;
+end;
+$$;
+
+grant execute on function public.get_default_dashboard_context() to authenticated;
+
+create or replace function public.get_profile_settings(
+  p_house_public_code text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+  v_is_admin boolean;
+  v_result jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_house_id := public.get_accessible_house_id(p_house_public_code);
+  v_is_admin := public.is_house_admin(v_house_id);
+
+  select jsonb_build_object(
+    'profile', jsonb_build_object(
+      'id', p.id,
+      'email', p.email,
+      'full_name', p.full_name,
+      'avatar_url', p.avatar_url,
+      'user_hash_id', p.user_hash_id
+    ),
+    'house_member', jsonb_build_object(
+      'role', hm.role,
+      'room_label', hm.room_label,
+      'room_size', hm.room_size,
+      'stay_start_date', hm.stay_start_date,
+      'stay_end_date', hm.stay_end_date
+    ),
+    'can_remove_members', v_is_admin,
+    'removable_members', case
+      when v_is_admin then coalesce((
+        select jsonb_agg(
+          jsonb_build_object(
+            'profile_id', member.profile_id,
+            'display_name', public.profile_display_name(member.profile_id),
+            'role', member.role
+          )
+          order by public.profile_display_name(member.profile_id)
+        )
+        from public.house_members member
+        where member.house_id = v_house_id
+          and member.is_active = true
+      ), '[]'::jsonb)
+      else '[]'::jsonb
+    end
+  )
+  into v_result
+  from public.profiles p
+  join public.house_members hm
+    on hm.profile_id = p.id
+   and hm.house_id = v_house_id
+   and hm.is_active = true
+  where p.id = auth.uid()
+  limit 1;
+
+  if v_result is null then
+    raise exception 'Perfil no encontrado';
+  end if;
+
+  return v_result;
+end;
+$$;
+
+grant execute on function public.get_profile_settings(text) to authenticated;
+
+drop index if exists public.profiles_public_code_uidx;
+
+alter table public.profiles
+drop column if exists public_code;

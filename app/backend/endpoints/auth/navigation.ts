@@ -4,5 +4,5 @@ export {
   getJoinHouseErrorMessage,
   readHousePublicCode,
   readInviteCode,
-  readPublicCode,
+  readUserHashId,
 } from "../shared/dashboard-core";

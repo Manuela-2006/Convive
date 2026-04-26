@@ -36,7 +36,7 @@ type ProfileRecord = {
   email: string | null;
   full_name: string | null;
   avatar_url: string | null;
-  public_code: string | null;
+  user_hash_id: string | null;
 };
 
 type HouseRecord = {
@@ -49,7 +49,7 @@ type HouseRecord = {
 type AuthenticatedDashboardContext = {
   supabase: Awaited<ReturnType<typeof createClient>>;
   profile: ProfileRecord & {
-    public_code: string;
+    user_hash_id: string;
   };
 };
 
@@ -593,11 +593,11 @@ function asArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
 
-export function buildDashboardPath(userCode: string, houseCode: string) {
-  return `/dashboard/${userCode}/${houseCode}`;
+export function buildDashboardPath(userHashId: string, houseCode: string) {
+  return `/dashboard/${userHashId}/${houseCode}`;
 }
 
-export function readPublicCode(value: unknown) {
+function readPublicIdentifier(value: unknown) {
   if (typeof value !== "string") {
     return null;
   }
@@ -611,17 +611,21 @@ export function readPublicCode(value: unknown) {
   return normalizedValue;
 }
 
+export function readUserHashId(value: unknown) {
+  return readPublicIdentifier(value);
+}
+
 export function readHousePublicCode(value: unknown) {
-  return readPublicCode(value);
+  return readPublicIdentifier(value);
 }
 
 export function readInviteCode(value: unknown) {
-  return readPublicCode(value);
+  return readPublicIdentifier(value);
 }
 
-export async function getAuthenticatedProfilePublicCode() {
+export async function getAuthenticatedProfileHashId() {
   const { profile } = await getAuthenticatedProfileContext();
-  return profile.public_code;
+  return profile.user_hash_id;
 }
 
 export function getJoinHouseErrorMessage(errorMessage?: string | null) {
@@ -691,8 +695,8 @@ function readProfileRecord(value: unknown) {
     return null;
   }
 
-  const publicCode = readPublicCode(value.public_code);
-  if (!publicCode) {
+  const userHashId = readUserHashId(value.user_hash_id);
+  if (!userHashId) {
     return null;
   }
 
@@ -701,8 +705,8 @@ function readProfileRecord(value: unknown) {
     email: toNullableStringValue(value.email),
     full_name: toNullableStringValue(value.full_name),
     avatar_url: toNullableStringValue(value.avatar_url),
-    public_code: publicCode,
-  } satisfies ProfileRecord & { public_code: string };
+    user_hash_id: userHashId,
+  } satisfies ProfileRecord & { user_hash_id: string };
 }
 
 function readHouseRecord(value: unknown) {
@@ -747,7 +751,7 @@ export async function getAuthenticatedProfileContext(): Promise<AuthenticatedDas
 }
 
 export async function getAccessibleHouseContext(
-  userCode: string,
+  userHashId: string,
   houseCode: string
 ): Promise<AccessibleHouseContext> {
   const supabase = await createClient();
@@ -760,7 +764,7 @@ export async function getAccessibleHouseContext(
   }
 
   const { data, error } = await supabase.rpc("get_accessible_house_context", {
-    p_user_public_code: userCode,
+    p_user_hash_id: userHashId,
     p_house_public_code: houseCode,
   });
 
@@ -776,7 +780,7 @@ export async function getAccessibleHouseContext(
     profile,
     house,
     memberRole: isRecord(data) ? toStringValue(data.member_role, "member") : "member",
-    dashboardPath: buildDashboardPath(userCode, house.public_code),
+    dashboardPath: buildDashboardPath(userHashId, house.public_code),
   };
 }
 
@@ -801,7 +805,7 @@ export async function loadProfileSettingsWithClient(
       email: toNullableStringValue(profile.email),
       full_name: toNullableStringValue(profile.full_name),
       avatar_url: toNullableStringValue(profile.avatar_url),
-      public_code: toStringValue(profile.public_code),
+      user_hash_id: toStringValue(profile.user_hash_id),
     },
     house_member: {
       role: toStringValue(houseMember.role, "member"),
@@ -844,14 +848,14 @@ export async function getDefaultDashboardPath() {
     return "/login?flow=join";
   }
 
-  const userPublicCode = readPublicCode(data.profile_public_code);
+  const userHashId = readUserHashId(data.user_hash_id);
   const housePublicCode = readHousePublicCode(data.house_public_code);
 
-  if (!userPublicCode || !housePublicCode) {
+  if (!userHashId || !housePublicCode) {
     return "/login?flow=join";
   }
 
-  return buildDashboardPath(userPublicCode, housePublicCode);
+  return buildDashboardPath(userHashId, housePublicCode);
 }
 
 export async function loadActiveHouseInviteWithClient(

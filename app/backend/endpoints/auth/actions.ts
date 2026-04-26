@@ -9,7 +9,7 @@ import {
   getAuthenticatedProfileContext,
   getJoinHouseErrorMessage,
   readHousePublicCode,
-  readPublicCode,
+  readUserHashId,
 } from "../shared/dashboard-core";
 import { createClient } from "../shared/supabase-server";
 
@@ -158,12 +158,12 @@ export async function signInAndJoinHouseWithEmail({
     "get_authenticated_profile_context"
   );
 
-  const profilePublicCode =
+  const userHashId =
     profile && typeof profile === "object" && !Array.isArray(profile)
-      ? readPublicCode((profile as { public_code?: unknown }).public_code)
+      ? readUserHashId((profile as { user_hash_id?: unknown }).user_hash_id)
       : null;
 
-  if (profileError || !profilePublicCode) {
+  if (profileError || !userHashId) {
     return { error: "No he podido cargar tu perfil." };
   }
 
@@ -187,7 +187,7 @@ export async function signInAndJoinHouseWithEmail({
   return {
     success: true,
     dashboardPath: buildOnboardingPath(
-      buildDashboardPath(profilePublicCode, housePublicCode)
+      buildDashboardPath(userHashId, housePublicCode)
     ),
   };
 }
@@ -219,7 +219,7 @@ export async function createHouseAction(formData: {
     return { error: "No he podido obtener el codigo publico del piso." };
   }
 
-  redirect(buildOnboardingPath(buildDashboardPath(profile.public_code, housePublicCode)));
+  redirect(buildOnboardingPath(buildDashboardPath(profile.user_hash_id, housePublicCode)));
 }
 
 export async function joinHouseAction(formData: { code: string }) {
@@ -240,7 +240,7 @@ export async function joinHouseAction(formData: { code: string }) {
     return { error: "No he podido obtener el codigo publico del piso." };
   }
 
-  redirect(buildOnboardingPath(buildDashboardPath(profile.public_code, housePublicCode)));
+  redirect(buildOnboardingPath(buildDashboardPath(profile.user_hash_id, housePublicCode)));
 }
 
 export async function joinHouseAndReturnDashboardPathAction(formData: {
@@ -265,7 +265,7 @@ export async function joinHouseAndReturnDashboardPathAction(formData: {
 
   return {
     dashboardPath: buildOnboardingPath(
-      buildDashboardPath(profile.public_code, housePublicCode)
+      buildDashboardPath(profile.user_hash_id, housePublicCode)
     ),
   };
 }

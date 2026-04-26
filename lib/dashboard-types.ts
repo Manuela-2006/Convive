@@ -298,7 +298,7 @@ export type ProfileSettingsData = {
     email: string | null;
     full_name: string | null;
     avatar_url: string | null;
-    public_code: string;
+    user_hash_id: string;
   };
   house_member: {
     role: string;
