@@ -66,6 +66,7 @@ export function FacturasScreen({
     if (combined.includes("wifi") || combined.includes("internet")) return "wifi";
     if (combined.includes("agua") || combined.includes("water")) return "agua";
     if (combined.includes("luz") || combined.includes("elect")) return "luz";
+    if (normalizedName) return normalizedName;
     if (
       normalizedSlug &&
       !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
@@ -74,7 +75,7 @@ export function FacturasScreen({
     ) {
       return normalizedSlug;
     }
-    return normalizedName || normalizedSlug || "sin-categoria";
+    return normalizedSlug || "sin-categoria";
   };
 
   const uniqueSections = useMemo(() => {

@@ -418,15 +418,15 @@ function canonicalInvoiceCategoryKey(section: {
   if (combined.includes("agua") || combined.includes("water")) return "agua";
   if (combined.includes("luz") || combined.includes("elect")) return "luz";
 
+  if (name) {
+    return name;
+  }
+
   if (
     slug &&
     !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(slug)
   ) {
     return slug;
-  }
-
-  if (name) {
-    return name;
   }
 
   return slugifyInvoiceCategory(section.category_id || "sin-categoria");
