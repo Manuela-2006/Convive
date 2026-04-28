@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  convive-app:
+    image: manuela20065/convive-app:v1
+    container_name: convive
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=production
+
