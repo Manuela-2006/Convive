@@ -67,11 +67,11 @@ Parametros del escenario: ${JSON.stringify(parametros)}
 
     const prompts: Record<TipoEscenario, string> = {
       entra_alguien: `${contexto}
-Simula como cambiaria la situacion economica del piso si entrara una persona nueva.
+Simula como cambiaria la situación economica del piso si entrara una persona nueva.
 Ten en cuenta:
-- Se reparte entre mas miembros.
+- Se reparte entre más miembros.
 - Puede subir consumo de suministros.
-- El alquiler puede repartirse entre mas personas.
+- El alquiler puede repartirse entre más personas.
 
 Responde en espanol, claro y estructurado:
 1) Situacion actual
@@ -79,7 +79,7 @@ Responde en espanol, claro y estructurado:
 3) Diferencia por persona
 4) Conclusion y recomendacion`,
       sale_alguien: `${contexto}
-Simula como cambiaria la situacion economica del piso si saliera un miembro.
+Simula como cambiaria la situación economica del piso si saliera un miembro.
 Ten en cuenta:
 - Se reparte entre menos miembros.
 - Puede bajar algo el consumo.
@@ -129,3 +129,4 @@ Responde en espanol, claro y estructurado:
     );
   }
 }
+

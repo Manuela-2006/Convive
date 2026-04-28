@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -26,7 +26,7 @@ const loginSchema = z.object({
   email: z
     .string()
     .min(1, "El correo es obligatorio")
-    .email("Introduce un correo valido"),
+    .email("Introduce un correo válido"),
   password: z
     .string()
     .min(8, "La contraseña debe tener al menos 8 caracteres"),
@@ -39,13 +39,13 @@ const registerSchema = z
     email: z
       .string()
       .min(1, "El correo es obligatorio")
-      .email("Introduce un correo valido"),
+      .email("Introduce un correo válido"),
     password: z
       .string()
       .min(8, "La contraseña debe tener al menos 8 caracteres"),
     confirmPassword: z
       .string()
-      .min(8, "La verificacion debe tener al menos 8 caracteres"),
+      .min(8, "La verificación debe tener al menos 8 caracteres"),
   })
   .refine((values) => values.password === values.confirmPassword, {
     path: ["confirmPassword"],
@@ -56,16 +56,16 @@ const createHomeSchema = z.object({
   name: z.string().min(1, "El nombre es obligatorio"),
   people: z
     .string()
-    .min(1, "El numero de personas es obligatorio")
-    .regex(/^\d+$/, "Introduce solo numeros"),
+    .min(1, "El número de personas es obligatorio")
+    .regex(/^\d+$/, "Introduce solo números"),
 });
 
 const joinHomeSchema = z.object({
   code: z
     .string()
     .trim()
-    .min(1, "El codigo de invitacion es obligatorio")
-    .regex(/^[a-zA-Z0-9]+$/, "Introduce un codigo de invitacion valido"),
+    .min(1, "El código de invitación es obligatorio")
+    .regex(/^[a-zA-Z0-9]+$/, "Introduce un código de invitación válido"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -127,7 +127,7 @@ export function LoginCard({
   });
 
   const continueWithHouseStep = () => {
-    setGlobalSuccess("Sesion iniciada. Ahora ya puedes crear o unirte a un piso.");
+    setGlobalSuccess("Sesión iniciada. Ahora ya puedes crear o unirte a un piso.");
     setShowSetupStep(true);
     setHomeAction(preferredHomeAction);
   };
@@ -197,12 +197,12 @@ export function LoginCard({
 
       if (initialFlow === "join") {
         setGlobalSuccess(
-          "Cuenta creada correctamente. Inicia sesion y usa tu codigo de invitacion para entrar al piso."
+          "Cuenta creada correctamente. Inicia sesión y usa tu código de invitación para entrar al piso."
         );
         return;
       }
 
-      setGlobalSuccess("Cuenta creada correctamente. Ahora crea o unete a un piso.");
+      setGlobalSuccess("Cuenta creada correctamente. Ahora crea o únete a un piso.");
       setShowSetupStep(true);
       setHomeAction(preferredHomeAction);
     });
@@ -341,7 +341,7 @@ export function LoginCard({
                 <div className={styles.inputWrap}>
                   <Image
                     src="/iconos/building-svgrepo-com 1.svg"
-                    alt="Icono de codigo"
+                    alt="Icono de código"
                     width={16}
                     height={16}
                     className={`${styles.icon} ${styles.setupIcon}`}
@@ -349,7 +349,7 @@ export function LoginCard({
                   <Input
                     type="text"
                     className={styles.input}
-                    placeholder="Codigo de invitacion"
+                    placeholder="Código de invitación"
                     disabled={isPending}
                     {...joinHomeForm.register("code")}
                   />
@@ -365,7 +365,7 @@ export function LoginCard({
               {globalSuccess ? <p className={styles.success}>{globalSuccess}</p> : null}
 
               <Button type="submit" className={styles.submit} disabled={isPending}>
-                {isPending ? "Uniendome..." : "Unirme"}
+                {isPending ? "Uniéndome..." : "Unirme"}
               </Button>
             </form>
           )}
@@ -381,7 +381,7 @@ export function LoginCard({
           <div className={styles.tabsShell}>
             <TabsList className={styles.tabs}>
               <TabsTrigger value="login" className={styles.tab}>
-                Iniciar sesion
+                Iniciar sesión
               </TabsTrigger>
               <TabsTrigger value="register" className={styles.tab}>
                 Registrarse
@@ -452,7 +452,7 @@ export function LoginCard({
               {globalSuccess ? <p className={styles.success}>{globalSuccess}</p> : null}
 
               <Link href="/reset-password" className={styles.forgot}>
-                Olvidaste tu contraseña?
+                ¿Olvidaste tu contraseña?
               </Link>
 
               <Button type="submit" className={styles.submit} disabled={isPending}>
@@ -609,3 +609,4 @@ export function LoginCard({
     </div>
   );
 }
+

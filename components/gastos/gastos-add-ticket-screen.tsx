@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -71,7 +71,7 @@ const SUPERMARKET_KEYWORDS = [
   "alcampo",
   "simply",
   "masymas",
-  "mas y mas",
+  "más y más",
   "consum",
   "bonarea",
   "bonpreu",
@@ -593,4 +593,5 @@ export function GastosAddTicketScreen({
     </main>
   );
 }
+
 

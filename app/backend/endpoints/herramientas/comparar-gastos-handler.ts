@@ -105,9 +105,9 @@ export async function POST(req: NextRequest) {
         {
           role: "system",
           content: `Eres un experto en tarifas de servicios del hogar en Espana.
-Conoces las tarifas actuales de las principales companias espanolas de luz, agua y telecomunicaciones.
+Conoces las tarifas actuales de las principales compañías espanolas de luz, agua y telecomunicaciones.
 Siempre respondes en espanol con datos concretos y utiles.
-Respondes UNICAMENTE con JSON valido, sin texto adicional ni markdown.`,
+Respondes UNICAMENTE con JSON válido, sin texto adicional ni markdown.`,
         },
         {
           role: "user",
@@ -117,21 +117,21 @@ Respondes UNICAMENTE con JSON valido, sin texto adicional ni markdown.`,
 - Basado en ${numMeses} facturas registradas
 - Historial: ${JSON.stringify(facturas)}
 
-Compara con otras companias del mercado espanol que ofrecen ${categoria} y devuelve SOLO este JSON:
+Compara con otras compañías del mercado espanol que ofrecen ${categoria} y devuelve SOLO este JSON:
 {
   "categoria": "${categoria}",
   "proveedor_actual": {
     "nombre": "nombre del proveedor",
-    "importe_mensual": numero,
-    "valoracion": "descripcion breve"
+    "importe_mensual": número,
+    "valoracion": "descripción breve"
   },
   "alternativas": [
     {
-      "nombre": "nombre compania",
-      "importe_estimado": numero,
-      "ahorro_mensual": numero,
-      "ahorro_anual": numero,
-      "ventajas": "descripcion breve de ventajas",
+      "nombre": "nombre compañía",
+      "importe_estimado": número,
+      "ahorro_mensual": número,
+      "ahorro_anual": número,
+      "ventajas": "descripción breve de ventajas",
       "url_referencia": "web oficial"
     }
   ],
@@ -180,3 +180,4 @@ Para wifi: Movistar, Vodafone, Orange, MasMovil, Digi.`,
     );
   }
 }
+

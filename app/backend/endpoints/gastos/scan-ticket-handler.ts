@@ -1,4 +1,4 @@
-import Groq from "groq-sdk";
+﻿import Groq from "groq-sdk";
 import { NextRequest } from "next/server";
 
 import type { TicketScannerData } from "../../../../lib/ticket-scanner-types";
@@ -63,13 +63,13 @@ function extractJsonObject(raw: string): TicketScannerData {
 
 function normalizeGroqPayload(input: unknown): TicketScannerData {
   if (!input || typeof input !== "object") {
-    throw new Error("Respuesta JSON vacia o invalida.");
+    throw new Error("Respuesta JSON vacía o inválida.");
   }
 
   const payload = input as Record<string, unknown>;
   const tipo = payload.tipo;
   if (tipo !== "ticket" && tipo !== "factura" && tipo !== "desconocido") {
-    throw new Error("El JSON no contiene un campo tipo valido.");
+    throw new Error("El JSON no contiene un campo tipo válido.");
   }
 
   return payload as unknown as TicketScannerData;
@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
     const fileSize = Buffer.byteLength(fileBase64, "base64");
     if (fileSize <= 0 || fileSize > DOCUMENT_MAX_FILE_SIZE_BYTES) {
       return Response.json(
-        { success: false, error: "El archivo es demasiado grande. Maximo 10MB." },
+        { success: false, error: "El archivo es demasiado grande. Máximo 10MB." },
         { status: 400 }
       );
     }
@@ -158,36 +158,36 @@ export async function POST(req: NextRequest) {
 
     const systemPrompt =
       "Eres un asistente experto en extraer datos estructurados de tickets de compra y facturas. " +
-      "Siempre devuelves unicamente JSON valido, sin texto adicional, sin bloques de codigo markdown.";
+      "Siempre devuelves únicamente JSON válido, sin texto adicional, sin bloques de código markdown.";
     const userPrompt = `Analiza este documento de ticket de compra o factura.
-Puede haber errores de lectura. Interpreta con sentido comun.
-Devuelve UNICAMENTE un objeto JSON valido, sin texto antes ni despues, sin bloques de codigo markdown.
+Puede haber errores de lectura. Interpreta con sentido común.
+Devuelve UNICAMENTE un objeto JSON válido, sin texto antes ni después, sin bloques de código markdown.
 
 Si es un ticket de compra:
 {
   "tipo": "ticket",
   "comercio": "nombre del comercio o null",
   "fecha": "DD/MM/YYYY o null",
-  "importe_total": numero o null,
-  "articulos": [{ "nombre": "string", "precio": numero o null, "unidades": entero }]
+  "importe_total": número o null,
+  "articulos": [{ "nombre": "string", "precio": número o null, "unidades": entero }]
 }
 
 Reglas obligatorias para "articulos" en tickets:
-- Debes extraer SOLO las lineas de producto que aparezcan literalmente en el ticket.
+- Debes extraer SOLO las líneas de producto que aparezcan literalmente en el ticket.
 - No inventes articulos ni completes huecos.
 - No normalices ni corrijas nombres: copia el texto tal cual se ve.
-- Excluye lineas que no sean productos (TOTAL, IVA, SUBTOTAL, CAMBIO, TARJETA, etc.).
+- Excluye líneas que no sean productos (TOTAL, IVA, SUBTOTAL, CAMBIO, TARJETA, etc.).
 - Si una linea de producto indica varias unidades, pon ese valor en "unidades".
-- Si no se ve cantidad explicita, usa "unidades": 1.
+- Si no se ve cantidad explícita, usa "unidades": 1.
 
 Si es una factura (luz, agua, wifi, gas, alquiler):
 {
   "tipo": "factura",
-  "comercio": "nombre de la compania o null",
+  "comercio": "nombre de la compañía o null",
   "categoria": "luz | agua | wifi | gas | alquiler | otro",
   "fecha": "DD/MM/YYYY o null",
-  "periodo": "descripcion del periodo o null",
-  "importe_total": numero o null
+  "periodo": "descripción del periodo o null",
+  "importe_total": número o null
 }
 
 Si no puedes determinar con seguridad un campo, devuelve null para ese campo.
@@ -272,3 +272,4 @@ ${text}
     );
   }
 }
+

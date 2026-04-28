@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 
 import { formatCurrency } from "../../lib/dashboard-presenters";
@@ -104,7 +104,9 @@ export function HomeBoard({
               <h2 className={styles.title}>Deuda total</h2>
               <p className={styles.value}>{formatCurrency(debtSummary.totalAmount)}</p>
               <p className={styles.meta}>
-                {debtSummary.pendingCount} pagos pendientes de realizar
+                {debtSummary.pendingCount}{" "}
+                {debtSummary.pendingCount === 1 ? "pago pendiente" : "pagos pendientes"} de
+                realizar
               </p>
             </Link>
 
@@ -135,3 +137,4 @@ export function HomeBoard({
     </main>
   );
 }
+

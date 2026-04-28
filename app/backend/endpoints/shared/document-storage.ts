@@ -1,4 +1,4 @@
-import { DOCUMENT_MAX_FILE_SIZE_BYTES } from "../../../../lib/ticket-scanner-types";
+﻿import { DOCUMENT_MAX_FILE_SIZE_BYTES } from "../../../../lib/ticket-scanner-types";
 import type { DocumentUploadPayload } from "../../../../lib/document-upload-types";
 
 export const DOCUMENTS_BUCKET = "convive-documents";
@@ -26,12 +26,12 @@ export function validateDocumentUploadPayload(document: DocumentUploadPayload) {
     document.size <= 0 ||
     document.size > DOCUMENT_MAX_FILE_SIZE_BYTES
   ) {
-    throw new Error("El archivo es demasiado grande. Maximo 10MB.");
+    throw new Error("El archivo es demasiado grande. Máximo 10MB.");
   }
 
   const buffer = Buffer.from(document.base64, "base64");
   if (!buffer.length || buffer.length > DOCUMENT_MAX_FILE_SIZE_BYTES) {
-    throw new Error("El archivo no es valido o supera el tamano maximo.");
+    throw new Error("El archivo no es válido o supera el tamano máximo.");
   }
 
   if (Math.abs(buffer.length - document.size) > 8) {
@@ -91,3 +91,4 @@ function hasExpectedImageSignature(buffer: Buffer, mediaType: string) {
 
   return false;
 }
+

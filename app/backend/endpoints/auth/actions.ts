@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -181,7 +181,7 @@ export async function signInAndJoinHouseWithEmail({
   const housePublicCode = readHousePublicCode(housePublicCodeResult);
 
   if (!housePublicCode) {
-    return { error: "No he podido obtener el codigo publico del piso." };
+    return { error: "No he podido obtener el código publico del piso." };
   }
 
   return {
@@ -216,7 +216,7 @@ export async function createHouseAction(formData: {
   const housePublicCode = readHousePublicCode(data);
 
   if (!housePublicCode) {
-    return { error: "No he podido obtener el codigo publico del piso." };
+    return { error: "No he podido obtener el código publico del piso." };
   }
 
   redirect(buildOnboardingPath(buildDashboardPath(profile.user_hash_id, housePublicCode)));
@@ -237,7 +237,7 @@ export async function joinHouseAction(formData: { code: string }) {
   const housePublicCode = readHousePublicCode(data);
 
   if (!housePublicCode) {
-    return { error: "No he podido obtener el codigo publico del piso." };
+    return { error: "No he podido obtener el código publico del piso." };
   }
 
   redirect(buildOnboardingPath(buildDashboardPath(profile.user_hash_id, housePublicCode)));
@@ -260,7 +260,7 @@ export async function joinHouseAndReturnDashboardPathAction(formData: {
   const housePublicCode = readHousePublicCode(data);
 
   if (!housePublicCode) {
-    return { error: "No he podido obtener el codigo publico del piso." };
+    return { error: "No he podido obtener el código publico del piso." };
   }
 
   return {
@@ -402,7 +402,7 @@ export async function removeHouseMemberAction(
     if (input.profileId === profile.id) {
       return {
         success: false,
-        error: "No puedes sacarte a ti mismo del piso desde esta accion.",
+        error: "No puedes sacarte a ti mismo del piso desde esta acción.",
       };
     }
 
@@ -428,3 +428,4 @@ export async function removeHouseMemberAction(
     };
   }
 }
+

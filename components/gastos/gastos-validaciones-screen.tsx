@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -165,7 +165,7 @@ export function GastosValidacionesScreen({
                       <div key={payment.payment_id} className={styles.pendingRow}>
                         <div className={styles.pendingInfo}>
                           <p className={styles.main}>
-                            {payment.expense_title || "Gasto sin titulo"}
+                            {payment.expense_title || "Gasto sin título"}
                           </p>
                           <p className={styles.sub}>
                             {payment.from_name} - {payment.to_name} -{" "}
@@ -221,3 +221,4 @@ export function GastosValidacionesScreen({
     </main>
   );
 }
+

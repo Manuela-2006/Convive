@@ -118,11 +118,11 @@ export function HerramientasScreen({
   };
 
   const onSimularCambio = () => {
-    const descripcion = cambioDescripcion.trim();
-    if (!descripcion) {
+    const descripción = cambioDescripcion.trim();
+    if (!descripción) {
       return;
     }
-    void simular("cambiar_condiciones", { descripcion });
+    void simular("cambiar_condiciones", { descripción });
     onCloseCambioModal();
   };
 
@@ -295,7 +295,7 @@ export function HerramientasScreen({
           </Card>
 
           <Card className={styles.maroonCard}>
-            <h2 className={styles.maroonTitle}>Comparador de companias</h2>
+            <h2 className={styles.maroonTitle}>Comparador de compañías</h2>
 
             <div className={styles.tabsRow}>
               <button
@@ -417,3 +417,4 @@ export function HerramientasScreen({
     </main>
   );
 }
+
