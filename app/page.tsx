@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
+import BuildingScene from "../components/BuildingScene";
 
 type HomePageProps = {
   searchParams?: Promise<{
@@ -36,6 +37,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         className="landing-hero"
         aria-label="Imagen principal de Convive"
       >
+        <BuildingScene />
         <div className="landing-hero__grid">
           <div className="landing-hero__top-actions">
             <Link href={registerHref} className="convive-button">
