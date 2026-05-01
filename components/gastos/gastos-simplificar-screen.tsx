@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Card } from "../ui/card";
+import { ProfileAvatar } from "../ui/profile-avatar";
 import type { Settlement } from "../../lib/dashboard-types";
 import { formatCurrency } from "../../lib/dashboard-presenters";
 import styles from "./gastos-simplificar-screen.module.css";
@@ -71,8 +72,8 @@ export function GastosSimplificarScreen({
                   >
                     <div className={styles.flow}>
                       <span className={styles.personTag}>
-                        <Image
-                          src="/images/IconoperfilM.webp"
+                        <ProfileAvatar
+                          src={settlement.from_avatar_url}
                           alt=""
                           width={18}
                           height={18}
@@ -89,8 +90,8 @@ export function GastosSimplificarScreen({
                         height={18}
                       />
                       <span className={styles.personTag}>
-                        <Image
-                          src="/images/IconoperfilH.webp"
+                        <ProfileAvatar
+                          src={settlement.to_avatar_url}
                           alt=""
                           width={18}
                           height={18}

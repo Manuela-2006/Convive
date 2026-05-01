@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { getTicketDocumentSignedUrlAction } from "../../app/backend/endpoints/gastos/actions";
 import { Card } from "../ui/card";
+import { ProfileAvatar } from "../ui/profile-avatar";
 import type { ExpenseTicket } from "../../lib/dashboard-types";
 import {
   formatCurrency,
@@ -126,8 +127,8 @@ export function GastosTicketsScreen({
                         return (
                           <div className={styles.ticketRow} key={ticket.ticket_id}>
                             <div className={styles.ticketLeft}>
-                              <Image
-                                src="/images/IconoperfilM.webp"
+                              <ProfileAvatar
+                                src={ticket.paid_by_avatar_url}
                                 alt=""
                                 width={20}
                                 height={20}

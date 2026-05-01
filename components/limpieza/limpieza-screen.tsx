@@ -29,6 +29,7 @@ import { Calendar } from "../ui/calendar";
 import { Card } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { ProfileAvatar } from "../ui/profile-avatar";
 import {
   Tooltip,
   TooltipContent,
@@ -217,6 +218,20 @@ export function LimpiezaScreen({
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
   const hasMembers = formOptions.members.length > 0;
+  const memberAvatarUrlByProfileId = useMemo(
+    () =>
+      new Map(
+        formOptions.members.map((member) => [
+          member.profile_id,
+          member.avatar_url,
+        ])
+      ),
+    [formOptions.members]
+  );
+  const getTaskAvatarUrl = (task: CleaningTask) =>
+    task.assigned_to_profile_id
+      ? memberAvatarUrlByProfileId.get(task.assigned_to_profile_id) ?? null
+      : null;
   const pendingTasksByZone = useMemo(() => {
     const grouped = new Map<string, CleaningTask[]>();
     const availableZoneKeys = new Set(Object.keys(zoneBounds));
@@ -754,8 +769,8 @@ export function LimpiezaScreen({
                   historyTasks.map((task) => (
                     <div key={task.task_id} className={styles.historyRow}>
                       <div className={styles.historyMain}>
-                        <Image
-                          src="/images/IconoperfilM.webp"
+                        <ProfileAvatar
+                          src={getTaskAvatarUrl(task)}
                           alt=""
                           width={22}
                           height={22}
@@ -808,8 +823,8 @@ export function LimpiezaScreen({
                               className={styles.floorTaskCard}
                               onClick={() => handleOpenTask(task)}
                             >
-                              <Image
-                                src="/images/IconoperfilM.webp"
+                              <ProfileAvatar
+                                src={getTaskAvatarUrl(task)}
                                 alt=""
                                 width={18}
                                 height={18}
@@ -900,8 +915,8 @@ export function LimpiezaScreen({
                                   onClick={() => handleOpenTask(task)}
                                 >
                                   <div className={styles.taskLeft}>
-                                    <Image
-                                      src="/images/IconoperfilM.webp"
+                                    <ProfileAvatar
+                                      src={getTaskAvatarUrl(task)}
                                       alt=""
                                       width={22}
                                       height={22}

@@ -30,6 +30,7 @@ import type {
   SharedExpense,
 } from "./dashboard-types";
 import { createClient } from "./supabase-server";
+import { loadProfileAvatarUrlMapWithClient } from "./profile-avatar";
 
 type ProfileRecord = {
   id: string;
@@ -80,6 +81,8 @@ function mapExpenseTicket(ticket: Record<string, unknown>): ExpenseTicket {
     merchant: toStringValue(ticket.merchant),
     purchase_date: toStringValue(ticket.purchase_date),
     paid_by_name: toStringValue(ticket.paid_by_name),
+    paid_by_profile_id: toNullableStringValue(ticket.paid_by_profile_id),
+    paid_by_avatar_url: toNullableStringValue(ticket.paid_by_avatar_url),
     total_amount: toNumericLikeValue(ticket.total_amount),
     my_share_amount:
       ticket.my_share_amount === null || ticket.my_share_amount === undefined
@@ -103,6 +106,7 @@ function mapSharedExpense(expense: Record<string, unknown>): SharedExpense {
       typeof expense.participants_count === "number"
         ? expense.participants_count
         : Number(expense.participants_count ?? 0),
+    participants: [],
     total_amount: toNumericLikeValue(expense.total_amount),
     my_share_amount:
       expense.my_share_amount === null || expense.my_share_amount === undefined
@@ -218,7 +222,131 @@ function mapInvoiceMember(member: Record<string, unknown>): AddInvoiceMember {
       toStringValue(member.full_name) ||
       toStringValue(member.name),
     role: toStringValue(member.role, "member"),
+    avatar_url: toNullableStringValue(member.avatar_url),
   };
+}
+
+async function addSharedExpenseParticipantAvatarsWithClient(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  expenses: SharedExpense[]
+) {
+  const expenseIds = expenses.map((expense) => expense.expense_id).filter(Boolean);
+
+  if (!expenseIds.length) {
+    return expenses;
+  }
+
+  const { data: participantRows, error: participantError } = await supabase
+    .from("expense_participants")
+    .select("expense_id, profile_id")
+    .in("expense_id", expenseIds)
+    .eq("is_waived", false);
+
+  if (participantError || !Array.isArray(participantRows)) {
+    return expenses;
+  }
+
+  const profileIds = Array.from(
+    new Set(
+      participantRows
+        .map((row) => toStringValue((row as { profile_id?: unknown }).profile_id))
+        .filter(Boolean)
+    )
+  );
+
+  if (!profileIds.length) {
+    return expenses;
+  }
+
+  const [{ data: profileRows }, avatarUrlMap] = await Promise.all([
+    supabase.from("profiles").select("id, full_name, email").in("id", profileIds),
+    loadProfileAvatarUrlMapWithClient(supabase, profileIds),
+  ]);
+  const profileNameMap = new Map(
+    Array.isArray(profileRows)
+      ? profileRows.map((profile) => {
+          const row = profile as { id?: unknown; full_name?: unknown; email?: unknown };
+          const profileId = toStringValue(row.id);
+          return [
+            profileId,
+            toStringValue(row.full_name) ||
+              toStringValue(row.email) ||
+              "Participante",
+          ] as const;
+        })
+      : []
+  );
+  const participantsByExpenseId = new Map<
+    string,
+    Array<{ profile_id: string; display_name: string; avatar_url: string | null }>
+  >();
+
+  for (const participant of participantRows) {
+    const row = participant as { expense_id?: unknown; profile_id?: unknown };
+    const expenseId = toStringValue(row.expense_id);
+    const profileId = toStringValue(row.profile_id);
+
+    if (!expenseId || !profileId) continue;
+
+    const current = participantsByExpenseId.get(expenseId) ?? [];
+    current.push({
+      profile_id: profileId,
+      display_name: profileNameMap.get(profileId) ?? "Participante",
+      avatar_url: avatarUrlMap.get(profileId) ?? null,
+    });
+    participantsByExpenseId.set(expenseId, current);
+  }
+
+  return expenses.map((expense) => ({
+    ...expense,
+    participants: participantsByExpenseId.get(expense.expense_id) ?? [],
+  }));
+}
+
+async function addTicketPayerAvatarsWithClient(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  tickets: ExpenseTicket[]
+) {
+  const ticketIds = tickets.map((ticket) => ticket.ticket_id).filter(Boolean);
+
+  if (!ticketIds.length) {
+    return tickets;
+  }
+
+  const { data, error } = await supabase
+    .from("purchase_tickets")
+    .select("id, paid_by_profile_id")
+    .in("id", ticketIds);
+
+  if (error || !Array.isArray(data)) {
+    return tickets;
+  }
+
+  const payerByTicketId = new Map(
+    data.map((ticket) => [
+      toStringValue((ticket as { id?: unknown }).id),
+      toNullableStringValue(
+        (ticket as { paid_by_profile_id?: unknown }).paid_by_profile_id
+      ),
+    ])
+  );
+  const avatarUrlMap = await loadProfileAvatarUrlMapWithClient(
+    supabase,
+    Array.from(payerByTicketId.values()).filter((value): value is string => !!value)
+  );
+
+  return tickets.map((ticket) => {
+    const paidByProfileId =
+      ticket.paid_by_profile_id ?? payerByTicketId.get(ticket.ticket_id) ?? null;
+
+    return {
+      ...ticket,
+      paid_by_profile_id: paidByProfileId,
+      paid_by_avatar_url: paidByProfileId
+        ? avatarUrlMap.get(paidByProfileId) ?? ticket.paid_by_avatar_url
+        : ticket.paid_by_avatar_url,
+    };
+  });
 }
 
 function readCleaningZoneName(value: Record<string, unknown>) {
@@ -252,6 +380,7 @@ function mapCleaningMember(member: Record<string, unknown>): AddCleaningMember {
       toStringValue(member.full_name) ||
       toStringValue(member.name),
     role: toStringValue(member.role, "member"),
+    avatar_url: toNullableStringValue(member.avatar_url),
   };
 }
 
@@ -805,6 +934,7 @@ export async function loadProfileSettingsWithClient(
       email: toNullableStringValue(profile.email),
       full_name: toNullableStringValue(profile.full_name),
       avatar_url: toNullableStringValue(profile.avatar_url),
+      avatar_storage_path: toNullableStringValue(profile.avatar_storage_path),
       user_hash_id: toStringValue(profile.user_hash_id),
     },
     house_member: {
@@ -926,26 +1056,65 @@ export async function loadHouseExpensesDashboardWithClient(
         public_code: String(data.house.public_code ?? houseCode),
       }
     : null;
+  const rawSettlements = asArray<Record<string, unknown>>(data.settlements);
+  const rawPendingPaymentConfirmations = asArray<Record<string, unknown>>(
+    data.pending_payment_confirmations
+  );
+  const avatarUrlMap = await loadProfileAvatarUrlMapWithClient(
+    supabase,
+    [
+      ...rawSettlements.flatMap((settlement) => [
+        toStringValue(settlement.from_profile_id),
+        toStringValue(settlement.to_profile_id),
+      ]),
+      ...rawPendingPaymentConfirmations.flatMap((payment) => [
+        toStringValue(payment.from_profile_id),
+        toStringValue(payment.to_profile_id),
+      ]),
+    ]
+  );
+
+  const tickets = await addTicketPayerAvatarsWithClient(
+    supabase,
+    asArray<Record<string, unknown>>(data.tickets).map(mapExpenseTicket)
+  );
+  const sharedExpenses = await addSharedExpenseParticipantAvatarsWithClient(
+    supabase,
+    asArray<Record<string, unknown>>(data.shared_expenses).map(mapSharedExpense)
+  );
 
   return {
     house,
-    tickets: asArray<Record<string, unknown>>(data.tickets).map(mapExpenseTicket),
-    shared_expenses: asArray<Record<string, unknown>>(data.shared_expenses).map(
-      mapSharedExpense
-    ),
-    settlements: asArray<Settlement>(data.settlements),
-    pending_payment_confirmations: asArray<Record<string, unknown>>(
-      data.pending_payment_confirmations
-    ).map(
-      (payment) =>
-        ({
+    tickets,
+    shared_expenses: sharedExpenses,
+    settlements: rawSettlements.map((settlement) => {
+      const fromProfileId = toStringValue(settlement.from_profile_id);
+      const toProfileId = toStringValue(settlement.to_profile_id);
+
+      return {
+        from_profile_id: fromProfileId,
+        from_name: toStringValue(settlement.from_name),
+        from_avatar_url: avatarUrlMap.get(fromProfileId) ?? null,
+        to_profile_id: toProfileId,
+        to_name: toStringValue(settlement.to_name),
+        to_avatar_url: avatarUrlMap.get(toProfileId) ?? null,
+        amount: toNumericLikeValue(settlement.amount),
+      } satisfies Settlement;
+    }),
+    pending_payment_confirmations: rawPendingPaymentConfirmations.map((payment) => {
+      const fromProfileId = toStringValue(payment.from_profile_id);
+      const toProfileId = toStringValue(payment.to_profile_id);
+
+      return {
           payment_id: toStringValue(payment.payment_id),
           expense_id: toNullableStringValue(payment.expense_id),
           expense_title: toNullableStringValue(payment.expense_title),
-          from_profile_id: toStringValue(payment.from_profile_id),
+          from_profile_id: fromProfileId,
           from_name: toStringValue(payment.from_name),
-          to_profile_id: toStringValue(payment.to_profile_id),
+          from_avatar_url: avatarUrlMap.get(fromProfileId) ?? null,
+          to_profile_id: toProfileId,
           to_name: toStringValue(payment.to_name),
+          to_avatar_url: avatarUrlMap.get(toProfileId) ?? null,
           amount:
             typeof payment.amount === "number" || typeof payment.amount === "string"
               ? payment.amount
@@ -954,8 +1123,8 @@ export async function loadHouseExpensesDashboardWithClient(
           note: toNullableStringValue(payment.note),
           status: toStringValue(payment.status),
           can_review: payment.can_review === true,
-        }) satisfies PendingPaymentConfirmation
-    ),
+        } satisfies PendingPaymentConfirmation;
+    }),
   } satisfies ExpensesDashboardData;
 }
 
@@ -975,7 +1144,10 @@ export async function loadHousePurchaseTicketsHistoryWithClient(
     notFound();
   }
 
-  return asArray<Record<string, unknown>>(data).map(mapExpenseTicket);
+  return addTicketPayerAvatarsWithClient(
+    supabase,
+    asArray<Record<string, unknown>>(data).map(mapExpenseTicket)
+  );
 }
 
 export async function loadOpenHousePurchaseTicketsWithClient(
@@ -992,7 +1164,10 @@ export async function loadOpenHousePurchaseTicketsWithClient(
     notFound();
   }
 
-  return asArray<Record<string, unknown>>(data).map(mapExpenseTicket);
+  return addTicketPayerAvatarsWithClient(
+    supabase,
+    asArray<Record<string, unknown>>(data).map(mapExpenseTicket)
+  );
 }
 
 export async function loadHouseSharedExpensesHistoryWithClient(
@@ -1011,7 +1186,10 @@ export async function loadHouseSharedExpensesHistoryWithClient(
     notFound();
   }
 
-  return asArray<Record<string, unknown>>(data).map(mapSharedExpense);
+  return addSharedExpenseParticipantAvatarsWithClient(
+    supabase,
+    asArray<Record<string, unknown>>(data).map(mapSharedExpense)
+  );
 }
 
 export async function loadOpenHouseSharedExpensesWithClient(
@@ -1028,7 +1206,10 @@ export async function loadOpenHouseSharedExpensesWithClient(
     notFound();
   }
 
-  return asArray<Record<string, unknown>>(data).map(mapSharedExpense);
+  return addSharedExpenseParticipantAvatarsWithClient(
+    supabase,
+    asArray<Record<string, unknown>>(data).map(mapSharedExpense)
+  );
 }
 
 export async function loadHouseInvoicesDashboardWithClient(
@@ -1344,13 +1525,22 @@ export async function loadAddCleaningTaskFormOptionsWithClient(
     } satisfies AddCleaningTaskFormOptions;
   }
 
+  const members = asArray<Record<string, unknown>>(
+    data.members ?? data.house_members
+  ).map(mapCleaningMember);
+  const avatarUrlMap = await loadProfileAvatarUrlMapWithClient(
+    supabase,
+    members.map((member) => member.profile_id)
+  );
+
   return {
     zones: asArray<Record<string, unknown>>(
       data.zones ?? data.cleaning_zones ?? data.rooms
     ).map(mapCleaningZone),
-    members: asArray<Record<string, unknown>>(
-      data.members ?? data.house_members
-    ).map(mapCleaningMember),
+    members: members.map((member) => ({
+      ...member,
+      avatar_url: avatarUrlMap.get(member.profile_id) ?? member.avatar_url,
+    })),
   } satisfies AddCleaningTaskFormOptions;
 }
 
@@ -1495,6 +1685,14 @@ export async function loadAddInvoiceFormOptionsWithClient(
     } satisfies AddInvoiceFormOptions;
   }
 
+  const members = asArray<Record<string, unknown>>(
+    data.members ?? data.house_members
+  ).map(mapInvoiceMember);
+  const avatarUrlMap = await loadProfileAvatarUrlMapWithClient(
+    supabase,
+    members.map((member) => member.profile_id)
+  );
+
   return {
     categories: dedupeInvoiceCategories(
       [
@@ -1505,9 +1703,10 @@ export async function loadAddInvoiceFormOptionsWithClient(
         ...asArray<Record<string, unknown>>(data.custom_categories),
       ].map(mapInvoiceCategory)
     ),
-    members: asArray<Record<string, unknown>>(
-      data.members ?? data.house_members
-    ).map(mapInvoiceMember),
+    members: members.map((member) => ({
+      ...member,
+      avatar_url: avatarUrlMap.get(member.profile_id) ?? member.avatar_url,
+    })),
   } satisfies AddInvoiceFormOptions;
 }
 
@@ -1526,23 +1725,36 @@ export async function loadHousePendingPaymentConfirmationsWithClient(
     return [] satisfies PendingPaymentConfirmation[];
   }
 
-  return asArray<Record<string, unknown>>(data).map(
-    (payment) =>
-      ({
+  const payments = asArray<Record<string, unknown>>(data);
+  const avatarUrlMap = await loadProfileAvatarUrlMapWithClient(
+    supabase,
+    payments.flatMap((payment) => [
+      toStringValue(payment.from_profile_id),
+      toStringValue(payment.to_profile_id),
+    ])
+  );
+
+  return payments.map((payment) => {
+    const fromProfileId = toStringValue(payment.from_profile_id);
+    const toProfileId = toStringValue(payment.to_profile_id);
+
+    return {
         payment_id: toStringValue(payment.payment_id),
         expense_id: toNullableStringValue(payment.expense_id),
         expense_title: toNullableStringValue(payment.expense_title),
-        from_profile_id: toStringValue(payment.from_profile_id),
+        from_profile_id: fromProfileId,
         from_name: toStringValue(payment.from_name),
-        to_profile_id: toStringValue(payment.to_profile_id),
+        from_avatar_url: avatarUrlMap.get(fromProfileId) ?? null,
+        to_profile_id: toProfileId,
         to_name: toStringValue(payment.to_name),
+        to_avatar_url: avatarUrlMap.get(toProfileId) ?? null,
         amount: toNumericLikeValue(payment.amount),
         payment_date: toStringValue(payment.payment_date),
         note: toNullableStringValue(payment.note),
         status: toStringValue(payment.status),
         can_review: payment.can_review === true,
-      }) satisfies PendingPaymentConfirmation
-  );
+      } satisfies PendingPaymentConfirmation;
+  });
 }
 
 export async function loadAddExpenseFormOptionsWithClient(
@@ -1560,15 +1772,25 @@ export async function loadAddExpenseFormOptionsWithClient(
     } satisfies AddExpenseFormOptions;
   }
 
-  return {
-    members: asArray<Record<string, unknown>>(data.members).map(
-      (member) =>
-        ({
+  const members = asArray<Record<string, unknown>>(data.members).map(
+    (member) =>
+      ({
           profile_id: toStringValue(member.profile_id),
           display_name: toStringValue(member.display_name),
           role: toStringValue(member.role, "member"),
+          avatar_url: toNullableStringValue(member.avatar_url),
         }) satisfies AddExpenseMember
-    ),
+  );
+  const avatarUrlMap = await loadProfileAvatarUrlMapWithClient(
+    supabase,
+    members.map((member) => member.profile_id)
+  );
+
+  return {
+    members: members.map((member) => ({
+      ...member,
+      avatar_url: avatarUrlMap.get(member.profile_id) ?? member.avatar_url,
+    })),
     items: asArray<Record<string, unknown>>(data.items).map(
       (item) =>
         ({
@@ -1640,6 +1862,7 @@ function mapPersonalAreaDebtItem(item: Record<string, unknown>) {
     expense_id: toStringValue(item.expense_id),
     payment_id: toNullableStringValue(item.payment_id),
     person_name: toStringValue(item.person_name, "Companero"),
+    person_avatar_url: toNullableStringValue(item.person_avatar_url),
     title: toStringValue(item.title, "Gasto"),
     item_date: toStringValue(item.item_date),
     amount: toNumericLikeValue(item.amount),
@@ -1703,6 +1926,7 @@ function applySettlementBalances(
           expense_id: `settlement-${settlement.to_profile_id}`,
           payment_id: null,
           person_name: settlement.to_name,
+          person_avatar_url: settlement.to_avatar_url,
           title: "Pago simplificado",
           item_date: itemDate,
           amount: settlement.amount,
@@ -1718,6 +1942,7 @@ function applySettlementBalances(
           expense_id: `settlement-${settlement.from_profile_id}`,
           payment_id: null,
           person_name: settlement.from_name,
+          person_avatar_url: settlement.from_avatar_url,
           title: "Pago simplificado",
           item_date: itemDate,
           amount: settlement.amount,
@@ -1754,6 +1979,7 @@ function applySettlementBalances(
         amount: debt.amount,
         currency: debt.currency,
         person_name: debt.person_name,
+        person_avatar_url: debt.person_avatar_url,
       })),
       ...settlementReceivables.map((receivable) => ({
         event_id: `settlement-receivable:${receivable.expense_id}`,
@@ -1763,6 +1989,7 @@ function applySettlementBalances(
         amount: receivable.amount,
         currency: receivable.currency,
         person_name: receivable.person_name,
+        person_avatar_url: receivable.person_avatar_url,
       })),
     ],
   } satisfies PersonalAreaDashboardData;
@@ -1826,6 +2053,7 @@ export async function loadPersonalAreaDashboardWithClient(
         amount: toNumericLikeValue(event.amount),
         currency: toStringValue(event.currency, "EUR"),
         person_name: toStringValue(event.person_name),
+        person_avatar_url: toNullableStringValue(event.person_avatar_url),
       })
     ),
     chart: asArray<Record<string, unknown>>(data.chart).map((item) => ({

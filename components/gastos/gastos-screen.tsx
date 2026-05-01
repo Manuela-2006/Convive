@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTicketDocumentSignedUrlAction } from "../../app/backend/endpoints/gastos/actions";
 import { Card } from "../ui/card";
+import { ProfileAvatar } from "../ui/profile-avatar";
 import type {
   ExpenseTicket,
   PendingPaymentConfirmation,
@@ -111,7 +112,12 @@ export function GastosScreen({
                   return (
                     <div key={ticket.ticket_id} className={styles.innerRow}>
                       <div className={styles.leftInfo}>
-                        <Image src="/images/IconoperfilM.webp" alt="" width={20} height={20} />
+                        <ProfileAvatar
+                          src={ticket.paid_by_avatar_url}
+                          alt=""
+                          width={20}
+                          height={20}
+                        />
                         <div>
                           <p className={styles.mainText}>
                             {ticket.paid_by_name} -{" "}
@@ -240,8 +246,8 @@ export function GastosScreen({
                   >
                     <div className={styles.flow}>
                       <span className={styles.personTag}>
-                        <Image
-                          src="/images/IconoperfilM.webp"
+                        <ProfileAvatar
+                          src={settlement.from_avatar_url}
                           alt=""
                           width={16}
                           height={16}
@@ -258,8 +264,8 @@ export function GastosScreen({
                         height={18}
                       />
                       <span className={styles.personTag}>
-                        <Image
-                          src="/images/IconoperfilH.webp"
+                        <ProfileAvatar
+                          src={settlement.to_avatar_url}
                           alt=""
                           width={16}
                           height={16}
@@ -314,8 +320,8 @@ export function GastosScreen({
                     <div key={payment.payment_id} className={styles.payRow}>
                       <div className={styles.flow}>
                         <span className={styles.personTag}>
-                          <Image
-                            src="/images/IconoperfilM.webp"
+                          <ProfileAvatar
+                            src={payment.from_avatar_url}
                             alt=""
                             width={16}
                             height={16}
@@ -332,8 +338,8 @@ export function GastosScreen({
                           height={18}
                         />
                         <span className={styles.personTag}>
-                          <Image
-                            src="/images/IconoperfilH.webp"
+                          <ProfileAvatar
+                            src={payment.to_avatar_url}
                             alt=""
                             width={16}
                             height={16}

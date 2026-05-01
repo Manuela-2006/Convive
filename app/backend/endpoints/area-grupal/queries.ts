@@ -12,6 +12,7 @@ import {
   loadHouseInvoiceHistoryWithClient,
   loadHouseSharedExpensesHistoryWithClient,
 } from "../shared/dashboard-core";
+import { loadProfileAvatarUrlMapWithClient } from "../shared/profile-avatar";
 import { createClient } from "../shared/supabase-server";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
@@ -364,13 +365,17 @@ export async function loadAreaGrupalDashboardWithClient(
         }) satisfies GroupExpenseComparisonItem
     )
     .sort((first, second) => toNumber(second.current_amount) - toNumber(first.current_amount));
+  const avatarUrlMap = await loadProfileAvatarUrlMapWithClient(
+    supabase,
+    memberOptions.members.map((member) => member.profile_id)
+  );
 
   return {
     members: memberOptions.members.map((member) => ({
       profile_id: member.profile_id,
       display_name: member.display_name,
       role: member.role,
-      avatar_url: null,
+      avatar_url: avatarUrlMap.get(member.profile_id) ?? member.avatar_url,
     })),
     shopping_list: shoppingList,
     shared_funds: {

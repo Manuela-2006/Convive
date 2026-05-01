@@ -7934,3 +7934,308 @@ drop index if exists public.profiles_public_code_uidx;
 
 alter table public.profiles
 drop column if exists public_code;
+
+
+-- =========================================================
+-- AVATAR PRIVADO DE PERFIL
+-- =========================================================
+
+-- Guarda la ultima foto personalizada subida aunque el avatar activo sea
+-- uno de los iconos internos de la aplicacion.
+alter table public.profiles
+add column if not exists avatar_storage_path text;
+
+
+-- Helper seguro para rutas:
+-- profiles/{profile_id}/avatar/{uuid}.{ext}
+create or replace function public.storage_path_profile_id(p_name text)
+returns uuid
+language plpgsql
+stable
+as $$
+declare
+  v_profile_id_text text;
+begin
+  if p_name is null or p_name !~ '^profiles/[0-9a-fA-F-]+/avatar/[^/]+$' then
+    return null;
+  end if;
+
+  v_profile_id_text := split_part(p_name, '/', 2);
+  return v_profile_id_text::uuid;
+exception
+  when others then
+    return null;
+end;
+$$;
+
+
+-- Politicas adicionales para avatares dentro del bucket privado existente.
+-- Mantiene convive-documents privado y permite solo al usuario autenticado
+-- operar sobre su propia carpeta profiles/{auth.uid()}/avatar/.
+drop policy if exists "convive_documents_profile_avatar_select_own" on storage.objects;
+create policy "convive_documents_profile_avatar_select_own"
+on storage.objects
+for select
+to authenticated
+using (
+  bucket_id = 'convive-documents'
+  and public.storage_path_profile_id(name) = auth.uid()
+);
+
+drop policy if exists "convive_documents_profile_avatar_insert_own" on storage.objects;
+create policy "convive_documents_profile_avatar_insert_own"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'convive-documents'
+  and public.storage_path_profile_id(name) = auth.uid()
+);
+
+drop policy if exists "convive_documents_profile_avatar_update_own" on storage.objects;
+create policy "convive_documents_profile_avatar_update_own"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'convive-documents'
+  and public.storage_path_profile_id(name) = auth.uid()
+)
+with check (
+  bucket_id = 'convive-documents'
+  and public.storage_path_profile_id(name) = auth.uid()
+);
+
+drop policy if exists "convive_documents_profile_avatar_delete_own" on storage.objects;
+create policy "convive_documents_profile_avatar_delete_own"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'convive-documents'
+  and public.storage_path_profile_id(name) = auth.uid()
+);
+
+
+-- Funcion especifica para cambiar el avatar activo sin mezclarlo con el
+-- guardado de nombre/email/contrasena.
+create or replace function public.set_own_profile_avatar(
+  p_avatar_url text,
+  p_avatar_storage_path text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_avatar_url text;
+  v_avatar_storage_path text;
+  v_current_storage_path text;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_avatar_url := nullif(trim(coalesce(p_avatar_url, '')), '');
+  v_avatar_storage_path := nullif(trim(coalesce(p_avatar_storage_path, '')), '');
+
+  if v_avatar_storage_path is not null
+     and public.storage_path_profile_id(v_avatar_storage_path) is distinct from auth.uid() then
+    raise exception 'Ruta de avatar no permitida';
+  end if;
+
+  select avatar_storage_path
+  into v_current_storage_path
+  from public.profiles
+  where id = auth.uid()
+  limit 1;
+
+  if v_avatar_url is not null
+     and v_avatar_url not in ('/images/IconoperfilM.webp', '/images/IconoperfilH.webp') then
+    if public.storage_path_profile_id(v_avatar_url) is distinct from auth.uid() then
+      raise exception 'Avatar no permitido';
+    end if;
+
+    if v_avatar_storage_path is null and v_current_storage_path is distinct from v_avatar_url then
+      raise exception 'La foto seleccionada no pertenece a tu perfil';
+    end if;
+  end if;
+
+  update public.profiles
+  set
+    avatar_url = v_avatar_url,
+    avatar_storage_path = coalesce(v_avatar_storage_path, avatar_storage_path)
+  where id = auth.uid();
+
+  if not found then
+    raise exception 'Perfil no encontrado';
+  end if;
+
+  return jsonb_build_object(
+    'avatar_url', v_avatar_url,
+    'avatar_storage_path', coalesce(v_avatar_storage_path, v_current_storage_path)
+  );
+end;
+$$;
+
+grant execute on function public.set_own_profile_avatar(text, text) to authenticated;
+
+
+create or replace function public.update_own_profile_settings(
+  p_full_name text,
+  p_email text,
+  p_avatar_url text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_avatar_url text;
+  v_current_storage_path text;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_avatar_url := nullif(trim(coalesce(p_avatar_url, '')), '');
+
+  if v_avatar_url is not null
+     and v_avatar_url not in ('/images/IconoperfilM.webp', '/images/IconoperfilH.webp') then
+    if public.storage_path_profile_id(v_avatar_url) is distinct from auth.uid() then
+      raise exception 'Avatar no permitido';
+    end if;
+
+    select avatar_storage_path
+    into v_current_storage_path
+    from public.profiles
+    where id = auth.uid()
+    limit 1;
+
+    if v_current_storage_path is distinct from v_avatar_url then
+      raise exception 'La foto seleccionada no pertenece a tu perfil';
+    end if;
+  end if;
+
+  update public.profiles
+  set
+    full_name = nullif(trim(p_full_name), ''),
+    email = nullif(trim(p_email), ''),
+    avatar_url = v_avatar_url
+  where id = auth.uid();
+
+  if not found then
+    raise exception 'Perfil no encontrado';
+  end if;
+
+  return jsonb_build_object('status', 'updated');
+end;
+$$;
+
+grant execute on function public.update_own_profile_settings(text, text, text) to authenticated;
+
+
+create or replace function public.get_profile_settings(
+  p_house_public_code text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+  v_is_admin boolean;
+  v_result jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_house_id := public.get_accessible_house_id(p_house_public_code);
+  v_is_admin := public.is_house_admin(v_house_id);
+
+  select jsonb_build_object(
+    'profile', jsonb_build_object(
+      'id', p.id,
+      'email', p.email,
+      'full_name', p.full_name,
+      'avatar_url', p.avatar_url,
+      'avatar_storage_path', p.avatar_storage_path,
+      'user_hash_id', p.user_hash_id
+    ),
+    'house_member', jsonb_build_object(
+      'role', hm.role,
+      'room_label', hm.room_label,
+      'room_size', hm.room_size,
+      'stay_start_date', hm.stay_start_date,
+      'stay_end_date', hm.stay_end_date
+    ),
+    'can_remove_members', v_is_admin,
+    'removable_members', case
+      when v_is_admin then coalesce((
+        select jsonb_agg(
+          jsonb_build_object(
+            'profile_id', member.profile_id,
+            'display_name', public.profile_display_name(member.profile_id),
+            'role', member.role
+          )
+          order by public.profile_display_name(member.profile_id)
+        )
+        from public.house_members member
+        where member.house_id = v_house_id
+          and member.is_active = true
+      ), '[]'::jsonb)
+      else '[]'::jsonb
+    end
+  )
+  into v_result
+  from public.profiles p
+  join public.house_members hm
+    on hm.profile_id = p.id
+   and hm.house_id = v_house_id
+   and hm.is_active = true
+  where p.id = auth.uid()
+  limit 1;
+
+  if v_result is null then
+    raise exception 'Perfil no encontrado';
+  end if;
+
+  return v_result;
+end;
+$$;
+
+grant execute on function public.get_profile_settings(text) to authenticated;
+
+
+-- =========================================================
+-- AVATAR PRIVADO - LECTURA ENTRE MIEMBROS DEL MISMO PISO
+-- =========================================================
+
+-- Permite mostrar avatares personalizados en Area grupal y pantallas de
+-- gastos/limpieza solo entre miembros activos que comparten piso.
+-- La escritura sigue limitada a profiles/{auth.uid()}/avatar/.
+drop policy if exists "convive_documents_profile_avatar_select_own" on storage.objects;
+create policy "convive_documents_profile_avatar_select_own"
+on storage.objects
+for select
+to authenticated
+using (
+  bucket_id = 'convive-documents'
+  and (
+    public.storage_path_profile_id(name) = auth.uid()
+    or exists (
+      select 1
+      from public.house_members viewer
+      join public.house_members owner_member
+        on owner_member.house_id = viewer.house_id
+       and owner_member.is_active = true
+      where viewer.profile_id = auth.uid()
+        and viewer.is_active = true
+        and owner_member.profile_id = public.storage_path_profile_id(name)
+    )
+  )
+);

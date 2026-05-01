@@ -23,11 +23,7 @@ function getHistoryIcon(item: PersonalAreaHistoryItem) {
     return "/iconos/Carrodecompra.svg";
   }
 
-  if (item.item_type === "pago_recibido") {
-    return "/images/IconoperfilM.webp";
-  }
-
-  return "/images/IconoperfilH.webp";
+  return "/iconos/euro.svg";
 }
 
 function matchesSearch(item: PersonalAreaHistoryItem, searchTerm: string) {

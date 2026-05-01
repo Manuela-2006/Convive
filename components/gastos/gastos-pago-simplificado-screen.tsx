@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
+import { ProfileAvatar } from "../ui/profile-avatar";
 import type { Settlement } from "../../lib/dashboard-types";
 import { formatCurrency } from "../../lib/dashboard-presenters";
 import styles from "./gastos-pago-simplificado-screen.module.css";
@@ -75,8 +76,8 @@ export function GastosPagoSimplificadoScreen({
                       key={`${settlement.from_profile_id}-${settlement.to_profile_id}-${index}`}
                       className={styles.personTag}
                     >
-                      <Image
-                        src="/images/IconoperfilM.webp"
+                      <ProfileAvatar
+                        src={settlement.from_avatar_url}
                         alt=""
                         width={22}
                         height={22}
@@ -91,8 +92,8 @@ export function GastosPagoSimplificadoScreen({
                         width={18}
                         height={18}
                       />
-                      <Image
-                        src="/images/IconoperfilH.webp"
+                      <ProfileAvatar
+                        src={settlement.to_avatar_url}
                         alt=""
                         width={22}
                         height={22}

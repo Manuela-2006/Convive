@@ -479,7 +479,8 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
         )
       : [];
   const sharedExpensesHistory =
-    sectionPath === "gastos/division"
+    sectionPath === "gastos/division" ||
+    sectionPath.startsWith("gastos/division/reparto/")
       ? await loadHouseSharedExpensesHistoryWithClient(
           routeContext.supabase,
           routeContext.house.public_code,
@@ -500,8 +501,8 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
       <GastosScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-        tickets={expensesDashboard?.tickets ?? openHousePurchaseTickets}
-        sharedExpenses={expensesDashboard?.shared_expenses ?? openHouseSharedExpenses}
+        tickets={openHousePurchaseTickets}
+        sharedExpenses={openHouseSharedExpenses}
         settlements={expensesDashboard?.settlements ?? []}
         pendingPaymentConfirmations={pendingPaymentConfirmations}
         canReviewPayments={canReviewExpensePayments}
@@ -542,7 +543,9 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
 
   if (sectionPath.startsWith("gastos/division/reparto/")) {
     const expenseId = sectionPath.replace("gastos/division/reparto/", "");
-    const sourceExpenses = expensesDashboard?.shared_expenses ?? [];
+    const sourceExpenses = sharedExpensesHistory.length
+      ? sharedExpensesHistory
+      : (expensesDashboard?.shared_expenses ?? []);
     const selectedExpense =
       sourceExpenses.find((expense) => expense.expense_id === expenseId) ?? null;
 

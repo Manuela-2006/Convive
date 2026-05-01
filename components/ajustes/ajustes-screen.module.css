@@ -320,6 +320,18 @@
   border-radius: 999px;
 }
 
+.avatarImage {
+  display: block;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.avatarImageFallback {
+  display: block;
+  border-radius: 999px;
+  background: rgba(139, 26, 47, 0.18);
+}
+
 .avatarOverlay {
   position: absolute;
   inset: 0;
@@ -401,7 +413,8 @@
 }
 
 .avatarFileName,
-.avatarUploadError {
+.avatarUploadError,
+.avatarUploadSuccess {
   margin: 0.2rem 0 0;
   font-family: "Poppins", sans-serif;
   font-size: 0.78rem;
@@ -413,6 +426,24 @@
 }
 
 .avatarUploadError {
+  color: #8b1a2f;
+}
+
+.avatarUploadSuccess {
+  color: #2f6846;
+}
+
+.avatarStatus,
+.avatarStatusError {
+  margin: -0.85rem 0 0;
+  min-height: 14px;
+  color: #2f6846;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.avatarStatusError {
   color: #8b1a2f;
 }
 
@@ -489,6 +520,12 @@
 
 .avatarDotButton img {
   border-radius: 999px;
+  border: 3px solid #be6f8b;
+  background: #fff;
+}
+
+.avatarDotButton .avatarImage,
+.avatarDotButton .avatarImageFallback {
   border: 3px solid #be6f8b;
   background: #fff;
 }

@@ -13,6 +13,7 @@ import { Calendar } from "../ui/calendar";
 import { Card } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { ProfileAvatar } from "../ui/profile-avatar";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { TicketUploader } from "../ui/ticket-uploader";
 import type { TicketScannerData } from "../../lib/ticket-scanner-types";
@@ -503,8 +504,8 @@ export function GastosAddTicketScreen({
                         checked={selectedParticipantIds.includes(member.profile_id)}
                         onCheckedChange={() => toggleParticipant(member.profile_id)}
                       />
-                      <Image
-                        src="/images/IconoperfilM.webp"
+                      <ProfileAvatar
+                        src={member.avatar_url}
                         alt=""
                         width={22}
                         height={22}

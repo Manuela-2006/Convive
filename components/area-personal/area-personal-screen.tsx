@@ -18,6 +18,7 @@ import { formatCurrency } from "../../lib/dashboard-presenters";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { ProfileAvatar } from "../ui/profile-avatar";
 import styles from "./area-personal-screen.module.css";
 
 type AreaPersonalScreenProps = {
@@ -84,12 +85,6 @@ function buildChartData(data: PersonalAreaDashboardData) {
     value: total > 0 ? Math.round((toNumber(item.amount) / total) * 100) : 0,
     color: chartColors[index % chartColors.length],
   }));
-}
-
-function iconForEvent(event: PersonalAreaCalendarEvent) {
-  return event.event_type === "me_deben"
-    ? "/images/IconoperfilM.webp"
-    : "/images/IconoperfilH.webp";
 }
 
 export function AreaPersonalScreen({
@@ -255,8 +250,8 @@ export function AreaPersonalScreen({
                   return (
                     <div className={styles.row} key={debt.expense_id}>
                       <div className={styles.person}>
-                        <Image
-                          src="/images/IconoperfilM.webp"
+                        <ProfileAvatar
+                          src={debt.person_avatar_url}
                           alt="Perfil"
                           width={22}
                           height={22}
@@ -309,8 +304,8 @@ export function AreaPersonalScreen({
                     key={`${receivable.expense_id}-${receivable.person_name}`}
                   >
                     <div className={styles.person}>
-                      <Image
-                        src="/images/IconoperfilH.webp"
+                      <ProfileAvatar
+                        src={receivable.person_avatar_url}
                         alt="Perfil"
                         width={22}
                         height={22}
@@ -371,11 +366,10 @@ export function AreaPersonalScreen({
                   <div className={`${styles.row} ${styles.historyRow}`} key={`${item.item_type}-${item.item_id}`}>
                     <div className={styles.person}>
                       <Image
-                        src={item.icon_type === "purchase" ? "/iconos/Carrodecompra.svg" : "/images/IconoperfilH.webp"}
+                        src={item.icon_type === "purchase" ? "/iconos/Carrodecompra.svg" : "/iconos/euro.svg"}
                         alt=""
                         width={22}
                         height={22}
-                        className={item.icon_type === "purchase" ? undefined : styles.avatar}
                       />
                       <div>
                         <p className={styles.personLine}>{item.title}</p>
@@ -459,12 +453,21 @@ export function AreaPersonalScreen({
                           onMouseLeave={() => setActiveCalendarDate(null)}
                         >
                           <span className={styles.popoverLine}>
-                            <Image
-                              src={iconForEvent(firstEvent)}
-                              alt=""
-                              width={14}
-                              height={14}
-                            />
+                            {firstEvent.person_avatar_url ? (
+                              <ProfileAvatar
+                                src={firstEvent.person_avatar_url}
+                                alt=""
+                                width={14}
+                                height={14}
+                              />
+                            ) : (
+                              <Image
+                                src="/iconos/euro.svg"
+                                alt=""
+                                width={14}
+                                height={14}
+                              />
+                            )}
                             {firstEvent.title} ·{" "}
                             {formatCurrency(firstEvent.amount, firstEvent.currency)}
                           </span>

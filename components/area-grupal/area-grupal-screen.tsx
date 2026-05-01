@@ -42,6 +42,7 @@ import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
+import { ProfileAvatar } from "../ui/profile-avatar";
 import { Progress } from "../ui/progress";
 import styles from "./area-grupal-screen.module.css";
 
@@ -305,8 +306,8 @@ export function AreaGrupalScreen({
                 {data.members.length ? (
                   data.members.map((member) => (
                     <div key={member.profile_id} className={styles.memberItem}>
-                      <Image
-                        src={member.avatar_url || "/images/IconoperfilM.webp"}
+                      <ProfileAvatar
+                        src={member.avatar_url}
                         alt={member.display_name}
                         width={28}
                         height={28}
@@ -581,7 +582,7 @@ export function AreaGrupalScreen({
                       <li key={item.name}>
                         <div className={styles.compareLeft}>
                           <Image
-                            src="/images/IconoperfilH.webp"
+                            src="/iconos/euro.svg"
                             alt=""
                             width={20}
                             height={20}

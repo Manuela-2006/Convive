@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Card } from "../ui/card";
+import { ProfileAvatar } from "../ui/profile-avatar";
 import type { SharedExpense } from "../../lib/dashboard-types";
 import { formatCurrency, formatShortDate } from "../../lib/dashboard-presenters";
 import styles from "./gastos-reparto-screen.module.css";
@@ -63,7 +64,13 @@ export function GastosRepartoScreen({
   }
 
   const totalAmount = Number(expense.total_amount);
-  const participants = parseParticipants(expense.participants_text);
+  const participants = expense.participants.length
+    ? expense.participants
+    : parseParticipants(expense.participants_text).map((name, index) => ({
+        profile_id: `fallback-${index}`,
+        display_name: name,
+        avatar_url: null,
+      }));
   const participantsCount = Math.max(
     1,
     expense.participants_count || 0,
@@ -74,10 +81,14 @@ export function GastosRepartoScreen({
       ? totalAmount / participantsCount
       : 0;
 
-  const fallbackNames = Array.from({ length: participantsCount }).map(
-    (_, index) => `Participante ${index + 1}`
+  const fallbackParticipants = Array.from({ length: participantsCount }).map(
+    (_, index) => ({
+      profile_id: `fallback-${index}`,
+      display_name: `Participante ${index + 1}`,
+      avatar_url: null,
+    })
   );
-  const names = participants.length ? participants : fallbackNames;
+  const participantRows = participants.length ? participants : fallbackParticipants;
 
   return (
     <main className={styles.page}>
@@ -128,16 +139,19 @@ export function GastosRepartoScreen({
 
               <Card className={styles.resultBox}>
                 <div className={styles.participantsList}>
-                  {names.map((name, index) => (
-                    <div key={`${name}-${index}`} className={styles.participantRow}>
+                  {participantRows.map((participant, index) => (
+                    <div
+                      key={`${participant.profile_id}-${index}`}
+                      className={styles.participantRow}
+                    >
                       <span className={styles.participantLeft}>
-                        <Image
-                          src={index % 2 === 0 ? "/images/IconoperfilM.webp" : "/images/IconoperfilH.webp"}
+                        <ProfileAvatar
+                          src={participant.avatar_url}
                           alt=""
                           width={20}
                           height={20}
                         />
-                        {name}
+                        {participant.display_name}
                       </span>
                       <span className={styles.participantAmount}>
                         {formatCurrency(perPersonAmount, expense.currency)}

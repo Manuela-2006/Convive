@@ -78,6 +78,14 @@ type LoginCardProps = {
   initialJoinCode?: string;
 };
 
+function getAuthErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+
+  return "No se pudo completar la autenticación. Revisa la conexión e inténtalo de nuevo.";
+}
+
 export function LoginCard({
   initialFlow = "login",
   initialJoinCode = "",
@@ -137,43 +145,47 @@ export function LoginCard({
     setGlobalSuccess("");
 
     startTransition(async () => {
-      const inviteCode = joinHomeForm.getValues("code").trim();
-      const result =
-        initialFlow === "join" && inviteCode
-          ? await signInAndJoinHouseWithEmail({
-              ...values,
-              code: inviteCode,
-            })
-          : await signInWithEmail({
-              ...values,
-              redirectTo: initialFlow === "login" ? undefined : null,
-            });
+      try {
+        const inviteCode = joinHomeForm.getValues("code").trim();
+        const result =
+          initialFlow === "join" && inviteCode
+            ? await signInAndJoinHouseWithEmail({
+                ...values,
+                code: inviteCode,
+              })
+            : await signInWithEmail({
+                ...values,
+                redirectTo: initialFlow === "login" ? undefined : null,
+              });
 
-      if (result?.error) {
-        setGlobalError(result.error);
-        return;
-      }
+        if (result?.error) {
+          setGlobalError(result.error);
+          return;
+        }
 
-      const dashboardPath =
-        result && "dashboardPath" in result ? result.dashboardPath : undefined;
+        const dashboardPath =
+          result && "dashboardPath" in result ? result.dashboardPath : undefined;
 
-      if (dashboardPath) {
-        router.push(dashboardPath);
-        router.refresh();
-        return;
-      }
+        if (dashboardPath) {
+          router.push(dashboardPath);
+          router.refresh();
+          return;
+        }
 
-      const nextPath =
-        result && "redirectTo" in result ? result.redirectTo : undefined;
+        const nextPath =
+          result && "redirectTo" in result ? result.redirectTo : undefined;
 
-      if (nextPath) {
-        router.push(nextPath);
-        router.refresh();
-        return;
-      }
+        if (nextPath) {
+          router.push(nextPath);
+          router.refresh();
+          return;
+        }
 
-      if (initialFlow !== "login") {
-        continueWithHouseStep();
+        if (initialFlow !== "login") {
+          continueWithHouseStep();
+        }
+      } catch (error) {
+        setGlobalError(getAuthErrorMessage(error));
       }
     });
   };
@@ -183,28 +195,32 @@ export function LoginCard({
     setGlobalSuccess("");
 
     startTransition(async () => {
-      const result = await signUpWithEmail({
-        firstName: values.firstName,
-        lastName: values.lastName,
-        email: values.email,
-        password: values.password,
-      });
+      try {
+        const result = await signUpWithEmail({
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          password: values.password,
+        });
 
-      if (result?.error) {
-        setGlobalError(result.error);
-        return;
+        if (result?.error) {
+          setGlobalError(result.error);
+          return;
+        }
+
+        if (initialFlow === "join") {
+          setGlobalSuccess(
+            "Cuenta creada correctamente. Inicia sesión y usa tu código de invitación para entrar al piso."
+          );
+          return;
+        }
+
+        setGlobalSuccess("Cuenta creada correctamente. Ahora crea o únete a un piso.");
+        setShowSetupStep(true);
+        setHomeAction(preferredHomeAction);
+      } catch (error) {
+        setGlobalError(getAuthErrorMessage(error));
       }
-
-      if (initialFlow === "join") {
-        setGlobalSuccess(
-          "Cuenta creada correctamente. Inicia sesión y usa tu código de invitación para entrar al piso."
-        );
-        return;
-      }
-
-      setGlobalSuccess("Cuenta creada correctamente. Ahora crea o únete a un piso.");
-      setShowSetupStep(true);
-      setHomeAction(preferredHomeAction);
     });
   };
 

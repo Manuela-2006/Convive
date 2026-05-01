@@ -5,6 +5,8 @@ export type ExpenseTicket = {
   merchant: string;
   purchase_date: string;
   paid_by_name: string;
+  paid_by_profile_id: string | null;
+  paid_by_avatar_url: string | null;
   total_amount: number | string;
   my_share_amount?: number | string | null;
   currency: string;
@@ -20,6 +22,11 @@ export type SharedExpense = {
   paid_by_name: string;
   participants_text: string;
   participants_count: number;
+  participants: Array<{
+    profile_id: string;
+    display_name: string;
+    avatar_url: string | null;
+  }>;
   total_amount: number | string;
   my_share_amount?: number | string | null;
   my_status?: string | null;
@@ -31,8 +38,10 @@ export type SharedExpense = {
 export type Settlement = {
   from_profile_id: string;
   from_name: string;
+  from_avatar_url: string | null;
   to_profile_id: string;
   to_name: string;
+  to_avatar_url: string | null;
   amount: number | string;
 };
 
@@ -40,6 +49,7 @@ export type AddExpenseMember = {
   profile_id: string;
   display_name: string;
   role: string;
+  avatar_url: string | null;
 };
 
 export type AddExpenseCatalogItem = {
@@ -87,6 +97,7 @@ export type AddInvoiceMember = {
   profile_id: string;
   display_name: string;
   role: string;
+  avatar_url: string | null;
 };
 
 export type AddInvoiceFormOptions = {
@@ -100,8 +111,10 @@ export type PendingPaymentConfirmation = {
   expense_title: string | null;
   from_profile_id: string;
   from_name: string;
+  from_avatar_url: string | null;
   to_profile_id: string;
   to_name: string;
+  to_avatar_url: string | null;
   amount: number | string;
   payment_date: string;
   note: string | null;
@@ -164,6 +177,7 @@ export type AddCleaningMember = {
   profile_id: string;
   display_name: string;
   role: string;
+  avatar_url: string | null;
 };
 
 export type AddCleaningTaskFormOptions = {
@@ -175,6 +189,7 @@ export type PersonalAreaDebtItem = {
   expense_id: string;
   payment_id: string | null;
   person_name: string;
+  person_avatar_url: string | null;
   title: string;
   item_date: string;
   amount: number | string;
@@ -206,6 +221,7 @@ export type PersonalAreaCalendarEvent = {
   amount: number | string;
   currency: string;
   person_name: string;
+  person_avatar_url: string | null;
 };
 
 export type PersonalAreaChartItem = {
@@ -298,6 +314,7 @@ export type ProfileSettingsData = {
     email: string | null;
     full_name: string | null;
     avatar_url: string | null;
+    avatar_storage_path: string | null;
     user_hash_id: string;
   };
   house_member: {

@@ -9,7 +9,17 @@ import {
   updateHouseMemberSettingsAction,
   updateProfileSettingsAction,
 } from "../../app/backend/endpoints/auth/actions";
+import {
+  getProfileAvatarSignedUrlAction,
+  selectProfileAvatarAction,
+  uploadProfileAvatarAction,
+} from "../../app/backend/endpoints/profile/avatar-actions";
 import type { ProfileSettingsData } from "../../lib/dashboard-types";
+import { fileToDocumentUploadPayload } from "../../lib/document-upload-client";
+import {
+  PROFILE_AVATAR_DEFAULTS,
+  isProfileAvatarStoragePath,
+} from "../../lib/profile-avatar";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
@@ -23,7 +33,59 @@ type AjustesScreenProps = {
   settings: ProfileSettingsData;
 };
 
-const PROFILE_AVATARS = ["/images/IconoperfilM.webp", "/images/IconoperfilH.webp"];
+const PROFILE_AVATARS = [...PROFILE_AVATAR_DEFAULTS];
+
+type AvatarOption = {
+  value: string;
+  imageSrc: string | null;
+  kind: "default" | "custom";
+};
+
+function AvatarPicture({
+  src,
+  alt,
+  width,
+  height,
+  className,
+}: {
+  src: string | null;
+  alt: string;
+  width: number;
+  height: number;
+  className?: string;
+}) {
+  if (!src) {
+    return (
+      <span
+        className={`${styles.avatarImageFallback} ${className ?? ""}`}
+        style={{ width, height }}
+        aria-label={alt}
+      />
+    );
+  }
+
+  if (src.startsWith("/")) {
+    return (
+      <Image
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        className={className}
+      />
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      className={className}
+    />
+  );
+}
 
 function splitFullName(fullName: string | null) {
   const parts = (fullName ?? "").trim().split(/\s+/).filter(Boolean);
@@ -70,15 +132,23 @@ export function AjustesScreen({
     () => splitFullName(settings.profile.full_name),
     [settings.profile.full_name]
   );
-  const initialAvatarIndex = Math.max(
-    0,
-    PROFILE_AVATARS.findIndex((avatar) => avatar === settings.profile.avatar_url)
-  );
+  const initialAvatarUrl = settings.profile.avatar_url || PROFILE_AVATARS[0];
+  const initialAvatarStoragePath =
+    settings.profile.avatar_storage_path ??
+    (isProfileAvatarStoragePath(settings.profile.avatar_url, settings.profile.id)
+      ? settings.profile.avatar_url
+      : null);
   const [firstName, setFirstName] = useState(initialName.firstName);
   const [lastName, setLastName] = useState(initialName.lastName);
   const [email, setEmail] = useState(settings.profile.email ?? "");
   const [password, setPassword] = useState("");
-  const [selectedAvatar, setSelectedAvatar] = useState(initialAvatarIndex);
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState(initialAvatarUrl);
+  const [customAvatarPath, setCustomAvatarPath] = useState<string | null>(
+    initialAvatarStoragePath
+  );
+  const [customAvatarSignedUrl, setCustomAvatarSignedUrl] = useState<string | null>(
+    null
+  );
   const [roomLabel, setRoomLabel] = useState(
     settings.house_member.room_label ?? ""
   );
@@ -98,6 +168,9 @@ export function AjustesScreen({
   const [avatarPopoverOpen, setAvatarPopoverOpen] = useState(false);
   const [avatarDragging, setAvatarDragging] = useState(false);
   const [avatarUploadError, setAvatarUploadError] = useState<string | null>(null);
+  const [avatarUploadSuccess, setAvatarUploadSuccess] = useState<string | null>(
+    null
+  );
   const [avatarFileName, setAvatarFileName] = useState<string | null>(null);
   const [contractPopoverOpen, setContractPopoverOpen] = useState(false);
   const [contractDragging, setContractDragging] = useState(false);
@@ -105,12 +178,35 @@ export function AjustesScreen({
     null
   );
   const [contractFileName, setContractFileName] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isProfilePending, startProfileTransition] = useTransition();
+  const [isHousePending, startHouseTransition] = useTransition();
+  const [isAvatarPending, startAvatarTransition] = useTransition();
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const contractInputRef = useRef<HTMLInputElement>(null);
-  const visibleCount = 3;
-  const selectedAvatarUrl =
-    PROFILE_AVATARS[selectedAvatar] ?? PROFILE_AVATARS[0];
+  const avatarOptions = useMemo<AvatarOption[]>(() => {
+    const options: AvatarOption[] = PROFILE_AVATARS.map((avatar) => ({
+      value: avatar,
+      imageSrc: avatar,
+      kind: "default",
+    }));
+
+    if (customAvatarPath) {
+      options.push({
+        value: customAvatarPath,
+        imageSrc: customAvatarSignedUrl,
+        kind: "custom",
+      });
+    }
+
+    return options;
+  }, [customAvatarPath, customAvatarSignedUrl]);
+  const selectedAvatarIndex = Math.max(
+    0,
+    avatarOptions.findIndex((avatar) => avatar.value === selectedAvatarUrl)
+  );
+  const visibleCount = Math.min(3, avatarOptions.length);
+  const selectedAvatarDisplayUrl =
+    avatarOptions[selectedAvatarIndex]?.imageSrc ?? null;
   const profileDisplayName =
     [firstName, lastName].filter(Boolean).join(" ").trim() || "Perfil";
   const trimmedFirstName = firstName.trim();
@@ -128,7 +224,6 @@ export function AjustesScreen({
     trimmedFirstName !== initialFirstName ||
     trimmedLastName !== initialLastName ||
     normalizedEmail !== initialEmail ||
-    selectedAvatar !== initialAvatarIndex ||
     password.trim().length > 0;
 
   const hasHouseChanges =
@@ -137,15 +232,46 @@ export function AjustesScreen({
     stayStartDate !== initialStayStartDate ||
     stayEndDate !== initialStayEndDate;
 
-  const goPrevAvatar = () =>
-    setSelectedAvatar(
-      (prev) => (prev - 1 + PROFILE_AVATARS.length) % PROFILE_AVATARS.length
-    );
-  const goNextAvatar = () =>
-    setSelectedAvatar((prev) => (prev + 1) % PROFILE_AVATARS.length);
+  const selectAvatar = (avatarUrl: string) => {
+    if (avatarUrl === selectedAvatarUrl || isAvatarPending) {
+      return;
+    }
 
-  const handleAvatarFile = (file: File) => {
+    setAvatarUploadError(null);
+    setAvatarUploadSuccess(null);
+    setSelectedAvatarUrl(avatarUrl);
+    startAvatarTransition(async () => {
+      const result = await selectProfileAvatarAction({
+        dashboardPath: basePath,
+        avatarUrl,
+      });
+
+      if (result.success) {
+        router.refresh();
+        return;
+      }
+
+      setSelectedAvatarUrl(settings.profile.avatar_url || PROFILE_AVATARS[0]);
+      if ("error" in result) {
+        setAvatarUploadError(result.error);
+      }
+    });
+  };
+
+  const goPrevAvatar = () => {
+    const previousIndex =
+      (selectedAvatarIndex - 1 + avatarOptions.length) % avatarOptions.length;
+    selectAvatar(avatarOptions[previousIndex]?.value ?? PROFILE_AVATARS[0]);
+  };
+  const goNextAvatar = () => {
+    const nextIndex = (selectedAvatarIndex + 1) % avatarOptions.length;
+    selectAvatar(avatarOptions[nextIndex]?.value ?? PROFILE_AVATARS[0]);
+  };
+
+  const handleAvatarFile = async (file: File) => {
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    setAvatarUploadSuccess(null);
+
     if (!allowedTypes.includes(file.type)) {
       setAvatarUploadError("Solo se permiten imágenes JPG, PNG o WEBP.");
       return;
@@ -158,7 +284,34 @@ export function AjustesScreen({
 
     setAvatarUploadError(null);
     setAvatarFileName(file.name);
-    setAvatarPopoverOpen(false);
+    startAvatarTransition(async () => {
+      try {
+        const document = await fileToDocumentUploadPayload(file);
+        const result = await uploadProfileAvatarAction({
+          dashboardPath: basePath,
+          document,
+        });
+
+        if ("error" in result) {
+          setAvatarUploadError(result.error);
+          return;
+        }
+
+        setCustomAvatarPath(result.data.storagePath);
+        setCustomAvatarSignedUrl(result.data.signedUrl);
+        setSelectedAvatarUrl(result.data.storagePath);
+        setAvatarUploadSuccess("Imagen subida correctamente.");
+        router.refresh();
+      } catch (error) {
+        setAvatarUploadError(
+          error instanceof Error ? error.message : "No se pudo subir la imagen."
+        );
+      } finally {
+        if (avatarInputRef.current) {
+          avatarInputRef.current.value = "";
+        }
+      }
+    });
   };
 
   const handleContractFile = (file: File) => {
@@ -180,17 +333,17 @@ export function AjustesScreen({
 
   useEffect(() => {
     const refreshedName = splitFullName(settings.profile.full_name);
-    const refreshedAvatarIndex = Math.max(
-      0,
-      PROFILE_AVATARS.findIndex(
-        (avatar) => avatar === settings.profile.avatar_url
-      )
-    );
+    const refreshedAvatarStoragePath =
+      settings.profile.avatar_storage_path ??
+      (isProfileAvatarStoragePath(settings.profile.avatar_url, settings.profile.id)
+        ? settings.profile.avatar_url
+        : null);
 
     setFirstName(refreshedName.firstName);
     setLastName(refreshedName.lastName);
     setEmail(settings.profile.email ?? "");
-    setSelectedAvatar(refreshedAvatarIndex);
+    setSelectedAvatarUrl(settings.profile.avatar_url || PROFILE_AVATARS[0]);
+    setCustomAvatarPath(refreshedAvatarStoragePath);
     setRoomLabel(settings.house_member.room_label ?? "");
     setRoomSize(settings.house_member.room_size ?? "");
     setStayStartDate(settings.house_member.stay_start_date ?? "");
@@ -199,15 +352,45 @@ export function AjustesScreen({
     settings.profile.full_name,
     settings.profile.email,
     settings.profile.avatar_url,
+    settings.profile.avatar_storage_path,
+    settings.profile.id,
     settings.house_member.room_label,
     settings.house_member.room_size,
     settings.house_member.stay_start_date,
     settings.house_member.stay_end_date,
   ]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!customAvatarPath) {
+      setCustomAvatarSignedUrl(null);
+      return;
+    }
+
+    startAvatarTransition(async () => {
+      const result = await getProfileAvatarSignedUrlAction({
+        storagePath: customAvatarPath,
+      });
+
+      if (cancelled) return;
+
+      if (result.success) {
+        setCustomAvatarSignedUrl(result.data.signedUrl);
+      } else if ("error" in result) {
+        setCustomAvatarSignedUrl(null);
+        setAvatarUploadError(result.error);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [customAvatarPath]);
+
   const handleProfileSave = () => {
     setFeedbackMessage(null);
-    startTransition(async () => {
+    startProfileTransition(async () => {
       const result = await updateProfileSettingsAction({
         houseCode,
         dashboardPath: basePath,
@@ -231,7 +414,7 @@ export function AjustesScreen({
 
   const handleHouseSettingsSave = () => {
     setFeedbackMessage(null);
-    startTransition(async () => {
+    startHouseTransition(async () => {
       const result = await updateHouseMemberSettingsAction({
         houseCode,
         dashboardPath: basePath,
@@ -376,10 +559,10 @@ export function AjustesScreen({
                     hasProfileChanges ? "" : styles.hiddenActionButton
                   }`}
                   onClick={handleProfileSave}
-                  disabled={isPending || !hasProfileChanges}
+                  disabled={isProfilePending || !hasProfileChanges}
                   aria-hidden={!hasProfileChanges}
                 >
-                  Actualizar
+                  {isProfilePending ? "Guardando..." : "Actualizar"}
                 </button>
               </div>
             </Card>
@@ -393,11 +576,12 @@ export function AjustesScreen({
                     aria-label="Subir imagen de avatar"
                   >
                     <div className={styles.avatarBadge}>
-                      <Image
-                        src={selectedAvatarUrl}
+                      <AvatarPicture
+                        src={selectedAvatarDisplayUrl}
                         alt="Avatar principal"
                         width={44}
                         height={44}
+                        className={styles.avatarImage}
                       />
                       <span className={styles.avatarOverlay} aria-hidden="true">
                         <Image
@@ -427,7 +611,7 @@ export function AjustesScreen({
                       setAvatarDragging(false);
                       const file = event.dataTransfer.files?.[0];
                       if (file) {
-                        handleAvatarFile(file);
+                        void handleAvatarFile(file);
                       }
                     }}
                   >
@@ -439,7 +623,9 @@ export function AjustesScreen({
                       className={styles.avatarDropIcon}
                     />
                     <p className={styles.avatarDropTitle}>Sube o arrastra una imagen</p>
-                    <p className={styles.avatarDropHint}>JPG, PNG o WEBP - Max 10MB</p>
+                    <p className={styles.avatarDropHint}>
+                      {isAvatarPending ? "Subiendo imagen..." : "JPG, PNG o WEBP - Max 10MB"}
+                    </p>
                   </div>
                   <input
                     ref={avatarInputRef}
@@ -449,12 +635,15 @@ export function AjustesScreen({
                     onChange={(event) => {
                       const file = event.target.files?.[0];
                       if (file) {
-                        handleAvatarFile(file);
+                        void handleAvatarFile(file);
                       }
                     }}
                   />
                   {avatarFileName ? (
                     <p className={styles.avatarFileName}>{avatarFileName}</p>
+                  ) : null}
+                  {avatarUploadSuccess ? (
+                    <p className={styles.avatarUploadSuccess}>{avatarUploadSuccess}</p>
                   ) : null}
                   {avatarUploadError ? (
                     <p className={styles.avatarUploadError}>{avatarUploadError}</p>
@@ -468,6 +657,7 @@ export function AjustesScreen({
                   className={styles.navArrow}
                   onClick={goPrevAvatar}
                   aria-label="Avatar anterior"
+                  disabled={isAvatarPending}
                 >
                   <Image
                     src="/iconos/flechascalendario.svg"
@@ -481,8 +671,8 @@ export function AjustesScreen({
                   <div className={styles.avatarList}>
                     {Array.from({ length: visibleCount }).map((_, offset) => {
                       const index =
-                        (selectedAvatar + offset) % PROFILE_AVATARS.length;
-                      const avatar = PROFILE_AVATARS[index];
+                        (selectedAvatarIndex + offset) % avatarOptions.length;
+                      const avatar = avatarOptions[index];
                       return (
                         <button
                           key={`avatar-${offset}-${index}`}
@@ -490,10 +680,21 @@ export function AjustesScreen({
                           className={`${styles.avatarDotButton} ${
                             offset === 0 ? styles.avatarDotButtonActive : ""
                           }`}
-                          onClick={() => setSelectedAvatar(index)}
-                          aria-label={`Seleccionar avatar ${index + 1}`}
+                          onClick={() => selectAvatar(avatar.value)}
+                          aria-label={
+                            avatar.kind === "custom"
+                              ? "Seleccionar foto subida"
+                              : `Seleccionar avatar ${index + 1}`
+                          }
+                          disabled={isAvatarPending}
                         >
-                          <Image src={avatar} alt="" width={34} height={34} />
+                          <AvatarPicture
+                            src={avatar.imageSrc}
+                            alt=""
+                            width={34}
+                            height={34}
+                            className={styles.avatarImage}
+                          />
                         </button>
                       );
                     })}
@@ -504,6 +705,7 @@ export function AjustesScreen({
                   className={styles.navArrow}
                   onClick={goNextAvatar}
                   aria-label="Siguiente avatar"
+                  disabled={isAvatarPending}
                 >
                   <Image
                     src="/iconos/flechascalendario.svg"
@@ -514,6 +716,12 @@ export function AjustesScreen({
                   />
                 </button>
               </div>
+              {avatarUploadSuccess ? (
+                <p className={styles.avatarStatus}>{avatarUploadSuccess}</p>
+              ) : null}
+              {avatarUploadError && !avatarPopoverOpen ? (
+                <p className={styles.avatarStatusError}>{avatarUploadError}</p>
+              ) : null}
             </Card>
 
             <Card className={`${styles.block} ${styles.houseBlock}`}>
@@ -609,10 +817,10 @@ export function AjustesScreen({
                     hasHouseChanges ? "" : styles.hiddenActionButton
                   }`}
                   onClick={handleHouseSettingsSave}
-                  disabled={isPending || !hasHouseChanges}
+                  disabled={isHousePending || !hasHouseChanges}
                   aria-hidden={!hasHouseChanges}
                 >
-                  Actualizar
+                  {isHousePending ? "Guardando..." : "Actualizar"}
                 </button>
               </div>
               {feedbackMessage ? (

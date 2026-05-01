@@ -12,6 +12,10 @@ import {
   readUserHashId,
 } from "../shared/dashboard-core";
 import { createClient } from "../shared/supabase-server";
+import {
+  isDefaultProfileAvatar,
+  isProfileAvatarStoragePath,
+} from "../../../../lib/profile-avatar";
 
 type AuthPayload = {
   email: string;
@@ -46,6 +50,10 @@ type RemoveHouseMemberInput = {
   houseCode: string;
   dashboardPath: string;
   profileId: string;
+};
+
+type ProfileAvatarRow = {
+  avatar_storage_path?: string | null;
 };
 
 type ActionResult<T> =
@@ -304,6 +312,29 @@ export async function updateProfileSettingsAction(
         success: false,
         error: "La contraseña debe tener al menos 6 caracteres.",
       };
+    }
+
+    if (avatarUrl && !isDefaultProfileAvatar(avatarUrl)) {
+      if (!isProfileAvatarStoragePath(avatarUrl, user.id)) {
+        return { success: false, error: "Avatar no permitido." };
+      }
+
+      const { data: avatarRow, error: avatarReadError } = await supabase
+        .from("profiles")
+        .select("avatar_storage_path")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (avatarReadError) {
+        return { success: false, error: avatarReadError.message };
+      }
+
+      if ((avatarRow as ProfileAvatarRow | null)?.avatar_storage_path !== avatarUrl) {
+        return {
+          success: false,
+          error: "La foto seleccionada no pertenece a tu perfil.",
+        };
+      }
     }
 
     const authAttributes: {

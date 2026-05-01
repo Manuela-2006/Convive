@@ -71,14 +71,14 @@ export function HerramientasEntraScreen({
             <Card className={styles.stateCard}>
               <div className={styles.stateRow}>
                 <div className={styles.personTag}>
-                  <Image src="/images/IconoperfilM.webp" alt="" width={22} height={22} />
+                  <Image src="/iconos/persons-svgrepo-com 1.svg" alt="" width={22} height={22} />
                   Lucia
                 </div>
                 <strong>80€</strong>
               </div>
               <div className={styles.stateRow}>
                 <div className={styles.personTag}>
-                  <Image src="/images/IconoperfilM.webp" alt="" width={22} height={22} />
+                  <Image src="/iconos/persons-svgrepo-com 1.svg" alt="" width={22} height={22} />
                   Lucia
                 </div>
                 <strong>80€</strong>
@@ -100,14 +100,14 @@ export function HerramientasEntraScreen({
             <Card className={styles.stateCard}>
               <div className={styles.stateRow}>
                 <div className={styles.personTag}>
-                  <Image src="/images/IconoperfilM.webp" alt="" width={22} height={22} />
+                  <Image src="/iconos/persons-svgrepo-com 1.svg" alt="" width={22} height={22} />
                   Lucia
                 </div>
                 <strong>50€</strong>
               </div>
               <div className={styles.stateRow}>
                 <div className={styles.personTag}>
-                  <Image src="/images/IconoperfilM.webp" alt="" width={22} height={22} />
+                  <Image src="/iconos/persons-svgrepo-com 1.svg" alt="" width={22} height={22} />
                   Lucia
                 </div>
                 <strong>50€</strong>
