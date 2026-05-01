@@ -982,7 +982,7 @@ main {
   row-gap: 1.5rem;
   transform: translate(
     calc((min(1400px, 100vw) - 2.5rem) / 24 / 2 + 10rem),
-    2.6rem
+    8.5rem
   );
 }
 

@@ -9,7 +9,7 @@ const KEYFRAMES = [
   { rotationY: Math.PI * 2, cameraX: 0, cameraY: 17, lookAtY: 17 }, // S2 trasera
   { rotationY: Math.PI * 3, cameraX: 0, cameraY: 12, lookAtY: 12 }, // S3 delantera
   { rotationY: Math.PI * 4, cameraX: 0, cameraY: 7, lookAtY: 7 }, // S4 trasera
-  { rotationY: Math.PI * 5, cameraX: 0, cameraY: 3, lookAtY: 3 }, // S5 delantera
+  { rotationY: Math.PI * 5, cameraX: 0, cameraY: 3.5, lookAtY: 3.5 }, // S5 delantera
 ];
 
 const SECTION_SELECTORS = [
