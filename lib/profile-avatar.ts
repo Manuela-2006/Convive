@@ -1,6 +1,11 @@
 export const PROFILE_AVATAR_DEFAULTS = [
-  "/images/IconoperfilM.webp",
-  "/images/IconoperfilH.webp",
+  "/iconos/icono1.svg",
+  "/iconos/icono2.svg",
+  "/iconos/icono3.svg",
+  "/iconos/icono4.svg",
+  "/iconos/icono5.svg",
+  "/iconos/icono6.svg",
+  "/iconos/icono7.svg",
 ] as const;
 
 export function isDefaultProfileAvatar(value: string | null | undefined) {

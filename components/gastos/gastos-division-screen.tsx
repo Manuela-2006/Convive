@@ -27,6 +27,32 @@ type GastosDivisionScreenProps = {
   currentProfileId?: string;
 };
 
+function normalizeKey(value?: string | null) {
+  return `${value || ""}`
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getDivisionIcon(expense: SharedExpense) {
+  const category = normalizeKey(expense.expense_type);
+  const context = `${category} ${normalizeKey(expense.title)}`;
+  const isInvoice = context.includes("factura") || context.includes("invoice");
+
+  if (context.includes("alquiler")) return "/iconos/alquiler.svg";
+  if (context.includes("agua") || context.includes("water")) return "/iconos/agua.svg";
+  if (context.includes("luz") || context.includes("elect")) return "/iconos/luz.svg";
+  if (context.includes("suscrip") || context.includes("subscription")) {
+    return "/iconos/suscripciones.svg";
+  }
+  if (context.includes("wifi") || context.includes("internet")) return "/iconos/wifi.svg";
+
+  return isInvoice ? "/iconos/alquiler.svg" : "/iconos/compra.svg";
+}
+
 function matchesSearch(expense: SharedExpense, searchTerm: string) {
   const haystack = [
     expense.title,
@@ -191,10 +217,10 @@ export function GastosDivisionScreen({
                           <div key={expense.expense_id} className={styles.row}>
                             <div className={styles.left}>
                               <Image
-                                src="/iconos/building-2-svgrepo-com 1.svg"
+                                src={getDivisionIcon(expense)}
                                 alt=""
-                                width={20}
-                                height={20}
+                                width={46}
+                                height={46}
                               />
                               <div>
                                 <p className={styles.main}>{expense.title}</p>

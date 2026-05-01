@@ -44,6 +44,30 @@ const MONTH_NAMES = [
 
 const chartColors = ["#F0EAE4", "#C47A93", "#8B1A2F", "#D7B9C3"];
 
+function getHistoryIcon(item: PersonalAreaDashboardData["history"][number]) {
+  const normalized = `${item.item_type} ${item.icon_type} ${item.title} ${item.subtitle}`
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  if (normalized.includes("alquiler")) return "/iconos/alquiler.svg";
+  if (normalized.includes("agua") || normalized.includes("water")) return "/iconos/agua.svg";
+  if (normalized.includes("luz") || normalized.includes("elect")) return "/iconos/luz.svg";
+  if (normalized.includes("suscrip") || normalized.includes("subscription")) {
+    return "/iconos/suscripciones.svg";
+  }
+  if (normalized.includes("wifi") || normalized.includes("internet")) return "/iconos/wifi.svg";
+  if (normalized.includes("invoice") || normalized.includes("factura")) {
+    return "/iconos/alquiler.svg";
+  }
+  if (normalized.includes("purchase") || normalized.includes("ticket") || normalized.includes("gasto")) {
+    return "/iconos/compra.svg";
+  }
+
+  return "/iconos/compra.svg";
+}
+
 function toNumber(value: number | string | null | undefined) {
   const numericValue =
     typeof value === "number" ? value : Number(String(value ?? 0));
@@ -366,10 +390,10 @@ export function AreaPersonalScreen({
                   <div className={`${styles.row} ${styles.historyRow}`} key={`${item.item_type}-${item.item_id}`}>
                     <div className={styles.person}>
                       <Image
-                        src={item.icon_type === "purchase" ? "/iconos/Carrodecompra.svg" : "/iconos/euro.svg"}
+                        src={getHistoryIcon(item)}
                         alt=""
-                        width={22}
-                        height={22}
+                        width={46}
+                        height={46}
                       />
                       <div>
                         <p className={styles.personLine}>{item.title}</p>

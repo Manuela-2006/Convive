@@ -319,6 +319,11 @@
   align-items: center;
 }
 
+.historyRow .person {
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 0.9rem;
+}
+
 .historyRows {
   gap: 1.3rem;
 }

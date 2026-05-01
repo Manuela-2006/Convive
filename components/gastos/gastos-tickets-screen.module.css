@@ -192,8 +192,8 @@
 
 .ticketLeft {
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
-  gap: 0.42rem;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 1rem;
   align-items: start;
 }
 

@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTicketDocumentSignedUrlAction } from "../../app/backend/endpoints/gastos/actions";
 import { Card } from "../ui/card";
-import { ProfileAvatar } from "../ui/profile-avatar";
 import type {
   ExpenseTicket,
   PendingPaymentConfirmation,
@@ -22,6 +21,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { ProfileAvatar } from "../ui/profile-avatar";
 import styles from "./gastos-screen.module.css";
 
 type GastosScreenProps = {
@@ -33,6 +33,31 @@ type GastosScreenProps = {
   pendingPaymentConfirmations?: PendingPaymentConfirmation[];
   canReviewPayments?: boolean;
 };
+
+function normalizeKey(value?: string | null) {
+  return `${value || ""}`
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getDivisionIcon(expense: SharedExpense) {
+  const context = `${normalizeKey(expense.expense_type)} ${normalizeKey(expense.title)}`;
+  const isInvoice = context.includes("factura") || context.includes("invoice");
+
+  if (context.includes("alquiler")) return "/iconos/alquiler.svg";
+  if (context.includes("agua") || context.includes("water")) return "/iconos/agua.svg";
+  if (context.includes("luz") || context.includes("elect")) return "/iconos/luz.svg";
+  if (context.includes("suscrip") || context.includes("subscription")) {
+    return "/iconos/suscripciones.svg";
+  }
+  if (context.includes("wifi") || context.includes("internet")) return "/iconos/wifi.svg";
+
+  return isInvoice ? "/iconos/alquiler.svg" : "/iconos/compra.svg";
+}
 
 export function GastosScreen({
   houseCode,
@@ -111,12 +136,12 @@ export function GastosScreen({
                 visibleTickets.map((ticket) => {
                   return (
                     <div key={ticket.ticket_id} className={styles.innerRow}>
-                      <div className={styles.leftInfo}>
-                        <ProfileAvatar
-                          src={ticket.paid_by_avatar_url}
+                      <div className={`${styles.leftInfo} ${styles.ticketLeftInfo}`}>
+                        <Image
+                          src="/iconos/compra.svg"
                           alt=""
-                          width={20}
-                          height={20}
+                          width={46}
+                          height={46}
                         />
                         <div>
                           <p className={styles.mainText}>
@@ -176,10 +201,10 @@ export function GastosScreen({
                   <div key={expense.expense_id} className={styles.innerRow}>
                     <div className={styles.leftInfo}>
                       <Image
-                        src="/iconos/building-2-svgrepo-com 1.svg"
+                        src={getDivisionIcon(expense)}
                         alt=""
-                        width={20}
-                        height={20}
+                        width={46}
+                        height={46}
                       />
                       <div>
                         <p className={styles.mainText}>{expense.title}</p>

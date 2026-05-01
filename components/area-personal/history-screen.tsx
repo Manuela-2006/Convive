@@ -19,11 +19,27 @@ type AreaPersonalHistoryScreenProps = {
 };
 
 function getHistoryIcon(item: PersonalAreaHistoryItem) {
-  if (item.icon_type === "purchase") {
-    return "/iconos/Carrodecompra.svg";
+  const normalized = `${item.item_type} ${item.icon_type} ${item.title} ${item.subtitle}`
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  if (normalized.includes("alquiler")) return "/iconos/alquiler.svg";
+  if (normalized.includes("agua") || normalized.includes("water")) return "/iconos/agua.svg";
+  if (normalized.includes("luz") || normalized.includes("elect")) return "/iconos/luz.svg";
+  if (normalized.includes("suscrip") || normalized.includes("subscription")) {
+    return "/iconos/suscripciones.svg";
+  }
+  if (normalized.includes("wifi") || normalized.includes("internet")) return "/iconos/wifi.svg";
+  if (normalized.includes("invoice") || normalized.includes("factura")) {
+    return "/iconos/alquiler.svg";
+  }
+  if (normalized.includes("purchase") || normalized.includes("ticket") || normalized.includes("gasto")) {
+    return "/iconos/compra.svg";
   }
 
-  return "/iconos/euro.svg";
+  return "/iconos/compra.svg";
 }
 
 function matchesSearch(item: PersonalAreaHistoryItem, searchTerm: string) {
@@ -111,7 +127,7 @@ export function AreaPersonalHistoryScreen({
                       {group.items.map((item) => (
                         <div className={styles.row} key={`${item.item_type}-${item.item_id}`}>
                           <div className={styles.left}>
-                            <Image src={getHistoryIcon(item)} alt="" width={20} height={20} />
+                            <Image src={getHistoryIcon(item)} alt="" width={46} height={46} />
                             <div>
                               <p className={styles.mainText}>{item.title}</p>
                               {item.subtitle ? <p className={styles.subText}>{item.subtitle}</p> : null}

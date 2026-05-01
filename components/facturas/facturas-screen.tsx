@@ -32,6 +32,31 @@ type FacturasScreenProps = {
   canMarkInvoicesPaid?: boolean;
 };
 
+function normalizeCategoryKey(value?: string | null) {
+  return `${value || ""}`
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getInvoiceCategoryIcon(categoryKey?: string | null) {
+  const normalized = normalizeCategoryKey(categoryKey);
+  const combined = ` ${normalized} `;
+
+  if (combined.includes(" alquiler ")) return "/iconos/alquiler.svg";
+  if (combined.includes(" agua ") || combined.includes(" water ")) return "/iconos/agua.svg";
+  if (combined.includes(" luz ") || combined.includes(" elect ")) return "/iconos/luz.svg";
+  if (combined.includes(" suscrip ") || combined.includes(" subscription ")) {
+    return "/iconos/suscripciones.svg";
+  }
+  if (combined.includes(" wifi ") || combined.includes(" internet ")) return "/iconos/wifi.svg";
+
+  return "/iconos/building-2-svgrepo-com 1.svg";
+}
+
 export function FacturasScreen({
   houseCode,
   dashboardPath,
@@ -45,20 +70,8 @@ export function FacturasScreen({
   const basePath = dashboardPath;
 
   const canonicalCategoryKey = (section: InvoiceCategorySection) => {
-    const normalizedName = `${section.category_name || ""}`
-      .toLowerCase()
-      .trim()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-    const normalizedSlug = `${section.category_slug || ""}`
-      .toLowerCase()
-      .trim()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
+    const normalizedName = normalizeCategoryKey(section.category_name);
+    const normalizedSlug = normalizeCategoryKey(section.category_slug);
     const combined = `${normalizedName} ${normalizedSlug}`;
 
     if (combined.includes("alquiler")) return "alquiler";
@@ -223,15 +236,16 @@ export function FacturasScreen({
                     section.invoices.map((invoice) => {
                       const canMarkPaid =
                         canMarkInvoicesPaid && invoice.can_mark_paid;
+                      const iconSrc = getInvoiceCategoryIcon(section.category_slug);
 
                       return (
                         <div className={styles.paperRow} key={invoice.expense_id}>
                           <div className={styles.left}>
                             <Image
-                              src="/iconos/building-2-svgrepo-com 1.svg"
+                              src={iconSrc}
                               alt=""
-                              width={20}
-                              height={20}
+                              width={46}
+                              height={46}
                             />
                             <div>
                               <p className={styles.mainText}>{invoice.title}</p>

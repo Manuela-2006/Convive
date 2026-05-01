@@ -223,8 +223,8 @@
 
 .left {
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
-  gap: 0.42rem;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 0.9rem;
   align-items: center;
   padding-left: 0.45rem;
 }
