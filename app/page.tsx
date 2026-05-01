@@ -1,6 +1,5 @@
 ﻿import Image from "next/image";
 import Link from "next/link";
-import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import BuildingScene from "../components/BuildingScene";
 
@@ -26,9 +25,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const inviteCode = params?.code?.trim() ?? "";
   const registerHref = buildAuthHref("register", inviteCode);
   const loginHref = buildAuthHref("login", inviteCode);
-  const joinFloorHref = inviteCode
-    ? loginHref
-    : "/login?flow=join";
+  const joinFloorHref = inviteCode ? loginHref : "/login?flow=join";
 
   return (
     <main>
@@ -59,10 +56,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                   <span className="landing-hero__card-line" />
                 </a>
 
-                <Button className="landing-hero__card-button landing-hero__card-button--active">
+                <button
+                  type="button"
+                  className="landing-hero__card-button landing-hero__card-button--active"
+                >
                   <span className="landing-hero__card-label">A</span>
                   <span className="landing-hero__card-line" />
-                </Button>
+                </button>
 
                 <a
                   href="#landing-section-four"
@@ -112,10 +112,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               para que lo único que tengas que hacer sea convivir sin dramas
             </p>
 
-            <Link
-              href={joinFloorHref}
-              className="convive-button landing-hero__button"
-            >
+            <Link href={joinFloorHref} className="convive-button landing-hero__button">
               Unirse a un piso
             </Link>
           </div>
@@ -123,10 +120,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       </section>
 
       <section
+        id="landing-section-two"
         className="landing-section-two"
         aria-label="Segunda sección de Convive"
       >
-        <div id="landing-section-two" className="landing-anchor" aria-hidden="true" />
+        <div className="landing-anchor" aria-hidden="true" />
         <div className="landing-section-two__grid">
           <h2 className="landing-section-two__title">
             Compartir piso puede ser todo un reto
@@ -136,10 +134,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             compartido. Su inteligencia artificial automatiza los procesos más
             tediosos y su diseño está orientado a la convivencia en su totalidad.
           </p>
-          <Link
-            href={registerHref}
-            className="convive-button landing-section-two__button"
-          >
+          <Link href={registerHref} className="convive-button landing-section-two__button">
             Registrarse
           </Link>
         </div>
@@ -147,10 +142,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <Card className="landing-hero__bottom-card landing-section-two__bottom-card">
           <div className="landing-hero__card-content">
             <div className="landing-hero__card-grid">
-              <Button className="landing-hero__card-button landing-hero__card-button--active">
+              <button
+                type="button"
+                className="landing-hero__card-button landing-hero__card-button--active"
+              >
                 <span className="landing-hero__card-label">3</span>
                 <span className="landing-hero__card-line" />
-              </Button>
+              </button>
 
               <a
                 href="#landing-section-one"
@@ -194,52 +192,61 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         aria-label="Tercera sección de Convive"
       >
         <div className="landing-section-three__grid">
-          <div className="landing-section-three__stack-main">
-            <div className="landing-section-three__item landing-section-three__item--main-1">
-              <div className="landing-section-three__badge">1</div>
-              <p className="landing-section-three__badge-text">
-                Registro siempre
-                <br />
-                actualizado
-              </p>
+          <div className="landing-section-three__content">
+            <h2 className="landing-section-three__title">¿Cuál es la diferencia?</h2>
+
+            <div className="landing-section-three__feature">
+              <div className="landing-section-three__badge">
+                <Image
+                  src="/iconos/balanza.svg"
+                  alt="Icono de balanza"
+                  width={26}
+                  height={26}
+                  className="landing-section-three__badge-icon"
+                />
+              </div>
+              <div className="landing-section-three__feature-copy">
+                <h3 className="landing-section-three__feature-title">División justa y automática</h3>
+                <p className="landing-section-three__feature-text">
+                  Olvídate de calcular quién debe qué. Convive reparte cada gasto al instante.
+                </p>
+              </div>
             </div>
 
-            <div className="landing-section-three__item landing-section-three__item--main-2">
-              <div className="landing-section-three__badge">2</div>
-              <p className="landing-section-three__badge-text">
-                División justa y
-                <br />
-                automática
-              </p>
+            <div className="landing-section-three__feature">
+              <div className="landing-section-three__badge">
+                <Image
+                  src="/iconos/ia.svg"
+                  alt="Icono IA"
+                  width={26}
+                  height={26}
+                  className="landing-section-three__badge-icon"
+                />
+              </div>
+              <div className="landing-section-three__feature-copy">
+                <h3 className="landing-section-three__feature-title">IA que trabaja por ti</h3>
+                <p className="landing-section-three__feature-text">
+                  Detecta patrones, sugiere divisiones y automatiza lo tedioso sin que hagas nada.
+                </p>
+              </div>
             </div>
 
-            <div className="landing-section-three__item landing-section-three__item--main-3">
-              <div className="landing-section-three__badge">3</div>
-              <p className="landing-section-three__badge-text">
-                Comunicación sin
-                <br />
-                fricciones
-              </p>
-            </div>
-          </div>
-
-          <div className="landing-section-three__stack-copy">
-            <div className="landing-section-three__item landing-section-three__item--copy-1">
-              <div className="landing-section-three__badge">4</div>
-              <p className="landing-section-three__badge-text">
-                Registro siempre
-                <br />
-                actualizado
-              </p>
-            </div>
-
-            <div className="landing-section-three__item landing-section-three__item--copy-2">
-              <div className="landing-section-three__badge">5</div>
-              <p className="landing-section-three__badge-text">
-                Comunicación
-                <br />
-                sin fricciones
-              </p>
+            <div className="landing-section-three__feature">
+              <div className="landing-section-three__badge">
+                <Image
+                  src="/iconos/documentos.svg"
+                  alt="Icono documentos"
+                  width={26}
+                  height={26}
+                  className="landing-section-three__badge-icon"
+                />
+              </div>
+              <div className="landing-section-three__feature-copy">
+                <h3 className="landing-section-three__feature-title">Comunicación sin fricciones</h3>
+                <p className="landing-section-three__feature-text">
+                  Un solo lugar para coordinar el piso. Sin grupos de WhatsApp, sin malentendidos.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -271,10 +278,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 <span className="landing-hero__card-line" />
               </a>
 
-              <Button className="landing-hero__card-button landing-hero__card-button--active">
+              <button
+                type="button"
+                className="landing-hero__card-button landing-hero__card-button--active"
+              >
                 <span className="landing-hero__card-label">2</span>
                 <span className="landing-hero__card-line" />
-              </Button>
+              </button>
             </div>
 
             <a
@@ -289,10 +299,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       </section>
 
       <section
+        id="landing-section-four"
         className="landing-section-four"
         aria-label="Cuarta sección de Convive"
       >
-        <div id="landing-section-four" className="landing-anchor" aria-hidden="true" />
+        <div className="landing-anchor" aria-hidden="true" />
         <div className="landing-section-two__grid landing-section-four__grid">
           <h2 className="landing-section-two__title">
             Todo lo que necesita tu piso, en un solo lugar
@@ -302,10 +313,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             claro de las deudas puede ser más complejo de lo que parece. Convive
             nace para eliminar esa carga.
           </p>
-          <Link
-            href={loginHref}
-            className="convive-button landing-section-two__button"
-          >
+          <Link href={loginHref} className="convive-button landing-section-two__button">
             Unirme a un piso
           </Link>
         </div>
@@ -329,10 +337,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                 <span className="landing-hero__card-line" />
               </a>
 
-              <Button className="landing-hero__card-button landing-hero__card-button--active">
+              <button
+                type="button"
+                className="landing-hero__card-button landing-hero__card-button--active"
+              >
                 <span className="landing-hero__card-label">1</span>
                 <span className="landing-hero__card-line" />
-              </Button>
+              </button>
 
               <a
                 href="#landing-section-three"
@@ -355,15 +366,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       </section>
 
       <section
+        id="landing-section-five"
         className="landing-section-five"
         aria-label="Quinta sección de Convive"
       >
-        <div id="landing-section-five" className="landing-anchor" aria-hidden="true" />
+        <div className="landing-anchor" aria-hidden="true" />
         <div className="landing-section-five__grid">
           <div className="landing-section-five__content">
-            <h2 className="landing-section-five__title">
-              EMPIEZA A CONVIVIR MEJOR
-            </h2>
+            <h2 className="landing-section-five__title">EMPIEZA A CONVIVIR MEJOR</h2>
             <div className="landing-section-five__actions">
               <Link href={registerHref} className="convive-button">
                 Registrarse
@@ -411,15 +421,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               </a>
             </div>
 
-            <Button className="landing-hero__card-button landing-hero__card-button--active landing-hero__card-button--bottom">
+            <button
+              type="button"
+              className="landing-hero__card-button landing-hero__card-button--active landing-hero__card-button--bottom"
+            >
               <span className="landing-hero__card-label">PB</span>
               <span className="landing-hero__card-line" />
-            </Button>
+            </button>
           </div>
         </Card>
       </section>
     </main>
   );
 }
-
-
