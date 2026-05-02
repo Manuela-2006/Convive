@@ -772,8 +772,8 @@ export function LimpiezaScreen({
                         <ProfileAvatar
                           src={getTaskAvatarUrl(task)}
                           alt=""
-                          width={22}
-                          height={22}
+                          width={46}
+                          height={46}
                         />
                         <div>
                           <p>{task.title}</p>
@@ -918,8 +918,8 @@ export function LimpiezaScreen({
                                     <ProfileAvatar
                                       src={getTaskAvatarUrl(task)}
                                       alt=""
-                                      width={22}
-                                      height={22}
+                                      width={46}
+                                      height={46}
                                     />
                                 <div>
                                   <p>{task.title}</p>

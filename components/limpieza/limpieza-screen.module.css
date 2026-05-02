@@ -270,8 +270,8 @@
 
 .taskLeft {
   display: grid;
-  grid-template-columns: 22px 1fr;
-  gap: 0.35rem;
+  grid-template-columns: 46px 1fr;
+  gap: 0.9rem;
   min-width: 0;
 }
 
@@ -833,8 +833,8 @@
 
 .historyMain {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
-  gap: 0.72rem;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 0.9rem;
   min-width: 0;
 }
 

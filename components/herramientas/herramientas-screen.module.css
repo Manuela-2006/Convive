@@ -82,7 +82,7 @@
   margin: 0;
   color: #8b1a2f;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: 32px;
+  font-size: 20px;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -245,7 +245,7 @@
   margin: 0;
   color: #f0eae4;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: 32px;
+  font-size: 20px;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -335,14 +335,19 @@
 
 .vendorLeft {
   display: grid;
-  grid-template-columns: 20px 1fr;
-  gap: 0.35rem;
-  align-items: start;
+  grid-template-columns: 46px 1fr;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.compareCategoryIcon {
+  align-self: center;
 }
 
 .vendorLeft div {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 0.04rem;
 }
 

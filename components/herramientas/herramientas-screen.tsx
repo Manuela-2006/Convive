@@ -126,6 +126,13 @@ export function HerramientasScreen({
     onCloseCambioModal();
   };
 
+  const categoryIconSrc =
+    categoriaActiva === "agua"
+      ? "/iconos/agua.svg"
+      : categoriaActiva === "wifi"
+        ? "/iconos/wifi.svg"
+        : "/iconos/luz.svg";
+
   return (
     <main className={styles.page}>
       {showCambioModal && (
@@ -349,10 +356,11 @@ export function HerramientasScreen({
                   <div className={styles.compareRow}>
                     <div className={styles.vendorLeft}>
                       <Image
-                        src="/iconos/building-2-svgrepo-com 1.svg"
+                        src={categoryIconSrc}
                         alt=""
-                        width={20}
-                        height={20}
+                        width={46}
+                        height={46}
+                        className={styles.compareCategoryIcon}
                       />
                       <div>
                         <p>
@@ -388,10 +396,11 @@ export function HerramientasScreen({
                     >
                       <div className={styles.vendorLeft}>
                         <Image
-                          src="/iconos/building-2-svgrepo-com 1.svg"
+                          src={categoryIconSrc}
                           alt=""
-                          width={20}
-                          height={20}
+                          width={46}
+                          height={46}
+                          className={styles.compareCategoryIcon}
                         />
                         <div>
                           <p>{item.nombre}</p>

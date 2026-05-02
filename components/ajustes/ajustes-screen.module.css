@@ -102,6 +102,36 @@
   align-items: stretch;
 }
 
+.leaveHouseWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.35rem;
+}
+
+.leaveHouseButton {
+  min-height: 34px;
+  border: none;
+  border-radius: 10px;
+  background: #be6f8b;
+  color: #f0eae4;
+  padding: 0.42rem 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: normal;
+  cursor: pointer;
+}
+
+.leaveHouseIcon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  filter: brightness(0) invert(1);
+}
+
 .block {
   border: none;
   border-radius: 8px;
@@ -139,6 +169,16 @@
   .profileBlock,
   .houseBlock {
     height: 270px;
+  }
+
+  .avatarDotButton {
+    width: 52px;
+    height: 52px;
+  }
+
+  .avatarDotButton img {
+    width: 52px;
+    height: 52px;
   }
 }
 
@@ -294,12 +334,12 @@
 
 .avatarBadge {
   position: absolute;
-  top: -12px;
-  border: 9px solid #f2eeeb;
+  top: -14px;
+  border: 10px solid #f2eeeb;
   border-radius: 999px;
   background: transparent;
-  width: 58px;
-  height: 58px;
+  width: 66px;
+  height: 66px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -307,9 +347,9 @@
 
 .avatarBadgeButton {
   position: absolute;
-  top: -12px;
-  width: 58px;
-  height: 58px;
+  top: -14px;
+  width: 66px;
+  height: 66px;
   border: none;
   background: transparent;
   padding: 0;
@@ -359,8 +399,8 @@
 }
 
 .avatarOverlayIcon {
-  width: 22px;
-  height: 22px;
+  width: 20px !important;
+  height: 20px !important;
   filter: brightness(0) saturate(100%) invert(100%);
 }
 
@@ -889,16 +929,16 @@
   }
 
   .avatarBadge {
-    top: -8px;
-    width: 44px;
-    height: 44px;
-    border-width: 6px;
+    top: -10px;
+    width: 50px;
+    height: 50px;
+    border-width: 7px;
   }
 
   .avatarBadgeButton {
-    top: -8px;
-    width: 44px;
-    height: 44px;
+    top: -10px;
+    width: 50px;
+    height: 50px;
   }
 
   .avatarBadge img {

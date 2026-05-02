@@ -22,6 +22,17 @@ import {
   isProfileAvatarStoragePath,
 } from "../../lib/profile-avatar";
 import { Card } from "../ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -34,7 +45,11 @@ type AjustesScreenProps = {
   settings: ProfileSettingsData;
 };
 
-const PROFILE_AVATARS = [...PROFILE_AVATAR_DEFAULTS];
+const PROFILE_AVATARS = PROFILE_AVATAR_DEFAULTS.filter(
+  (avatar) =>
+    avatar !== "/images/IconoperfilM.webp" &&
+    avatar !== "/images/IconoperfilH.webp"
+);
 
 type AvatarOption = {
   value: string;
@@ -615,16 +630,16 @@ export function AjustesScreen({
                       <AvatarPicture
                         src={selectedAvatarDisplayUrl}
                         alt="Avatar principal"
-                        width={44}
-                        height={44}
+                        width={50}
+                        height={50}
                         className={styles.avatarImage}
                       />
                       <span className={styles.avatarOverlay} aria-hidden="true">
                         <Image
                           src="/iconos/Escanearimagen.svg"
                           alt=""
-                          width={22}
-                          height={22}
+                          width={10}
+                          height={10}
                           className={styles.avatarOverlayIcon}
                         />
                       </span>
@@ -875,6 +890,34 @@ export function AjustesScreen({
                 <p className={styles.feedbackMessage}>{feedbackMessage}</p>
               ) : null}
             </Card>
+          </div>
+          <div className={styles.leaveHouseWrap}>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button type="button" className={styles.leaveHouseButton}>
+                  <Image
+                    src="/iconos/peligro.svg"
+                    alt=""
+                    width={16}
+                    height={16}
+                    className={styles.leaveHouseIcon}
+                  />
+                  <span>Abandonar este piso</span>
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirmar salida del piso</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    ¿Seguro que quieres abandonar este piso? Esta acción te sacará del piso actual.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction>Confirmar salida</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
         </div>
