@@ -117,23 +117,37 @@
   font-family: "Poppins", sans-serif;
 }
 
-.memberDeleteButton {
+.memberAvatarWrap {
+  position: relative;
+  width: 46px;
+  height: 46px;
+}
+
+.memberDeleteIconButton {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 18px;
+  height: 18px;
   border: none;
-  border-radius: 10px;
-  background: #be6f8b;
-  color: #f0eae4;
-  font-family: "Poppins", sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1;
-  min-height: 24px;
-  padding: 0.2rem 0.6rem;
+  background: transparent;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 
-.memberDeleteButton:disabled {
+.memberDeleteIconButton:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.memberDeleteIcon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  filter: brightness(0) invert(1);
 }
 
 .code {
@@ -371,7 +385,7 @@
 }
 
 .spentAmount {
-  color: #be6f8b;
+  color: #8b1a2f;
 }
 
 .spentAmountOver {
@@ -403,18 +417,52 @@
   align-items: center;
 }
 
-.budgetInput {
+.budgetInputWrap {
+  position: relative;
   height: 30px;
   border: 1px solid #8b1a2f;
   border-radius: 8px;
   background: transparent;
-  padding: 0 0.5rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.budgetInput {
+  height: 100%;
+  width: 100%;
+  border: 0 !important;
+  background: transparent;
+  padding: 0 1.7rem 0 0.5rem;
   font-size: 12px;
+  box-shadow: none !important;
+}
+
+.budgetEuroIcon {
+  position: absolute;
+  right: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  display: block;
+  pointer-events: none;
+  filter: brightness(0) saturate(100%) invert(15%) sepia(25%) saturate(4849%)
+    hue-rotate(329deg) brightness(84%) contrast(98%);
 }
 
 .budgetSaveButton {
   min-height: 30px;
   padding: 0.2rem 0.65rem;
+  background: #be6f8b;
+  color: #f0eae4;
+  width: auto;
+  min-width: 96px;
+  justify-self: start;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .maroonCard {
@@ -490,6 +538,24 @@
   list-style: none;
   display: grid;
   gap: 0.35rem;
+  max-height: 165px;
+  overflow-y: scroll;
+  padding-right: 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: #8b1a2f transparent;
+}
+
+.compareList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.compareList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.compareList::-webkit-scrollbar-thumb {
+  background: #8b1a2f;
+  border-radius: 999px;
 }
 
 .compareList li {
@@ -507,8 +573,9 @@
 
 .compareLeft {
   display: grid;
-  grid-template-columns: 20px 1fr;
-  gap: 0.36rem;
+  grid-template-columns: 46px 1fr;
+  gap: 0.9rem;
+  align-items: center;
 }
 
 .compareLeft p {
@@ -529,7 +596,7 @@
   gap: 0.2rem;
   align-items: center;
   justify-content: flex-end;
-  min-width: 92px;
+  min-width: 78px;
   color: #8b1a2f;
 }
 

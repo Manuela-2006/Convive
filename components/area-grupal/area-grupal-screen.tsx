@@ -81,16 +81,34 @@ function formatPercentChange(percentChange: number | null) {
 }
 
 function formatComparisonMeta(percentChange: number | null) {
-  return formatPercentChange(percentChange).replace(
-    " del mes anterior",
-    " del\nmes anterior"
-  );
+  return formatPercentChange(percentChange);
 }
 
 function getTrend(currentAmount: number, previousAmount: number) {
   if (currentAmount > previousAmount) return "up";
   if (currentAmount < previousAmount) return "down";
   return "equal";
+}
+
+function getComparisonIcon(name: string) {
+  const normalized = name
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  if (normalized.includes("alquiler")) return "/iconos/alquiler.svg";
+  if (normalized.includes("agua") || normalized.includes("water")) return "/iconos/agua.svg";
+  if (normalized.includes("luz") || normalized.includes("elect")) return "/iconos/luz.svg";
+  if (normalized.includes("suscrip") || normalized.includes("subscription")) {
+    return "/iconos/suscripciones.svg";
+  }
+  if (normalized.includes("wifi") || normalized.includes("internet")) return "/iconos/wifi.svg";
+  if (normalized.includes("compra") || normalized.includes("ticket") || normalized.includes("gasto")) {
+    return "/iconos/compra.svg";
+  }
+
+  return "/iconos/compra.svg";
 }
 
 export function AreaGrupalScreen({
@@ -113,9 +131,6 @@ export function AreaGrupalScreen({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const basePath = dashboardPath ?? `/dashboard/${houseCode}`;
-  const inviteHref = inviteCode
-    ? `/login?flow=join&code=${encodeURIComponent(inviteCode)}`
-    : null;
   const budgetAmount = toNumber(data.shared_funds.budget_amount);
   const spentAmount = toNumber(data.shared_funds.spent_amount);
   const progressBase = budgetAmount + spentAmount;
@@ -302,45 +317,54 @@ export function AreaGrupalScreen({
                 {data.members.length ? (
                   data.members.map((member) => (
                     <div key={member.profile_id} className={styles.memberItem}>
-                      <ProfileAvatar
-                        src={member.avatar_url}
-                        alt={member.display_name}
-                        width={28}
-                        height={28}
-                      />
-                      <span>{member.display_name}</span>
-                      {canRemoveMember(member) ? (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <button
-                              type="button"
-                              className={styles.memberDeleteButton}
-                              disabled={isPending}
-                            >
-                              Eliminar
-                            </button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Eliminar participante</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Esta acción sacará a {member.display_name} del piso sin borrar
-                                su historial. Â¿Quieres continuar?
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() =>
-                                  handleRemoveParticipant(member.profile_id, member.display_name)
-                                }
+                      <div className={styles.memberAvatarWrap}>
+                        <ProfileAvatar
+                          src={member.avatar_url}
+                          alt={member.display_name}
+                          width={46}
+                          height={46}
+                        />
+                        {canRemoveMember(member) ? (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <button
+                                type="button"
+                                className={styles.memberDeleteIconButton}
+                                disabled={isPending}
+                                aria-label={`Eliminar a ${member.display_name}`}
                               >
-                                Eliminar
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      ) : null}
+                                <Image
+                                  src="/iconos/eliminar.svg"
+                                  alt=""
+                                  width={16}
+                                  height={16}
+                                  className={styles.memberDeleteIcon}
+                                />
+                              </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Eliminar participante</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta acción sacará a {member.display_name} del piso sin borrar
+                                  su historial. Â¿Quieres continuar?
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() =>
+                                    handleRemoveParticipant(member.profile_id, member.display_name)
+                                  }
+                                >
+                                  Eliminar
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        ) : null}
+                      </div>
+                      <span>{member.display_name}</span>
                     </div>
                   ))
                 ) : (
@@ -350,18 +374,13 @@ export function AreaGrupalScreen({
             </div>
             <div className={styles.inviteBox}>
               {canManageInvites && inviteCode ? (
-                <>
-                  <p className={styles.code}>
-                    <span className={styles.codeLabel}>CODIGO DE INVITACION</span>
-                    <span className={styles.codeValue}>{inviteCode}</span>
-                  </p>
-                  <Link href={inviteHref ?? "#"} className={styles.inviteLink}>
-                    Invitar al piso
-                  </Link>
-                </>
+                <p className={styles.code}>
+                  <span className={styles.codeLabel}>CÓDIGO DE INVITACIÓN</span>
+                  <span className={styles.codeValue}>{inviteCode}</span>
+                </p>
               ) : (
                 <p className={styles.code}>
-                  <span className={styles.codeLabel}>CODIGO PUBLICO DEL PISO</span>
+                  <span className={styles.codeLabel}>CÓDIGO PÚBLICO DEL PISO</span>
                   <span className={styles.codeValue}>{houseCode}</span>
                 </p>
               )}
@@ -460,13 +479,22 @@ export function AreaGrupalScreen({
               <Progress value={progressValue} className={styles.progressRoot} />
               {canManageInvites && data.shared_funds.can_edit_budget ? (
                 <div className={styles.budgetEditor}>
-                  <Input
-                    value={budgetInput}
-                    onChange={(event) => setBudgetInput(event.target.value)}
-                    className={styles.budgetInput}
-                    inputMode="decimal"
-                    placeholder="0"
-                  />
+                  <div className={styles.budgetInputWrap}>
+                    <Input
+                      value={budgetInput}
+                      onChange={(event) => setBudgetInput(event.target.value)}
+                      className={styles.budgetInput}
+                      inputMode="decimal"
+                      placeholder="0"
+                    />
+                    <Image
+                      src="/iconos/euro.svg"
+                      alt="Euro"
+                      width={14}
+                      height={14}
+                      className={styles.budgetEuroIcon}
+                    />
+                  </div>
                   <Button
                     className={styles.budgetSaveButton}
                     onClick={handleSaveBudget}
@@ -578,10 +606,10 @@ export function AreaGrupalScreen({
                       <li key={item.name}>
                         <div className={styles.compareLeft}>
                           <Image
-                            src="/iconos/euro.svg"
+                            src={getComparisonIcon(item.name)}
                             alt=""
-                            width={20}
-                            height={20}
+                            width={46}
+                            height={46}
                           />
                           <div>
                         <p>{item.name}</p>

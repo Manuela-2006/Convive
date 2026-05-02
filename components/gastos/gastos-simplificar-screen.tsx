@@ -72,13 +72,16 @@ export function GastosSimplificarScreen({
                   >
                     <div className={styles.flow}>
                       <span className={styles.personTag}>
-                        <ProfileAvatar
-                          src={settlement.from_avatar_url}
-                          alt=""
-                          width={18}
-                          height={18}
-                        />
-                        {settlement.from_name}
+                        <span className={styles.personAvatarFrame}>
+                          <ProfileAvatar
+                            src={settlement.from_avatar_url}
+                            alt=""
+                            width={72}
+                            height={72}
+                            className={styles.personAvatar}
+                          />
+                        </span>
+                        <span className={styles.personName}>{settlement.from_name}</span>
                       </span>
                       <span className={styles.smallAmount}>
                         {formatCurrency(settlement.amount)}
@@ -90,13 +93,16 @@ export function GastosSimplificarScreen({
                         height={18}
                       />
                       <span className={styles.personTag}>
-                        <ProfileAvatar
-                          src={settlement.to_avatar_url}
-                          alt=""
-                          width={18}
-                          height={18}
-                        />
-                        {settlement.to_name}
+                        <span className={styles.personAvatarFrame}>
+                          <ProfileAvatar
+                            src={settlement.to_avatar_url}
+                            alt=""
+                            width={72}
+                            height={72}
+                            className={styles.personAvatar}
+                          />
+                        </span>
+                        <span className={styles.personName}>{settlement.to_name}</span>
                       </span>
                     </div>
                     <Link

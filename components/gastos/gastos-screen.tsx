@@ -274,8 +274,8 @@ export function GastosScreen({
                         <ProfileAvatar
                           src={settlement.from_avatar_url}
                           alt=""
-                          width={16}
-                          height={16}
+                          width={46}
+                          height={46}
                         />
                         {settlement.from_name}
                       </span>
@@ -292,8 +292,8 @@ export function GastosScreen({
                         <ProfileAvatar
                           src={settlement.to_avatar_url}
                           alt=""
-                          width={16}
-                          height={16}
+                          width={46}
+                          height={46}
                         />
                         {settlement.to_name}
                       </span>
@@ -348,8 +348,8 @@ export function GastosScreen({
                           <ProfileAvatar
                             src={payment.from_avatar_url}
                             alt=""
-                            width={16}
-                            height={16}
+                            width={46}
+                            height={46}
                           />
                           {payment.from_name}
                         </span>
@@ -366,8 +366,8 @@ export function GastosScreen({
                           <ProfileAvatar
                             src={payment.to_avatar_url}
                             alt=""
-                            width={16}
-                            height={16}
+                            width={46}
+                            height={46}
                           />
                           {payment.to_name}
                         </span>

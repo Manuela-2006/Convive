@@ -90,8 +90,8 @@
 .title {
   margin: 0;
   font-family: var(--font-montserrat), sans-serif;
-  font-size: clamp(1.1rem, 1.8vw, 1.9rem);
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   text-transform: uppercase;
 }
 
@@ -292,10 +292,6 @@
   .tile {
     padding: clamp(1.6rem, 2.2vw, 2.35rem);
     gap: 2.05rem;
-  }
-
-  .title {
-    font-size: clamp(1.3rem, 1.9vw, 2.2rem);
   }
 
   .value {

@@ -143,10 +143,40 @@
 .personTag {
   display: inline-flex;
   align-items: center;
-  gap: 0.24rem;
+  gap: 0.7rem;
   color: #1f1a17;
   font-family: "Poppins", sans-serif;
   font-size: 15px;
+}
+
+.personName {
+  display: inline-block;
+  padding-left: 0.7rem;
+}
+
+.personAvatarFrame {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  min-height: 56px;
+  border-radius: 999px;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 0.7rem !important;
+}
+
+.personAvatar {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover;
+  transform: scale(2.7);
+  transform-origin: center center;
+  flex-shrink: 0;
 }
 
 .smallAmount {

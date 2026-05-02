@@ -277,8 +277,8 @@ export function AreaPersonalScreen({
                         <ProfileAvatar
                           src={debt.person_avatar_url}
                           alt="Perfil"
-                          width={22}
-                          height={22}
+                          width={46}
+                          height={46}
                           className={styles.avatar}
                         />
                         <div>
@@ -331,8 +331,8 @@ export function AreaPersonalScreen({
                       <ProfileAvatar
                         src={receivable.person_avatar_url}
                         alt="Perfil"
-                        width={22}
-                        height={22}
+                        width={46}
+                        height={46}
                         className={styles.avatar}
                       />
                       <div>

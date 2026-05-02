@@ -465,7 +465,17 @@ export function FacturasAddScreen({
                   onChange={(event) => setTotalAmount(event.target.value)}
                   placeholder="0,00"
                 />
-                <span className={styles.totalCurrency}>â‚¬</span>
+                <Image
+                  src="/iconos/euro.svg"
+                  alt="Euro"
+                  width={14}
+                  height={14}
+                  className={styles.totalCurrencyIcon}
+                  style={{
+                    filter:
+                      "brightness(0) saturate(100%) invert(15%) sepia(25%) saturate(4849%) hue-rotate(329deg) brightness(84%) contrast(98%)",
+                  }}
+                />
               </div>
             </section>
 
