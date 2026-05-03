@@ -20,8 +20,10 @@
 .panel {
   position: relative;
   z-index: 1;
+  justify-self: center;
   width: calc(100% * 7 / 12);
   max-width: 980px;
+  margin-inline: auto;
   background: rgba(240, 234, 228, 0.5);
   border-radius: 10px;
   overflow: hidden;
