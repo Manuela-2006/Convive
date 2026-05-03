@@ -12,7 +12,7 @@ const KEYFRAMES = [
   { rotationY: Math.PI * 5, cameraX: 0, cameraY: 3.5, lookAtY: 3.5 }, // S5 delantera
 ];
 const LARGE_SCREEN_MIN_WIDTH = 1600;
-const SECTION_FIVE_EXTRA_CAMERA_Y = 0.5;
+const SECTION_FIVE_EXTRA_CAMERA_Y = 0.2;
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
