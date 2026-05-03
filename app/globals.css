@@ -149,7 +149,7 @@ main {
   position: absolute;
   inset: 0;
   z-index: 0;
-  filter: blur(1.8px) saturate(104%);
+  filter: blur(0.9px) saturate(102%);
   transform: none;
   transform-origin: center;
 }
@@ -157,7 +157,7 @@ main {
 .landing-hero__building-overlay-dark {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.07);
   pointer-events: none;
   z-index: 6;
   opacity: 1;
