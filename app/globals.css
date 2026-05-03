@@ -157,7 +157,7 @@ main {
 .landing-hero__building-overlay-dark {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.16);
   pointer-events: none;
   z-index: 6;
   opacity: 1;
