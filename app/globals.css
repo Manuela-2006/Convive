@@ -149,12 +149,15 @@ main {
   position: absolute;
   inset: 0;
   z-index: 0;
+  filter: blur(6px) saturate(115%);
+  transform: scale(1.03);
+  transform-origin: center;
 }
 
 .landing-hero__building-overlay-dark {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.42);
+  background: rgba(0, 0, 0, 0.22);
   pointer-events: none;
   z-index: 6;
   opacity: 1;
@@ -190,9 +193,8 @@ main {
   width: 100% !important;
   height: 100% !important;
   background: transparent !important;
-  filter: blur(2.8px) saturate(112%);
-  transform: scale(1.015);
-  transform-origin: center;
+  filter: none;
+  transform: none;
 }
 
 .landing-section-two {
