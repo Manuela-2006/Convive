@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 const KEYFRAMES = [
-  { rotationY: Math.PI, cameraX: -0.8, cameraY: 22, lookAtY: 22 }, // S1 delantera
+  { rotationY: Math.PI, cameraX: 0, cameraY: 22, lookAtY: 22 }, // S1 delantera
   { rotationY: Math.PI * 2, cameraX: 0, cameraY: 17, lookAtY: 17 }, // S2 trasera
   { rotationY: Math.PI * 3, cameraX: 0, cameraY: 12, lookAtY: 12 }, // S3 delantera
   { rotationY: Math.PI * 4, cameraX: 0, cameraY: 7, lookAtY: 7 }, // S4 trasera
@@ -193,7 +193,7 @@ export default function BuildingScene() {
       }
       camera.position.x += (s.targetCameraX - camera.position.x) * LERP;
       camera.position.y += (s.targetCameraY - camera.position.y) * LERP;
-      camera.lookAt(camera.position.x, s.targetLookAtY, 0);
+      camera.lookAt(0, s.targetLookAtY, 0);
 
       renderer.render(scene, camera);
     };
