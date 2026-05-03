@@ -1,4 +1,15 @@
-import type { CapacitorConfig } from "@capacitor/cli";
+type CapacitorConfig = {
+  appId: string;
+  appName: string;
+  webDir: string;
+  server?: {
+    url: string;
+    cleartext: boolean;
+  };
+  android?: {
+    path: string;
+  };
+};
 
 const serverUrl =
   process.env.CAPACITOR_SERVER_URL?.trim() ||
