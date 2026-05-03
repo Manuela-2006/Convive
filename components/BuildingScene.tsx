@@ -13,6 +13,13 @@ const KEYFRAMES = [
 ];
 const LARGE_SCREEN_MIN_WIDTH = 1600;
 const SECTION_FIVE_EXTRA_CAMERA_Y = 0.2;
+const SECTION_IDS = [
+  "landing-section-one",
+  "landing-section-two",
+  "landing-section-three",
+  "landing-section-four",
+  "landing-section-five",
+] as const;
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
@@ -139,18 +146,38 @@ export default function BuildingScene() {
       (e) => console.error("Error GLB:", e)
     );
 
-    let maxScrollStable = 0;
     let stabilizeTimer: number | null = null;
 
     const computeProgress = () => {
-      const currentMax =
-        document.documentElement.scrollHeight - window.innerHeight;
-      maxScrollStable = Math.max(maxScrollStable, currentMax);
-      const progress = THREE.MathUtils.clamp(
-        window.scrollY / Math.max(1, maxScrollStable),
-        0,
-        1
-      );
+      const tops = SECTION_IDS.map((id) => {
+        const el = document.getElementById(id);
+        return el ? el.offsetTop : 0;
+      });
+
+      const y = window.scrollY;
+      const segmentCount = KEYFRAMES.length - 1;
+      let progress = 0;
+
+      if (y <= tops[0]) {
+        progress = 0;
+      } else if (y >= tops[tops.length - 1]) {
+        progress = 1;
+      } else {
+        for (let i = 0; i < tops.length - 1; i += 1) {
+          const start = tops[i];
+          const end = tops[i + 1];
+          if (y >= start && y < end) {
+            const localT = THREE.MathUtils.clamp(
+              (y - start) / Math.max(1, end - start),
+              0,
+              1
+            );
+            progress = (i + localT) / segmentCount;
+            break;
+          }
+        }
+      }
+
       const v = getValues(progress);
 
       // Only on large screens: lift camera slightly in the last section (PB)

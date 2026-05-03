@@ -149,7 +149,7 @@ main {
   position: absolute;
   inset: 0;
   z-index: 0;
-  filter: blur(0.9px) saturate(102%);
+  filter: blur(1.25px) saturate(103%);
   transform: none;
   transform-origin: center;
 }
