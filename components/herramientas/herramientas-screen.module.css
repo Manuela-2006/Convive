@@ -8,10 +8,9 @@
   background-color: #cfcfcf;
   padding: clamp(1.2rem, 2.4vw, 2rem);
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  justify-items: center;
+  align-content: center;
 }
 
 .backgroundImage {
@@ -28,7 +27,7 @@
   width: calc(100% * 7 / 12);
   max-width: 980px;
   margin-inline: auto;
-  margin-block: auto;
+  margin-block: clamp(1.4rem, 4vh, 3.6rem);
   background: rgba(240, 234, 228, 0.5);
   border-radius: 10px;
   overflow: hidden;
@@ -504,7 +503,7 @@
 
 @media (max-width: 900px) {
   .page {
-    align-items: center;
+    align-content: center;
   }
 
   .panel {
