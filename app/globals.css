@@ -190,6 +190,9 @@ main {
   width: 100% !important;
   height: 100% !important;
   background: transparent !important;
+  filter: blur(2.8px) saturate(112%);
+  transform: scale(1.015);
+  transform-origin: center;
 }
 
 .landing-section-two {
