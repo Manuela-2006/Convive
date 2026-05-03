@@ -11,6 +11,8 @@ const KEYFRAMES = [
   { rotationY: Math.PI * 4, cameraX: 0, cameraY: 7, lookAtY: 7 }, // S4 trasera
   { rotationY: Math.PI * 5, cameraX: 0, cameraY: 3.5, lookAtY: 3.5 }, // S5 delantera
 ];
+const LARGE_SCREEN_MIN_WIDTH = 1600;
+const SECTION_FIVE_EXTRA_CAMERA_Y = 1.6;
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
@@ -146,6 +148,16 @@ export default function BuildingScene() {
         1
       );
       const v = getValues(progress);
+
+      // Only on large screens: lift camera slightly in the last section (PB)
+      // without changing laptop behavior or earlier sections.
+      if (window.innerWidth >= LARGE_SCREEN_MIN_WIDTH) {
+        const sectionFiveT = THREE.MathUtils.clamp((progress - 0.75) / 0.25, 0, 1);
+        const extraY = SECTION_FIVE_EXTRA_CAMERA_Y * sectionFiveT;
+        v.cameraY += extraY;
+        v.lookAtY += extraY;
+      }
+
       stateRef.current.targetRotationY = v.rotationY;
       stateRef.current.targetCameraX = v.cameraX;
       stateRef.current.targetCameraY = v.cameraY;
