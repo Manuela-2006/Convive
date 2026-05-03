@@ -1,4 +1,4 @@
-﻿.page {
+.page {
   position: relative;
   width: 100%;
   min-height: 100svh;
@@ -9,6 +9,7 @@
   padding: clamp(1.2rem, 2.4vw, 2rem);
   box-sizing: border-box;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
@@ -27,6 +28,7 @@
   width: calc(100% * 7 / 12);
   max-width: 980px;
   margin-inline: auto;
+  margin-block: auto;
   background: rgba(240, 234, 228, 0.5);
   border-radius: 10px;
   overflow: hidden;
@@ -535,3 +537,4 @@
     align-content: start;
   }
 }
+
