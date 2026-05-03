@@ -11,6 +11,7 @@ type SecureDocumentViewerProps = {
   title: string;
   buttonClassName?: string;
   documentAvailable?: boolean;
+  documentType?: "image" | "pdf";
   disabled?: boolean;
   emptyMessage: string;
   loadSignedUrl: () => Promise<ActionResult<{ signedUrl: string }>>;
@@ -21,6 +22,7 @@ export function SecureDocumentViewer({
   title,
   buttonClassName,
   documentAvailable = true,
+  documentType = "image",
   disabled = false,
   emptyMessage,
   loadSignedUrl,
@@ -108,7 +110,11 @@ export function SecureDocumentViewer({
           </button>
           <h2 className={styles.title}>{title}</h2>
         </header>
-        {signedUrl ? (
+        {signedUrl && documentType === "pdf" ? (
+          <div className={styles.documentWrap}>
+            <iframe src={signedUrl} title={title} className={styles.documentFrame} />
+          </div>
+        ) : signedUrl ? (
           <div className={styles.imageWrap}>
             <img src={signedUrl} alt={title} className={styles.image} />
           </div>

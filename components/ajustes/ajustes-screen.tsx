@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import {
+  leaveHouseAction,
   updateHouseMemberSettingsAction,
   updateProfileSettingsAction,
 } from "../../app/backend/endpoints/auth/actions";
@@ -15,6 +16,10 @@ import {
   selectProfileAvatarAction,
   uploadProfileAvatarAction,
 } from "../../app/backend/endpoints/profile/avatar-actions";
+import {
+  getContractDocumentSignedUrlAction,
+  uploadContractDocumentAction,
+} from "../../app/backend/endpoints/profile/contract-actions";
 import type { ProfileSettingsData } from "../../lib/dashboard-types";
 import { fileToDocumentUploadPayload } from "../../lib/document-upload-client";
 import {
@@ -22,6 +27,7 @@ import {
   isProfileAvatarStoragePath,
 } from "../../lib/profile-avatar";
 import { Card } from "../ui/card";
+import { SecureDocumentViewer } from "../ui/secure-document-viewer";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -194,9 +200,15 @@ export function AjustesScreen({
     null
   );
   const [contractFileName, setContractFileName] = useState<string | null>(null);
+  const [contractFilePath, setContractFilePath] = useState(
+    settings.house_member.contract_file_path
+  );
   const [isProfilePending, startProfileTransition] = useTransition();
   const [isHousePending, startHouseTransition] = useTransition();
   const [isAvatarPending, startAvatarTransition] = useTransition();
+  const [isContractPending, startContractTransition] = useTransition();
+  const [isLeavingHouse, startLeaveHouseTransition] = useTransition();
+  const [leaveHouseError, setLeaveHouseError] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const contractInputRef = useRef<HTMLInputElement>(null);
   const avatarOptions = useMemo<AvatarOption[]>(() => {
@@ -380,7 +392,35 @@ export function AjustesScreen({
 
     setContractUploadError(null);
     setContractFileName(file.name);
-    setContractPopoverOpen(false);
+    startContractTransition(async () => {
+      try {
+        const document = await fileToDocumentUploadPayload(file);
+        const result = await uploadContractDocumentAction({
+          houseCode,
+          dashboardPath: basePath,
+          document,
+        });
+
+        if (result.success) {
+          setContractFilePath(result.data.storagePath);
+          setContractPopoverOpen(false);
+          router.refresh();
+          return;
+        }
+
+        if ("error" in result) {
+          setContractUploadError(result.error);
+        }
+      } catch (error) {
+        setContractUploadError(
+          error instanceof Error ? error.message : "No se pudo subir el contrato."
+        );
+      } finally {
+        if (contractInputRef.current) {
+          contractInputRef.current.value = "";
+        }
+      }
+    });
   };
 
   useEffect(() => {
@@ -400,6 +440,7 @@ export function AjustesScreen({
     setRoomSize(settings.house_member.room_size ?? "");
     setStayStartDate(settings.house_member.stay_start_date ?? "");
     setStayEndDate(settings.house_member.stay_end_date ?? "");
+    setContractFilePath(settings.house_member.contract_file_path);
   }, [
     settings.profile.full_name,
     settings.profile.email,
@@ -410,6 +451,7 @@ export function AjustesScreen({
     settings.house_member.room_size,
     settings.house_member.stay_start_date,
     settings.house_member.stay_end_date,
+    settings.house_member.contract_file_path,
   ]);
 
   useEffect(() => {
@@ -485,6 +527,28 @@ export function AjustesScreen({
     });
   };
 
+  const handleLeaveHouse = () => {
+    setFeedbackMessage(null);
+    setLeaveHouseError(null);
+    startLeaveHouseTransition(async () => {
+      const result = await leaveHouseAction({
+        houseCode,
+        dashboardPath: basePath,
+      });
+
+      if (result.success) {
+        router.push(result.data.redirectTo);
+        router.refresh();
+        return;
+      }
+
+      if ("error" in result) {
+        setLeaveHouseError(result.error);
+        setFeedbackMessage(result.error);
+      }
+    });
+  };
+
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
@@ -502,62 +566,77 @@ export function AjustesScreen({
             <h1 className={styles.title}>Perfil</h1>
             <p className={styles.subtitle}>Gestiona tu información personal</p>
           </div>
-          <Popover open={contractPopoverOpen} onOpenChange={setContractPopoverOpen}>
-            <PopoverTrigger asChild>
-              <button type="button" className={styles.headerContractButton}>
-                Ver contrato
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className={styles.avatarUploadPopover} side="bottom" align="end">
-              <div
-                className={`${styles.avatarDropzone} ${
-                  contractDragging ? styles.avatarDropzoneActive : ""
-                }`}
-                onClick={() => contractInputRef.current?.click()}
-                onDragOver={(event) => {
-                  event.preventDefault();
-                  setContractDragging(true);
-                }}
-                onDragLeave={() => setContractDragging(false)}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  setContractDragging(false);
-                  const file = event.dataTransfer.files?.[0];
-                  if (file) {
-                    handleContractFile(file);
-                  }
-                }}
-              >
-                <Image
-                  src="/iconos/Escanearimagen.svg"
-                  alt=""
-                  width={26}
-                  height={26}
-                  className={styles.avatarDropIcon}
+          {contractFilePath ? (
+            <SecureDocumentViewer
+              label="Ver contrato"
+              title="Contrato"
+              buttonClassName={styles.headerContractButton}
+              documentType="pdf"
+              emptyMessage="No hay contrato guardado."
+              loadSignedUrl={() =>
+                getContractDocumentSignedUrlAction({ houseCode })
+              }
+            />
+          ) : (
+            <Popover open={contractPopoverOpen} onOpenChange={setContractPopoverOpen}>
+              <PopoverTrigger asChild>
+                <button type="button" className={styles.headerContractButton}>
+                  Ver contrato
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className={styles.avatarUploadPopover} side="bottom" align="end">
+                <div
+                  className={`${styles.avatarDropzone} ${
+                    contractDragging ? styles.avatarDropzoneActive : ""
+                  }`}
+                  onClick={() => contractInputRef.current?.click()}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    setContractDragging(true);
+                  }}
+                  onDragLeave={() => setContractDragging(false)}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    setContractDragging(false);
+                    const file = event.dataTransfer.files?.[0];
+                    if (file) {
+                      handleContractFile(file);
+                    }
+                  }}
+                >
+                  <Image
+                    src="/iconos/Escanearimagen.svg"
+                    alt=""
+                    width={26}
+                    height={26}
+                    className={styles.avatarDropIcon}
+                  />
+                  <p className={styles.avatarDropTitle}>Sube o arrastra un PDF</p>
+                  <p className={styles.avatarDropHint}>
+                    {isContractPending ? "Subiendo..." : "PDF - Max 10MB"}
+                  </p>
+                </div>
+                <input
+                  ref={contractInputRef}
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  className={styles.avatarUploadInput}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) {
+                      handleContractFile(file);
+                    }
+                  }}
                 />
-                <p className={styles.avatarDropTitle}>Sube o arrastra un PDF</p>
-                <p className={styles.avatarDropHint}>PDF - Max 10MB</p>
-              </div>
-              <input
-                ref={contractInputRef}
-                type="file"
-                accept="application/pdf,.pdf"
-                className={styles.avatarUploadInput}
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) {
-                    handleContractFile(file);
-                  }
-                }}
-              />
-              {contractFileName ? (
-                <p className={styles.avatarFileName}>{contractFileName}</p>
-              ) : null}
-              {contractUploadError ? (
-                <p className={styles.avatarUploadError}>{contractUploadError}</p>
-              ) : null}
-            </PopoverContent>
-          </Popover>
+                {contractFileName ? (
+                  <p className={styles.avatarFileName}>{contractFileName}</p>
+                ) : null}
+                {contractUploadError ? (
+                  <p className={styles.avatarUploadError}>{contractUploadError}</p>
+                ) : null}
+              </PopoverContent>
+            </Popover>
+          )}
         </header>
 
         <div className={styles.content}>
@@ -918,10 +997,23 @@ export function AjustesScreen({
                   <AlertDialogDescription>
                     ¿Seguro que quieres abandonar este piso? Esta acción te sacará del piso actual.
                   </AlertDialogDescription>
+                  {leaveHouseError ? (
+                    <p className={styles.feedbackMessage}>{leaveHouseError}</p>
+                  ) : null}
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction>Confirmar salida</AlertDialogAction>
+                  <AlertDialogCancel disabled={isLeavingHouse}>
+                    Cancelar
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={(event) => {
+                      event.preventDefault();
+                      handleLeaveHouse();
+                    }}
+                    disabled={isLeavingHouse}
+                  >
+                    {isLeavingHouse ? "Saliendo..." : "Confirmar salida"}
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>

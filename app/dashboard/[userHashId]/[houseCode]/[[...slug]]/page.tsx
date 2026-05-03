@@ -52,6 +52,7 @@ import {
   loadOpenHousePurchaseTicketsWithClient,
   loadOpenHouseSharedExpensesWithClient,
 } from "../../../../backend/endpoints/gastos/queries";
+import { getSharedExpenseSplitAction } from "../../../../backend/endpoints/gastos/actions";
 import { loadHomeDashboardWithClient } from "../../../../backend/endpoints/home/queries";
 import {
   loadAddCleaningTaskFormOptionsWithClient,
@@ -453,6 +454,10 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
   const canReviewExpensePayments = pendingPaymentConfirmations.some(
     (payment) => payment.can_review
   );
+  const visiblePaymentSimplification =
+    expensesDashboard?.payment_simplification.isSimplified
+      ? expensesDashboard.payment_simplification.settlements
+      : [];
   const openHousePurchaseTickets =
     sectionPath === "gastos"
       ? await loadOpenHousePurchaseTicketsWithClient(
@@ -503,7 +508,7 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
         dashboardPath={routeContext.dashboardPath}
         tickets={openHousePurchaseTickets}
         sharedExpenses={openHouseSharedExpenses}
-        settlements={expensesDashboard?.settlements ?? []}
+        settlements={visiblePaymentSimplification}
         pendingPaymentConfirmations={pendingPaymentConfirmations}
         canReviewPayments={canReviewExpensePayments}
       />
@@ -543,16 +548,15 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
 
   if (sectionPath.startsWith("gastos/division/reparto/")) {
     const expenseId = sectionPath.replace("gastos/division/reparto/", "");
-    const sourceExpenses = sharedExpensesHistory.length
-      ? sharedExpensesHistory
-      : (expensesDashboard?.shared_expenses ?? []);
-    const selectedExpense =
-      sourceExpenses.find((expense) => expense.expense_id === expenseId) ?? null;
+    const splitResult = await getSharedExpenseSplitAction({
+      houseCode: routeContext.house.public_code,
+      expenseId,
+    });
 
     return withMiniDoor(
       <GastosRepartoScreen
         dashboardPath={routeContext.dashboardPath}
-        expense={selectedExpense}
+        expense={splitResult.success ? splitResult.data.split : null}
       />,
       routeContext.dashboardPath,
       "gastos"
@@ -576,7 +580,13 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
       <GastosSimplificarScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-        settlements={expensesDashboard?.settlements ?? []}
+        settlements={visiblePaymentSimplification}
+        originalPaymentCount={
+          expensesDashboard?.payment_simplification.originalPaymentCount ?? 0
+        }
+        optimizedPaymentCount={
+          expensesDashboard?.payment_simplification.optimizedPaymentCount ?? 0
+        }
       />,
       routeContext.dashboardPath,
       "gastos"
@@ -588,7 +598,7 @@ export default async function HouseRoutePage({ params }: HouseRoutePageProps) {
       <GastosPagoSimplificadoScreen
         houseCode={routeContext.house.public_code}
         dashboardPath={routeContext.dashboardPath}
-        settlements={expensesDashboard?.settlements ?? []}
+        settlements={visiblePaymentSimplification}
       />,
       routeContext.dashboardPath,
       "gastos"

@@ -467,7 +467,7 @@ export async function removeHouseMemberAction(
 
 export async function leaveHouseAction(
   input: LeaveHouseInput
-): Promise<ActionResult<{ left: true }>> {
+): Promise<ActionResult<{ left: true; redirectTo: string }>> {
   try {
     const { supabase } = await getAuthenticatedProfileContext();
 
@@ -480,8 +480,11 @@ export async function leaveHouseAction(
     }
 
     revalidateProfilePaths(input.dashboardPath);
+    revalidatePath("/dashboard");
 
-    return { success: true, data: { left: true } };
+    const redirectTo = await getDefaultDashboardPath();
+
+    return { success: true, data: { left: true, redirectTo } };
   } catch (error) {
     return {
       success: false,

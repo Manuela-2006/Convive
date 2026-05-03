@@ -76,6 +76,7 @@ type JoinHomeFormValues = z.infer<typeof joinHomeSchema>;
 type LoginCardProps = {
   initialFlow?: "login" | "create" | "join";
   initialJoinCode?: string;
+  initialSetupStep?: boolean;
 };
 
 function getAuthErrorMessage(error: unknown) {
@@ -89,10 +90,11 @@ function getAuthErrorMessage(error: unknown) {
 export function LoginCard({
   initialFlow = "login",
   initialJoinCode = "",
+  initialSetupStep = false,
 }: LoginCardProps) {
   const router = useRouter();
   const preferredHomeAction = initialFlow === "join" ? "join" : "create";
-  const [showSetupStep, setShowSetupStep] = useState(false);
+  const [showSetupStep, setShowSetupStep] = useState(initialSetupStep);
   const [homeAction, setHomeAction] = useState<"create" | "join">(
     preferredHomeAction
   );

@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { ProfileAvatar } from "../ui/profile-avatar";
+import { ExpenseSplitDialog } from "./expense-split-dialog";
 import styles from "./gastos-screen.module.css";
 
 type GastosScreenProps = {
@@ -222,12 +223,11 @@ export function GastosScreen({
                     <p className={styles.amount}>
                       {formatCurrency(expense.total_amount, expense.currency)}
                     </p>
-                    <Link
-                      href={`${basePath}/gastos/division/reparto/${expense.expense_id}`}
-                      className={`convive-button ${styles.actionButton}`}
-                    >
-                      Ver reparto
-                    </Link>
+                    <ExpenseSplitDialog
+                      houseCode={houseCode}
+                      expenseId={expense.expense_id}
+                      buttonClassName={`convive-button ${styles.actionButton}`}
+                    />
                   </div>
                 ))
               ) : (

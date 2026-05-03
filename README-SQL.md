@@ -8685,3 +8685,405 @@ end;
 $$;
 
 grant execute on function public.leave_current_house(text) to authenticated;
+
+
+-- =========================================================
+-- AJUSTES INCREMENTALES - REPARTO REAL, CONTRATO Y SIMPLIFICACION
+-- No borra datos ni modifica bloques anteriores.
+-- =========================================================
+
+alter table public.house_members
+add column if not exists contract_file_path text;
+
+
+create or replace function public.get_profile_settings(
+  p_house_public_code text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+  v_is_admin boolean;
+  v_result jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_house_id := public.get_accessible_house_id(p_house_public_code);
+  v_is_admin := public.is_house_admin(v_house_id);
+
+  select jsonb_build_object(
+    'profile', jsonb_build_object(
+      'id', p.id,
+      'email', p.email,
+      'full_name', p.full_name,
+      'avatar_url', p.avatar_url,
+      'avatar_storage_path', p.avatar_storage_path,
+      'user_hash_id', p.user_hash_id
+    ),
+    'house_member', jsonb_build_object(
+      'role', hm.role,
+      'room_label', hm.room_label,
+      'room_size', hm.room_size,
+      'stay_start_date', hm.stay_start_date,
+      'stay_end_date', hm.stay_end_date,
+      'contract_file_path', hm.contract_file_path
+    ),
+    'can_remove_members', v_is_admin,
+    'removable_members', case
+      when v_is_admin then coalesce((
+        select jsonb_agg(
+          jsonb_build_object(
+            'profile_id', member.profile_id,
+            'display_name', public.profile_display_name(member.profile_id),
+            'role', member.role
+          )
+          order by public.profile_display_name(member.profile_id)
+        )
+        from public.house_members member
+        where member.house_id = v_house_id
+          and member.is_active = true
+      ), '[]'::jsonb)
+      else '[]'::jsonb
+    end
+  )
+  into v_result
+  from public.profiles p
+  join public.house_members hm
+    on hm.profile_id = p.id
+   and hm.house_id = v_house_id
+   and hm.is_active = true
+  where p.id = auth.uid()
+  limit 1;
+
+  if v_result is null then
+    raise exception 'Perfil no encontrado';
+  end if;
+
+  return v_result;
+end;
+$$;
+
+grant execute on function public.get_profile_settings(text) to authenticated;
+
+
+create or replace function public.set_own_house_member_contract(
+  p_house_public_code text,
+  p_contract_file_path text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+  v_contract_file_path text;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_house_id := public.get_accessible_house_id(p_house_public_code);
+  v_contract_file_path := nullif(trim(coalesce(p_contract_file_path, '')), '');
+
+  if v_contract_file_path is null then
+    raise exception 'Contrato no valido';
+  end if;
+
+  if public.storage_path_house_id(v_contract_file_path) is distinct from v_house_id then
+    raise exception 'Contrato no permitido para este piso';
+  end if;
+
+  if v_contract_file_path !~ ('^house/' || v_house_id::text || '/members/' || auth.uid()::text || '/contract/') then
+    raise exception 'Contrato no permitido para este usuario';
+  end if;
+
+  update public.house_members
+  set
+    contract_file_path = v_contract_file_path,
+    updated_at = now()
+  where house_id = v_house_id
+    and profile_id = auth.uid()
+    and is_active = true;
+
+  if not found then
+    raise exception 'Participante no encontrado';
+  end if;
+
+  insert into public.house_audit_log (
+    house_id,
+    actor_profile_id,
+    entity_type,
+    entity_id,
+    action,
+    details
+  )
+  values (
+    v_house_id,
+    auth.uid(),
+    'house_member',
+    auth.uid(),
+    'contract_uploaded',
+    jsonb_build_object('contract_file_path', v_contract_file_path)
+  );
+
+  return jsonb_build_object(
+    'status', 'updated',
+    'contract_file_path', v_contract_file_path
+  );
+end;
+$$;
+
+grant execute on function public.set_own_house_member_contract(text, text) to authenticated;
+
+
+create or replace function public.get_own_house_member_contract(
+  p_house_public_code text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+  v_contract_file_path text;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_house_id := public.get_accessible_house_id(p_house_public_code);
+
+  select hm.contract_file_path
+  into v_contract_file_path
+  from public.house_members hm
+  where hm.house_id = v_house_id
+    and hm.profile_id = auth.uid()
+    and hm.is_active = true
+  limit 1;
+
+  return jsonb_build_object('contract_file_path', v_contract_file_path);
+end;
+$$;
+
+grant execute on function public.get_own_house_member_contract(text) to authenticated;
+
+
+create or replace function public.get_shared_expense_split(
+  p_house_public_code text,
+  p_expense_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+  v_result jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_house_id := public.get_accessible_house_id(p_house_public_code);
+
+  select jsonb_build_object(
+    'expense_id', se.id,
+    'title', se.title,
+    'expense_date', se.expense_date,
+    'total_amount', se.total_amount,
+    'currency', se.currency,
+    'paid_by_profile_id', se.paid_by_profile_id,
+    'paid_by_name', public.profile_display_name(se.paid_by_profile_id),
+    'description', se.description,
+    'settlement_status', coalesce(se.settlement_status, 'open'),
+    'participants', coalesce((
+      select jsonb_agg(
+        jsonb_build_object(
+          'profile_id', ep.profile_id,
+          'display_name', public.profile_display_name(ep.profile_id),
+          'avatar_url', p.avatar_url,
+          'share_amount', ep.share_amount,
+          'status', ep.status
+        )
+        order by public.profile_display_name(ep.profile_id)
+      )
+      from public.expense_participants ep
+      join public.profiles p on p.id = ep.profile_id
+      where ep.expense_id = se.id
+        and ep.is_waived = false
+    ), '[]'::jsonb)
+  )
+  into v_result
+  from public.shared_expenses se
+  where se.id = p_expense_id
+    and se.house_id = v_house_id
+    and se.status = 'active'
+  limit 1;
+
+  if v_result is null then
+    raise exception 'Gasto no encontrado';
+  end if;
+
+  return v_result;
+end;
+$$;
+
+grant execute on function public.get_shared_expense_split(text, uuid) to authenticated;
+
+
+create or replace function public.get_house_payment_simplification_context(
+  p_house_public_code text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_house_id uuid;
+  v_original_payment_count int;
+  v_optimized_payment_count int;
+  v_settlements jsonb := '[]'::jsonb;
+  v_creditor_id uuid;
+  v_creditor_name text;
+  v_credit numeric(12,2);
+  v_debtor_id uuid;
+  v_debtor_name text;
+  v_debt numeric(12,2);
+  v_transfer numeric(12,2);
+begin
+  if auth.uid() is null then
+    raise exception 'No autenticado';
+  end if;
+
+  v_house_id := public.get_accessible_house_id(p_house_public_code);
+
+  drop table if exists pg_temp.tmp_payment_simplification_balances;
+
+  create temp table pg_temp.tmp_payment_simplification_balances (
+    profile_id uuid primary key,
+    member_name text not null,
+    balance numeric(12,2) not null default 0
+  ) on commit drop;
+
+  with direct_payments as (
+    select
+      ep.profile_id as from_profile_id,
+      se.paid_by_profile_id as to_profile_id,
+      round(sum(ep.share_amount), 2) as amount
+    from public.expense_participants ep
+    join public.shared_expenses se on se.id = ep.expense_id
+    where se.house_id = v_house_id
+      and se.status = 'active'
+      and coalesce(se.settlement_status, 'open') <> 'settled'
+      and ep.is_waived = false
+      and ep.status <> 'paid'
+      and ep.profile_id <> se.paid_by_profile_id
+      and ep.share_amount > 0
+    group by ep.profile_id, se.paid_by_profile_id
+  )
+  select count(*)::int
+  into v_original_payment_count
+  from direct_payments
+  where amount > 0;
+
+  with direct_payments as (
+    select
+      ep.profile_id as from_profile_id,
+      se.paid_by_profile_id as to_profile_id,
+      round(sum(ep.share_amount), 2) as amount
+    from public.expense_participants ep
+    join public.shared_expenses se on se.id = ep.expense_id
+    where se.house_id = v_house_id
+      and se.status = 'active'
+      and coalesce(se.settlement_status, 'open') <> 'settled'
+      and ep.is_waived = false
+      and ep.status <> 'paid'
+      and ep.profile_id <> se.paid_by_profile_id
+      and ep.share_amount > 0
+    group by ep.profile_id, se.paid_by_profile_id
+  ),
+  balance_rows as (
+    select from_profile_id as profile_id, -sum(amount) as balance
+    from direct_payments
+    group by from_profile_id
+    union all
+    select to_profile_id as profile_id, sum(amount) as balance
+    from direct_payments
+    group by to_profile_id
+  )
+  insert into pg_temp.tmp_payment_simplification_balances (
+    profile_id,
+    member_name,
+    balance
+  )
+  select
+    br.profile_id,
+    public.profile_display_name(br.profile_id),
+    round(sum(br.balance), 2)
+  from balance_rows br
+  group by br.profile_id;
+
+  v_optimized_payment_count := 0;
+
+  loop
+    select profile_id, member_name, balance
+    into v_creditor_id, v_creditor_name, v_credit
+    from pg_temp.tmp_payment_simplification_balances
+    where balance > 0.009
+    order by balance desc
+    limit 1;
+
+    select profile_id, member_name, balance
+    into v_debtor_id, v_debtor_name, v_debt
+    from pg_temp.tmp_payment_simplification_balances
+    where balance < -0.009
+    order by balance asc
+    limit 1;
+
+    exit when v_creditor_id is null or v_debtor_id is null;
+
+    v_transfer := round(least(v_credit, abs(v_debt)), 2);
+    exit when v_transfer <= 0;
+
+    v_settlements := v_settlements || jsonb_build_array(jsonb_build_object(
+      'from_profile_id', v_debtor_id,
+      'from_name', v_debtor_name,
+      'to_profile_id', v_creditor_id,
+      'to_name', v_creditor_name,
+      'amount', v_transfer
+    ));
+    v_optimized_payment_count := v_optimized_payment_count + 1;
+
+    update pg_temp.tmp_payment_simplification_balances
+    set balance = round(balance - v_transfer, 2)
+    where profile_id = v_creditor_id;
+
+    update pg_temp.tmp_payment_simplification_balances
+    set balance = round(balance + v_transfer, 2)
+    where profile_id = v_debtor_id;
+
+    v_creditor_id := null;
+    v_debtor_id := null;
+  end loop;
+
+  return jsonb_build_object(
+    'settlements', v_settlements,
+    'original_payment_count', coalesce(v_original_payment_count, 0),
+    'optimized_payment_count', coalesce(v_optimized_payment_count, 0),
+    'is_simplified',
+      coalesce(v_optimized_payment_count, 0) > 0
+      and coalesce(v_original_payment_count, 0) > coalesce(v_optimized_payment_count, 0)
+  );
+end;
+$$;
+
+grant execute on function public.get_house_payment_simplification_context(text) to authenticated;

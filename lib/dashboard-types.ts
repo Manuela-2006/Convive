@@ -35,6 +35,27 @@ export type SharedExpense = {
   settlement_status: string | null;
 };
 
+export type ExpenseSplitParticipant = {
+  profile_id: string;
+  display_name: string;
+  avatar_url: string | null;
+  share_amount: number | string;
+  status: string | null;
+};
+
+export type ExpenseSplitDetail = {
+  expense_id: string;
+  title: string;
+  expense_date: string;
+  total_amount: number | string;
+  currency: string;
+  paid_by_profile_id: string | null;
+  paid_by_name: string;
+  description: string | null;
+  settlement_status: string | null;
+  participants: ExpenseSplitParticipant[];
+};
+
 export type Settlement = {
   from_profile_id: string;
   from_name: string;
@@ -43,6 +64,13 @@ export type Settlement = {
   to_name: string;
   to_avatar_url: string | null;
   amount: number | string;
+};
+
+export type PaymentSimplification = {
+  settlements: Settlement[];
+  originalPaymentCount: number;
+  optimizedPaymentCount: number;
+  isSimplified: boolean;
 };
 
 export type AddExpenseMember = {
@@ -141,6 +169,7 @@ export type ExpensesDashboardData = {
   tickets: ExpenseTicket[];
   shared_expenses: SharedExpense[];
   settlements: Settlement[];
+  payment_simplification: PaymentSimplification;
   pending_payment_confirmations: PendingPaymentConfirmation[];
 };
 
@@ -323,6 +352,7 @@ export type ProfileSettingsData = {
     room_size: string | null;
     stay_start_date: string | null;
     stay_end_date: string | null;
+    contract_file_path: string | null;
   };
   can_remove_members: boolean;
   removable_members: ProfileSettingsMemberOption[];

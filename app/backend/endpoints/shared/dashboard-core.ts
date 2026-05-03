@@ -24,6 +24,7 @@ import type {
   PersonalAreaDebtItem,
   PersonalAreaHistoryItem,
   PersonalAreaReceivableItem,
+  PaymentSimplification,
   ProfileSettingsData,
   ProfileSettingsMemberOption,
   Settlement,
@@ -117,6 +118,24 @@ function mapSharedExpense(expense: Record<string, unknown>): SharedExpense {
     source_ticket_id: toNullableStringValue(expense.source_ticket_id),
     settlement_status: toNullableStringValue(expense.settlement_status),
   };
+}
+
+function mapSettlement(
+  settlement: Record<string, unknown>,
+  avatarUrlMap: Map<string, string>
+) {
+  const fromProfileId = toStringValue(settlement.from_profile_id);
+  const toProfileId = toStringValue(settlement.to_profile_id);
+
+  return {
+    from_profile_id: fromProfileId,
+    from_name: toStringValue(settlement.from_name),
+    from_avatar_url: avatarUrlMap.get(fromProfileId) ?? null,
+    to_profile_id: toProfileId,
+    to_name: toStringValue(settlement.to_name),
+    to_avatar_url: avatarUrlMap.get(toProfileId) ?? null,
+    amount: toNumericLikeValue(settlement.amount),
+  } satisfies Settlement;
 }
 
 function readInvoiceCategoryName(invoice: Record<string, unknown>) {
@@ -943,6 +962,7 @@ export async function loadProfileSettingsWithClient(
       room_size: toNullableStringValue(houseMember.room_size),
       stay_start_date: toNullableStringValue(houseMember.stay_start_date),
       stay_end_date: toNullableStringValue(houseMember.stay_end_date),
+      contract_file_path: toNullableStringValue(houseMember.contract_file_path),
     },
     can_remove_members: data.can_remove_members === true,
     removable_members: asArray<Record<string, unknown>>(
@@ -1045,6 +1065,12 @@ export async function loadHouseExpensesDashboardWithClient(
       tickets: [],
       shared_expenses: [],
       settlements: [],
+      payment_simplification: {
+        settlements: [],
+        originalPaymentCount: 0,
+        optimizedPaymentCount: 0,
+        isSimplified: false,
+      },
       pending_payment_confirmations: [],
     } satisfies ExpensesDashboardData;
   }
@@ -1060,10 +1086,26 @@ export async function loadHouseExpensesDashboardWithClient(
   const rawPendingPaymentConfirmations = asArray<Record<string, unknown>>(
     data.pending_payment_confirmations
   );
+  const simplificationResult = await supabase.rpc(
+    "get_house_payment_simplification_context",
+    {
+      p_house_public_code: houseCode,
+    }
+  );
+  const simplificationData = isRecord(simplificationResult.data)
+    ? simplificationResult.data
+    : null;
+  const rawSimplificationSettlements = simplificationData
+    ? asArray<Record<string, unknown>>(simplificationData.settlements)
+    : rawSettlements;
   const avatarUrlMap = await loadProfileAvatarUrlMapWithClient(
     supabase,
     [
       ...rawSettlements.flatMap((settlement) => [
+        toStringValue(settlement.from_profile_id),
+        toStringValue(settlement.to_profile_id),
+      ]),
+      ...rawSimplificationSettlements.flatMap((settlement) => [
         toStringValue(settlement.from_profile_id),
         toStringValue(settlement.to_profile_id),
       ]),
@@ -1087,20 +1129,25 @@ export async function loadHouseExpensesDashboardWithClient(
     house,
     tickets,
     shared_expenses: sharedExpenses,
-    settlements: rawSettlements.map((settlement) => {
-      const fromProfileId = toStringValue(settlement.from_profile_id);
-      const toProfileId = toStringValue(settlement.to_profile_id);
-
-      return {
-        from_profile_id: fromProfileId,
-        from_name: toStringValue(settlement.from_name),
-        from_avatar_url: avatarUrlMap.get(fromProfileId) ?? null,
-        to_profile_id: toProfileId,
-        to_name: toStringValue(settlement.to_name),
-        to_avatar_url: avatarUrlMap.get(toProfileId) ?? null,
-        amount: toNumericLikeValue(settlement.amount),
-      } satisfies Settlement;
-    }),
+    settlements: rawSettlements.map((settlement) =>
+      mapSettlement(settlement, avatarUrlMap)
+    ),
+    payment_simplification: {
+      settlements: rawSimplificationSettlements.map((settlement) =>
+        mapSettlement(settlement, avatarUrlMap)
+      ),
+      originalPaymentCount:
+        typeof simplificationData?.original_payment_count === "number"
+          ? simplificationData.original_payment_count
+          : Number(simplificationData?.original_payment_count ?? rawSettlements.length),
+      optimizedPaymentCount:
+        typeof simplificationData?.optimized_payment_count === "number"
+          ? simplificationData.optimized_payment_count
+          : Number(simplificationData?.optimized_payment_count ?? rawSettlements.length),
+      isSimplified:
+        simplificationData?.is_simplified === true ||
+        (!simplificationData && rawSettlements.length > 1),
+    } satisfies PaymentSimplification,
     pending_payment_confirmations: rawPendingPaymentConfirmations.map((payment) => {
       const fromProfileId = toStringValue(payment.from_profile_id);
       const toProfileId = toStringValue(payment.to_profile_id);

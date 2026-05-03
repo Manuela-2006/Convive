@@ -4,21 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card } from "../ui/card";
 import { ProfileAvatar } from "../ui/profile-avatar";
-import type { SharedExpense } from "../../lib/dashboard-types";
+import type { ExpenseSplitDetail } from "../../lib/dashboard-types";
 import { formatCurrency, formatShortDate } from "../../lib/dashboard-presenters";
 import styles from "./gastos-reparto-screen.module.css";
 
 type GastosRepartoScreenProps = {
   dashboardPath: string;
-  expense: SharedExpense | null;
+  expense: ExpenseSplitDetail | null;
 };
-
-function parseParticipants(participantsText: string) {
-  return participantsText
-    .split(",")
-    .map((name) => name.trim())
-    .filter(Boolean);
-}
 
 export function GastosRepartoScreen({
   dashboardPath,
@@ -63,33 +56,6 @@ export function GastosRepartoScreen({
     );
   }
 
-  const totalAmount = Number(expense.total_amount);
-  const participants = expense.participants.length
-    ? expense.participants
-    : parseParticipants(expense.participants_text).map((name, index) => ({
-        profile_id: `fallback-${index}`,
-        display_name: name,
-        avatar_url: null,
-      }));
-  const participantsCount = Math.max(
-    1,
-    expense.participants_count || 0,
-    participants.length
-  );
-  const perPersonAmount =
-    Number.isFinite(totalAmount) && participantsCount > 0
-      ? totalAmount / participantsCount
-      : 0;
-
-  const fallbackParticipants = Array.from({ length: participantsCount }).map(
-    (_, index) => ({
-      profile_id: `fallback-${index}`,
-      display_name: `Participante ${index + 1}`,
-      avatar_url: null,
-    })
-  );
-  const participantRows = participants.length ? participants : fallbackParticipants;
-
   return (
     <main className={styles.page}>
       <section className={styles.panel}>
@@ -124,7 +90,8 @@ export function GastosRepartoScreen({
             </div>
 
             <p className={styles.meta}>
-              {expense.title} - {formatShortDate(expense.expense_date)}
+              {expense.title} - {formatShortDate(expense.expense_date)} - Pago{" "}
+              {expense.paid_by_name}
             </p>
 
             <div className={styles.grid}>
@@ -139,7 +106,7 @@ export function GastosRepartoScreen({
 
               <Card className={styles.resultBox}>
                 <div className={styles.participantsList}>
-                  {participantRows.map((participant, index) => (
+                  {expense.participants.map((participant, index) => (
                     <div
                       key={`${participant.profile_id}-${index}`}
                       className={styles.participantRow}
@@ -154,7 +121,7 @@ export function GastosRepartoScreen({
                         {participant.display_name}
                       </span>
                       <span className={styles.participantAmount}>
-                        {formatCurrency(perPersonAmount, expense.currency)}
+                        {formatCurrency(participant.share_amount, expense.currency)}
                       </span>
                     </div>
                   ))}

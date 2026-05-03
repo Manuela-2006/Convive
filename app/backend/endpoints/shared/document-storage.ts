@@ -16,6 +16,10 @@ const AVATAR_EXTENSION_BY_MEDIA_TYPE: Record<string, string> = {
   "image/svg+xml": "svg",
 };
 
+const PDF_EXTENSION_BY_MEDIA_TYPE: Record<string, string> = {
+  "application/pdf": "pdf",
+};
+
 export function getDocumentFileExtension(mediaType: string) {
   return EXTENSION_BY_MEDIA_TYPE[mediaType] ?? null;
 }
@@ -31,6 +35,13 @@ export function validateProfileAvatarUploadPayload(document: DocumentUploadPaylo
   return validateImageUploadPayload(document, {
     extensionByMediaType: AVATAR_EXTENSION_BY_MEDIA_TYPE,
     invalidFormatMessage: "Formato no permitido. Usa JPG, PNG, WEBP o SVG.",
+  });
+}
+
+export function validatePdfUploadPayload(document: DocumentUploadPayload) {
+  return validateImageUploadPayload(document, {
+    extensionByMediaType: PDF_EXTENSION_BY_MEDIA_TYPE,
+    invalidFormatMessage: "Formato no permitido. Usa PDF.",
   });
 }
 
@@ -89,7 +100,18 @@ export function buildInvoiceDocumentPath(input: {
   return `house/${input.houseId}/invoices/${input.expenseId}/invoice/${crypto.randomUUID()}.${input.extension}`;
 }
 
+export function buildHouseMemberContractPath(input: {
+  houseId: string;
+  profileId: string;
+}) {
+  return `house/${input.houseId}/members/${input.profileId}/contract/${crypto.randomUUID()}.pdf`;
+}
+
 function hasExpectedImageSignature(buffer: Buffer, mediaType: string) {
+  if (mediaType === "application/pdf") {
+    return buffer.toString("ascii", 0, 5) === "%PDF-";
+  }
+
   if (mediaType === "image/jpeg" || mediaType === "image/jpg") {
     return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
   }

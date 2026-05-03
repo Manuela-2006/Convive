@@ -12,14 +12,20 @@ type GastosSimplificarScreenProps = {
   houseCode: string;
   dashboardPath: string;
   settlements?: Settlement[];
+  originalPaymentCount?: number;
+  optimizedPaymentCount?: number;
 };
 
 export function GastosSimplificarScreen({
   houseCode,
   dashboardPath,
   settlements = [],
+  originalPaymentCount = 0,
+  optimizedPaymentCount = 0,
 }: GastosSimplificarScreenProps) {
   const basePath = dashboardPath;
+  const hasRealSimplification =
+    settlements.length > 0 && originalPaymentCount > optimizedPaymentCount;
 
   return (
     <main className={styles.page}>
@@ -64,7 +70,7 @@ export function GastosSimplificarScreen({
             <h3 className={styles.monthTitle}>Pagos recomendados</h3>
 
             <div className={styles.rows}>
-              {settlements.length ? (
+              {hasRealSimplification ? (
                 settlements.map((settlement, index) => (
                   <div
                     key={`${settlement.from_profile_id}-${settlement.to_profile_id}-${index}`}
@@ -115,7 +121,7 @@ export function GastosSimplificarScreen({
                 ))
               ) : (
                 <p className={styles.emptyState}>
-                  No hay pagos pendientes para optimizar.
+                  No hay pagos pendientes que se puedan simplificar ahora mismo.
                 </p>
               )}
             </div>

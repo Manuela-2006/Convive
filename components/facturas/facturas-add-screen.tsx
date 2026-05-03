@@ -25,6 +25,7 @@ type FacturasAddScreenProps = {
   houseCode: string;
   dashboardPath: string;
   formOptions: AddInvoiceFormOptions;
+  defaultRentAmount?: string | null;
 };
 
 const scannerCategoryLabels: Record<TicketScannerCategory, string> = {
@@ -85,6 +86,21 @@ function dedupeInvoiceCategories(categories: AddInvoiceCategory[]) {
   return Array.from(byKey.values());
 }
 
+function isRentCategory(category?: AddInvoiceCategory | null) {
+  if (!category) return false;
+  const context = `${normalizeCategoryKey(category.slug)} ${normalizeCategoryKey(
+    category.name
+  )}`;
+  return context.includes("alquiler") || context.includes("rent");
+}
+
+function normalizeMoneyInput(value?: string | null) {
+  const normalized = (value ?? "").trim().replace(",", ".");
+  if (!normalized) return "";
+  const amount = Number(normalized);
+  return Number.isFinite(amount) && amount > 0 ? amount.toFixed(2) : "";
+}
+
 function parseScannerDate(value?: string | null): Date | undefined {
   if (!value) return undefined;
   const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(value.trim());
@@ -130,6 +146,7 @@ export function FacturasAddScreen({
   houseCode,
   dashboardPath,
   formOptions,
+  defaultRentAmount = null,
 }: FacturasAddScreenProps) {
   const router = useRouter();
   const uniqueCategories = useMemo(
@@ -153,6 +170,20 @@ export function FacturasAddScreen({
   const [scanMessage, setScanMessage] = useState<string | null>(null);
   const basePath = dashboardPath;
   const hasMembers = formOptions.members.length > 0;
+  const normalizedDefaultRentAmount = useMemo(
+    () => normalizeMoneyInput(defaultRentAmount),
+    [defaultRentAmount]
+  );
+
+  const applyRentDefaultIfNeeded = (categoryId: string | null) => {
+    const selectedCategory = uniqueCategories.find(
+      (category) => category.category_id === categoryId
+    );
+
+    if (isRentCategory(selectedCategory) && normalizedDefaultRentAmount) {
+      setTotalAmount((current) => current || normalizedDefaultRentAmount);
+    }
+  };
 
   useEffect(() => {
     setSelectedCategoryId((current) => {
@@ -162,6 +193,10 @@ export function FacturasAddScreen({
       return uniqueCategories[0]?.category_id ?? null;
     });
   }, [uniqueCategories]);
+
+  useEffect(() => {
+    applyRentDefaultIfNeeded(selectedCategoryId);
+  }, [selectedCategoryId, normalizedDefaultRentAmount, uniqueCategories]);
 
   const toggleParticipant = (profileId: string) => {
     setSelectedParticipantIds((current) =>
@@ -174,6 +209,7 @@ export function FacturasAddScreen({
   const selectCategory = (categoryId: string) => {
     setSelectedCategoryId(categoryId);
     setManualCategoryName("");
+    applyRentDefaultIfNeeded(categoryId);
   };
 
   const selectScannedCategory = (category: TicketScannerCategory) => {
@@ -199,11 +235,19 @@ export function FacturasAddScreen({
   };
 
   const resetForm = () => {
+    const initialCategoryId = uniqueCategories[0]?.category_id ?? null;
+    const initialCategory = uniqueCategories.find(
+      (category) => category.category_id === initialCategoryId
+    );
     setDate(new Date());
     setTitle("");
-    setTotalAmount("");
+    setTotalAmount(
+      isRentCategory(initialCategory) && normalizedDefaultRentAmount
+        ? normalizedDefaultRentAmount
+        : ""
+    );
     setNotes("");
-    setSelectedCategoryId(uniqueCategories[0]?.category_id ?? null);
+    setSelectedCategoryId(initialCategoryId);
     setManualCategoryName("");
     setSelectedParticipantIds(
       formOptions.members.map((member) => member.profile_id)

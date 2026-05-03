@@ -17,6 +17,7 @@ import {
 } from "../../lib/dashboard-presenters";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
+import { ExpenseSplitDialog } from "./expense-split-dialog";
 import styles from "./gastos-division-screen.module.css";
 
 type GastosDivisionScreenProps = {
@@ -260,29 +261,36 @@ export function GastosDivisionScreen({
                                 expense.currency
                               )}
                             </p>
-                            {canRequestPayment ? (
-                              <Button
-                                className={styles.button}
-                                onClick={() =>
-                                  handleRequestPaymentConfirmation(expense)
-                                }
-                                disabled={isPending}
-                              >
-                                {isActive ? "Enviando" : "He pagado"}
-                              </Button>
-                            ) : isParticipant ? (
-                              <span className={styles.stateBadge}>
-                                {pendingPayment
-                                  ? "En revision"
-                                  : isMySharePaid
-                                    ? "Pagado"
-                                    : "Pendiente"}
-                              </span>
-                            ) : (
-                              <span className={styles.stateBadgeMuted}>
-                                Global
-                              </span>
-                            )}
+                            <div className={styles.actions}>
+                              <ExpenseSplitDialog
+                                houseCode={houseCode}
+                                expenseId={expense.expense_id}
+                                buttonClassName={styles.button}
+                              />
+                              {canRequestPayment ? (
+                                <Button
+                                  className={styles.button}
+                                  onClick={() =>
+                                    handleRequestPaymentConfirmation(expense)
+                                  }
+                                  disabled={isPending}
+                                >
+                                  {isActive ? "Enviando" : "He pagado"}
+                                </Button>
+                              ) : isParticipant ? (
+                                <span className={styles.stateBadge}>
+                                  {pendingPayment
+                                    ? "En revision"
+                                    : isMySharePaid
+                                      ? "Pagado"
+                                      : "Pendiente"}
+                                </span>
+                              ) : (
+                                <span className={styles.stateBadgeMuted}>
+                                  Global
+                                </span>
+                              )}
+                            </div>
                           </div>
                         );
                       })}

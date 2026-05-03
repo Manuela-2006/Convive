@@ -9,7 +9,9 @@ import {
   DOCUMENTS_BUCKET,
   validateDocumentUploadPayload,
 } from "../shared/document-storage";
+import { loadProfileAvatarUrlMapWithClient } from "../shared/profile-avatar";
 import type { DocumentUploadPayload } from "../../../../lib/document-upload-types";
+import type { ExpenseSplitDetail } from "../../../../lib/dashboard-types";
 import { revalidatePaths } from "../shared/revalidate";
 
 type CreatePendingTicketExpenseInput = {
@@ -30,6 +32,11 @@ type CreatePendingTicketExpenseInput = {
 type ViewTicketDocumentInput = {
   houseCode: string;
   ticketId: string;
+};
+
+type ViewExpenseSplitInput = {
+  houseCode: string;
+  expenseId: string;
 };
 
 type RequestExpensePaymentConfirmationInput = {
@@ -208,6 +215,99 @@ export async function getTicketDocumentSignedUrlAction(
     }
 
     return { success: true, data: { signedUrl: signedResult.data.signedUrl } };
+  } catch (error) {
+    return { success: false, error: toActionError(error) };
+  }
+}
+
+function toStringValue(value: unknown, fallback = "") {
+  return typeof value === "string" ? value : fallback;
+}
+
+function toNullableStringValue(value: unknown) {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function toNumericLikeValue(value: unknown) {
+  return typeof value === "number" || typeof value === "string" ? value : 0;
+}
+
+function readExpenseSplitDetail(value: unknown): ExpenseSplitDetail | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  const row = value as Record<string, unknown>;
+
+  return {
+    expense_id: toStringValue(row.expense_id),
+    title: toStringValue(row.title),
+    expense_date: toStringValue(row.expense_date),
+    total_amount: toNumericLikeValue(row.total_amount),
+    currency: toStringValue(row.currency, "EUR"),
+    paid_by_profile_id: toNullableStringValue(row.paid_by_profile_id),
+    paid_by_name: toStringValue(row.paid_by_name),
+    description: toNullableStringValue(row.description),
+    settlement_status: toNullableStringValue(row.settlement_status),
+    participants: Array.isArray(row.participants)
+      ? row.participants
+          .filter(
+            (participant): participant is Record<string, unknown> =>
+              Boolean(participant) &&
+              typeof participant === "object" &&
+              !Array.isArray(participant)
+          )
+          .map((participant) => ({
+            profile_id: toStringValue(participant.profile_id),
+            display_name: toStringValue(participant.display_name),
+            avatar_url: toNullableStringValue(participant.avatar_url),
+            share_amount: toNumericLikeValue(participant.share_amount),
+            status: toNullableStringValue(participant.status),
+          }))
+      : [],
+  };
+}
+
+export async function getSharedExpenseSplitAction(
+  input: ViewExpenseSplitInput
+): Promise<ActionResult<{ split: ExpenseSplitDetail }>> {
+  try {
+    const { supabase } = await getAuthenticatedProfileContext();
+
+    const { data, error } = await supabase.rpc("get_shared_expense_split", {
+      p_house_public_code: input.houseCode,
+      p_expense_id: input.expenseId,
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    const split = readExpenseSplitDetail(data);
+
+    if (!split) {
+      return { success: false, error: "No se pudo cargar el reparto." };
+    }
+
+    const avatarUrlMap = await loadProfileAvatarUrlMapWithClient(
+      supabase,
+      split.participants.map((participant) => participant.profile_id)
+    );
+
+    return {
+      success: true,
+      data: {
+        split: {
+          ...split,
+          participants: split.participants.map((participant) => ({
+            ...participant,
+            avatar_url:
+              avatarUrlMap.get(participant.profile_id) ??
+              participant.avatar_url,
+          })),
+        },
+      },
+    };
   } catch (error) {
     return { success: false, error: toActionError(error) };
   }

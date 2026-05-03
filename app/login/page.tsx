@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { LoginCard } from "../../components/auth/login-card";
+import { createClient } from "../backend/endpoints/shared/supabase-server";
 import styles from "./page.module.css";
 
 type LoginPageProps = {
@@ -16,6 +17,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       ? params.flow
       : "login";
   const joinCode = params?.code?.trim() ?? "";
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const initialSetupStep = Boolean(user && flow !== "login");
 
   return (
     <main className={styles.page}>
@@ -31,7 +37,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         />
         <p className={styles.subtitle}>Pon en orden tu piso compartido</p>
         <div className={styles.cardWrap}>
-          <LoginCard initialFlow={flow} initialJoinCode={joinCode} />
+          <LoginCard
+            initialFlow={flow}
+            initialJoinCode={joinCode}
+            initialSetupStep={initialSetupStep}
+          />
         </div>
       </section>
     </main>

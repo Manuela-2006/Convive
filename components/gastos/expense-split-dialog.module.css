@@ -1,0 +1,136 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(20, 18, 16, 0.72);
+}
+
+.modal {
+  width: min(560px, 100%);
+  max-height: min(86vh, 720px);
+  overflow: auto;
+  border: 1px solid rgba(139, 26, 47, 0.36);
+  border-radius: 8px;
+  background: #f0ebe6;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid rgba(139, 26, 47, 0.22);
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.backIcon {
+  display: block;
+  width: 32px;
+  height: 32px;
+  background-color: #8b1a2f;
+  -webkit-mask: url("/iconos/flechaatras.svg") no-repeat center / contain;
+  mask: url("/iconos/flechaatras.svg") no-repeat center / contain;
+}
+
+.title {
+  margin: 0;
+  color: #8b1a2f;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.meta,
+.description,
+.emptyState {
+  margin: 0;
+  color: #332a25;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+}
+
+.body {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+}
+
+.summary strong {
+  color: #8b1a2f;
+  font-size: 22px;
+}
+
+.participants {
+  display: grid;
+  gap: 8px;
+}
+
+.participantRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(139, 26, 47, 0.14);
+}
+
+.participantInfo {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+}
+
+.participantName,
+.participantStatus {
+  display: block;
+  color: #1f1a17;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+}
+
+.participantStatus {
+  color: #6e625c;
+  font-size: 12px;
+}
+
+.participantAmount {
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.emptyState {
+  padding: 18px;
+}
+
+@media (max-width: 640px) {
+  .overlay {
+    padding: 12px;
+  }
+}
