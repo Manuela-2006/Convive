@@ -93,14 +93,46 @@ Pregunta:
 ${question}
 `.trim();
 
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  const discoveredModels: string[] = [];
+  if (apiKey) {
+    try {
+      const listResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
+        { method: "GET" }
+      );
+      if (listResponse.ok) {
+        const payload = (await listResponse.json()) as {
+          models?: Array<{
+            name?: string;
+            supportedGenerationMethods?: string[];
+          }>;
+        };
+        for (const model of payload.models ?? []) {
+          const supportsGenerate = (model.supportedGenerationMethods ?? []).includes(
+            "generateContent"
+          );
+          if (!supportsGenerate || !model.name) {
+            continue;
+          }
+          discoveredModels.push(model.name.replace(/^models\//, ""));
+        }
+      }
+    } catch {
+      // Ignore discovery failures and use static fallback list below.
+    }
+  }
+
   const modelCandidates = [
+    ...discoveredModels,
     "gemini-2.0-flash",
     "gemini-1.5-flash-latest",
     "gemini-1.5-flash-8b",
   ];
+  const uniqueCandidates = Array.from(new Set(modelCandidates));
 
   let lastError: unknown = null;
-  for (const modelName of modelCandidates) {
+  for (const modelName of uniqueCandidates) {
     try {
       const model = gemini.getGenerativeModel({ model: modelName });
       const result = await model.generateContent([
@@ -118,7 +150,12 @@ ${question}
     }
   }
 
-  throw lastError ?? new Error("No hay modelos Gemini disponibles para esta cuenta.");
+  throw (
+    lastError ??
+    new Error(
+      "No hay modelos Gemini compatibles disponibles para esta clave/API version."
+    )
+  );
 }
 
 export async function askContractQuestionAction(
