@@ -17,6 +17,7 @@ import {
   uploadProfileAvatarAction,
 } from "../../app/backend/endpoints/profile/avatar-actions";
 import {
+  askContractQuestionAction,
   getContractDocumentSignedUrlAction,
   uploadContractDocumentAction,
 } from "../../app/backend/endpoints/profile/contract-actions";
@@ -203,6 +204,11 @@ export function AjustesScreen({
   const [contractFilePath, setContractFilePath] = useState(
     settings.house_member.contract_file_path
   );
+  const [contractAssistantOpen, setContractAssistantOpen] = useState(false);
+  const [contractQuestion, setContractQuestion] = useState("");
+  const [contractAnswer, setContractAnswer] = useState<string | null>(null);
+  const [contractAssistantError, setContractAssistantError] = useState<string | null>(null);
+  const [isContractAssistantPending, startContractAssistantTransition] = useTransition();
   const [isProfilePending, startProfileTransition] = useTransition();
   const [isHousePending, startHouseTransition] = useTransition();
   const [isAvatarPending, startAvatarTransition] = useTransition();
@@ -423,6 +429,32 @@ export function AjustesScreen({
     });
   };
 
+  const handleAskContract = () => {
+    const question = contractQuestion.trim();
+    if (!question) {
+      setContractAssistantError("Escribe una pregunta sobre el contrato.");
+      return;
+    }
+
+    setContractAssistantError(null);
+    setContractAnswer(null);
+    startContractAssistantTransition(async () => {
+      const result = await askContractQuestionAction({
+        houseCode,
+        question,
+      });
+
+      if (result.success) {
+        setContractAnswer(result.data.answer);
+        return;
+      }
+
+      if ("error" in result) {
+        setContractAssistantError(result.error);
+      }
+    });
+  };
+
   useEffect(() => {
     const refreshedName = splitFullName(settings.profile.full_name);
     const refreshedAvatarStoragePath =
@@ -566,77 +598,121 @@ export function AjustesScreen({
             <h1 className={styles.title}>Perfil</h1>
             <p className={styles.subtitle}>Gestiona tu información personal</p>
           </div>
-          {contractFilePath ? (
-            <SecureDocumentViewer
-              label="Ver contrato"
-              title="Contrato"
-              buttonClassName={styles.headerContractButton}
-              documentType="pdf"
-              emptyMessage="No hay contrato guardado."
-              loadSignedUrl={() =>
-                getContractDocumentSignedUrlAction({ houseCode })
-              }
-            />
-          ) : (
-            <Popover open={contractPopoverOpen} onOpenChange={setContractPopoverOpen}>
+          <div className={styles.contractHeaderActions}>
+            {contractFilePath ? (
+              <SecureDocumentViewer
+                label="Ver contrato"
+                title="Contrato"
+                buttonClassName={styles.headerContractButton}
+                documentType="pdf"
+                emptyMessage="No hay contrato guardado."
+                loadSignedUrl={() =>
+                  getContractDocumentSignedUrlAction({ houseCode })
+                }
+              />
+            ) : (
+              <Popover open={contractPopoverOpen} onOpenChange={setContractPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button type="button" className={styles.headerContractButton}>
+                    Ver contrato
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className={styles.avatarUploadPopover} side="bottom" align="end">
+                  <div
+                    className={`${styles.avatarDropzone} ${
+                      contractDragging ? styles.avatarDropzoneActive : ""
+                    }`}
+                    onClick={() => contractInputRef.current?.click()}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      setContractDragging(true);
+                    }}
+                    onDragLeave={() => setContractDragging(false)}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      setContractDragging(false);
+                      const file = event.dataTransfer.files?.[0];
+                      if (file) {
+                        handleContractFile(file);
+                      }
+                    }}
+                  >
+                    <Image
+                      src="/iconos/Escanearimagen.svg"
+                      alt=""
+                      width={26}
+                      height={26}
+                      className={styles.avatarDropIcon}
+                    />
+                    <p className={styles.avatarDropTitle}>Sube o arrastra un PDF</p>
+                    <p className={styles.avatarDropHint}>
+                      {isContractPending ? "Subiendo..." : "PDF - Max 10MB"}
+                    </p>
+                  </div>
+                  <input
+                    ref={contractInputRef}
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    className={styles.avatarUploadInput}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) {
+                        handleContractFile(file);
+                      }
+                    }}
+                  />
+                  {contractFileName ? (
+                    <p className={styles.avatarFileName}>{contractFileName}</p>
+                  ) : null}
+                  {contractUploadError ? (
+                    <p className={styles.avatarUploadError}>{contractUploadError}</p>
+                  ) : null}
+                </PopoverContent>
+              </Popover>
+            )}
+
+            <Popover open={contractAssistantOpen} onOpenChange={setContractAssistantOpen}>
               <PopoverTrigger asChild>
                 <button type="button" className={styles.headerContractButton}>
-                  Ver contrato
+                  Preguntar IA
                 </button>
               </PopoverTrigger>
-              <PopoverContent className={styles.avatarUploadPopover} side="bottom" align="end">
-                <div
-                  className={`${styles.avatarDropzone} ${
-                    contractDragging ? styles.avatarDropzoneActive : ""
-                  }`}
-                  onClick={() => contractInputRef.current?.click()}
-                  onDragOver={(event) => {
-                    event.preventDefault();
-                    setContractDragging(true);
-                  }}
-                  onDragLeave={() => setContractDragging(false)}
-                  onDrop={(event) => {
-                    event.preventDefault();
-                    setContractDragging(false);
-                    const file = event.dataTransfer.files?.[0];
-                    if (file) {
-                      handleContractFile(file);
-                    }
-                  }}
-                >
-                  <Image
-                    src="/iconos/Escanearimagen.svg"
-                    alt=""
-                    width={26}
-                    height={26}
-                    className={styles.avatarDropIcon}
-                  />
-                  <p className={styles.avatarDropTitle}>Sube o arrastra un PDF</p>
-                  <p className={styles.avatarDropHint}>
-                    {isContractPending ? "Subiendo..." : "PDF - Max 10MB"}
+              <PopoverContent className={styles.contractAssistantPopover} side="bottom" align="end">
+                {contractFilePath ? (
+                  <div className={styles.contractAssistantPanel}>
+                    <p className={styles.contractAssistantTitle}>
+                      Pregunta sobre tu contrato
+                    </p>
+                    <textarea
+                      className={styles.contractAssistantTextarea}
+                      placeholder="Ej: ¿Cuál es la fecha de fin del contrato?"
+                      value={contractQuestion}
+                      onChange={(event) => setContractQuestion(event.target.value)}
+                      rows={3}
+                    />
+                    <button
+                      type="button"
+                      className={styles.contractAssistantButton}
+                      onClick={handleAskContract}
+                      disabled={isContractAssistantPending}
+                    >
+                      {isContractAssistantPending ? "Consultando..." : "Preguntar"}
+                    </button>
+                    {contractAssistantError ? (
+                      <p className={styles.contractAssistantError}>{contractAssistantError}</p>
+                    ) : null}
+                    {contractAnswer ? (
+                      <p className={styles.contractAssistantAnswer}>{contractAnswer}</p>
+                    ) : null}
+                  </div>
+                ) : (
+                  <p className={styles.contractAssistantEmpty}>
+                    Sube primero un contrato para poder consultarlo.
                   </p>
-                </div>
-                <input
-                  ref={contractInputRef}
-                  type="file"
-                  accept="application/pdf,.pdf"
-                  className={styles.avatarUploadInput}
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    if (file) {
-                      handleContractFile(file);
-                    }
-                  }}
-                />
-                {contractFileName ? (
-                  <p className={styles.avatarFileName}>{contractFileName}</p>
-                ) : null}
-                {contractUploadError ? (
-                  <p className={styles.avatarUploadError}>{contractUploadError}</p>
-                ) : null}
+                )}
               </PopoverContent>
             </Popover>
-          )}
+          </div>
         </header>
 
         <div className={styles.content}>

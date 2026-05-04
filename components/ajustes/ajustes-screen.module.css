@@ -55,6 +55,94 @@
   transform: translateY(1px);
 }
 
+.contractHeaderActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.contractAssistantPopover {
+  width: min(460px, calc(100vw - 2rem));
+  background: #f0eae4;
+  border: 1px dotted #8b1a2f;
+  border-radius: 8px;
+  padding: 0.85rem;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.2);
+}
+
+.contractAssistantPanel {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.contractAssistantTitle {
+  margin: 0;
+  color: #8b1a2f;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.contractAssistantTextarea {
+  width: 100%;
+  border: 1px solid rgba(139, 26, 47, 0.35);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.84rem;
+  color: #2f2a27;
+  background: #f8f5f2;
+  resize: vertical;
+  min-height: 78px;
+}
+
+.contractAssistantTextarea:focus-visible {
+  outline: none;
+  border-color: #8b1a2f;
+  box-shadow: 0 0 0 1px rgba(139, 26, 47, 0.25);
+}
+
+.contractAssistantButton {
+  justify-self: start;
+  border: none;
+  border-radius: 8px;
+  background: #be6f8b;
+  color: #f0eae4;
+  padding: 0.42rem 0.85rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.contractAssistantButton:disabled {
+  opacity: 0.72;
+  cursor: default;
+}
+
+.contractAssistantError {
+  margin: 0;
+  color: #8b1a2f;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.76rem;
+}
+
+.contractAssistantAnswer {
+  margin: 0.1rem 0 0;
+  color: #2f2a27;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.contractAssistantEmpty {
+  margin: 0;
+  color: #5f5852;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
 .backLink {
   width: 56px;
   height: 56px;
