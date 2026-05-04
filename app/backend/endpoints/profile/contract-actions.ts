@@ -70,12 +70,26 @@ export async function uploadContractDocumentAction(
       profileId: profile.id,
     });
 
-    const uploadResult = await supabase.storage
+    let uploadResult = await supabase.storage
       .from(DOCUMENTS_BUCKET)
       .upload(storagePath, buffer, {
         contentType: input.document.mediaType,
         upsert: false,
       });
+
+    // Some bucket policies restrict "application/pdf". Retry with a generic
+    // content-type so uploads still work without changing bucket settings.
+    if (
+      uploadResult.error?.message?.toLowerCase().includes("mime type") &&
+      uploadResult.error.message.toLowerCase().includes("application/pdf")
+    ) {
+      uploadResult = await supabase.storage
+        .from(DOCUMENTS_BUCKET)
+        .upload(storagePath, buffer, {
+          contentType: "application/octet-stream",
+          upsert: false,
+        });
+    }
 
     if (uploadResult.error) {
       return { success: false, error: uploadResult.error.message };
