@@ -439,18 +439,26 @@ export function AjustesScreen({
     setContractAssistantError(null);
     setContractAnswer(null);
     startContractAssistantTransition(async () => {
-      const result = await askContractQuestionAction({
-        houseCode,
-        question,
-      });
+      try {
+        const result = await askContractQuestionAction({
+          houseCode,
+          question,
+        });
 
-      if (result.success) {
-        setContractAnswer(result.data.answer);
-        return;
-      }
+        if (result.success) {
+          setContractAnswer(result.data.answer);
+          return;
+        }
 
-      if ("error" in result) {
-        setContractAssistantError(result.error);
+        if ("error" in result) {
+          setContractAssistantError(result.error);
+        }
+      } catch (error) {
+        setContractAssistantError(
+          error instanceof Error
+            ? error.message
+            : "No se pudo consultar el contrato."
+        );
       }
     });
   };

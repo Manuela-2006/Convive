@@ -1,7 +1,5 @@
 ﻿"use server";
 
-import Groq from "groq-sdk";
-import { PDFParse } from "pdf-parse";
 import { getAuthenticatedProfileContext } from "../auth/queries";
 import type { ActionResult } from "../shared/action-result";
 import { toActionError } from "../shared/action-result";
@@ -15,7 +13,8 @@ type AskContractQuestionInput = {
   question: string;
 };
 
-function getGroqClient() {
+async function getGroqClient() {
+  const { default: Groq } = await import("groq-sdk");
   const apiKey = process.env.GROQ_API_KEY?.trim();
   if (!apiKey) {
     return null;
@@ -92,7 +91,7 @@ export async function askContractQuestionAction(
       };
     }
 
-    const groq = getGroqClient();
+    const groq = await getGroqClient();
     if (!groq) {
       return {
         success: false,
@@ -139,9 +138,11 @@ export async function askContractQuestionAction(
       return { success: false, error: "El contrato esta vacio." };
     }
 
+    const { PDFParse } = await import("pdf-parse");
     const parser = new PDFParse({ data: fileBuffer });
     const parsed = await parser.getText();
     await parser.destroy();
+
     const contractText = sanitizeSensitiveData((parsed.text ?? "").trim());
     if (!contractText) {
       return {
@@ -179,5 +180,3 @@ export async function askContractQuestionAction(
     return { success: false, error: toActionError(error) };
   }
 }
-
-
