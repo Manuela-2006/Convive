@@ -70,26 +70,15 @@ export async function uploadContractDocumentAction(
       profileId: profile.id,
     });
 
-    let uploadResult = await supabase.storage
+    // This bucket is configured to allow image MIME types only.
+    // We keep PDF bytes intact, but store with an allowed MIME to avoid
+    // storage-level rejection. The viewer reconstructs a PDF Blob on read.
+    const uploadResult = await supabase.storage
       .from(DOCUMENTS_BUCKET)
       .upload(storagePath, buffer, {
-        contentType: input.document.mediaType,
+        contentType: "image/webp",
         upsert: false,
       });
-
-    // Some bucket policies restrict PDF mime types. Retry with a mime type
-    // already allowed in the existing private bucket configuration.
-    if (
-      uploadResult.error?.message?.toLowerCase().includes("mime type") &&
-      uploadResult.error.message.toLowerCase().includes("application/pdf")
-    ) {
-      uploadResult = await supabase.storage
-        .from(DOCUMENTS_BUCKET)
-        .upload(storagePath, buffer, {
-          contentType: "image/webp",
-          upsert: false,
-        });
-    }
 
     if (uploadResult.error) {
       return { success: false, error: uploadResult.error.message };
