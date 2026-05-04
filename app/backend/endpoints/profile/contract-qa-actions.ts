@@ -72,6 +72,55 @@ function sanitizeSensitiveData(text: string) {
   return output;
 }
 
+async function generateContractAnswerWithFallback(
+  gemini: GoogleGenerativeAI,
+  fileBase64: string,
+  question: string
+) {
+  const prompt = `
+Eres un asistente de contratos de alquiler.
+Responde SOLO con informacion contenida en el contrato aportado.
+Si la respuesta no aparece en el contrato, responde exactamente:
+"No aparece en el contrato."
+
+Reglas de privacidad:
+- Nunca reveles datos sensibles: DNI/NIE/pasaporte, cuentas/IBAN, telefonos, firmas, correos o datos identificativos.
+- Si la pregunta pide esos datos, responde exactamente:
+"No puedo compartir datos sensibles del contrato."
+- No cites texto que incluya datos sensibles.
+
+Pregunta:
+${question}
+`.trim();
+
+  const modelCandidates = [
+    "gemini-2.0-flash",
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-flash-8b",
+  ];
+
+  let lastError: unknown = null;
+  for (const modelName of modelCandidates) {
+    try {
+      const model = gemini.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent([
+        {
+          inlineData: {
+            data: fileBase64,
+            mimeType: "application/pdf",
+          },
+        },
+        { text: prompt },
+      ]);
+      return result.response.text().trim();
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError ?? new Error("No hay modelos Gemini disponibles para esta cuenta.");
+}
+
 export async function askContractQuestionAction(
   input: AskContractQuestionInput
 ): Promise<ActionResult<{ answer: string }>> {
@@ -138,34 +187,11 @@ export async function askContractQuestionAction(
       return { success: false, error: "El contrato esta vacio." };
     }
 
-    const model = gemini.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const prompt = `
-Eres un asistente de contratos de alquiler.
-Responde SOLO con informacion contenida en el contrato aportado.
-Si la respuesta no aparece en el contrato, responde exactamente:
-"No aparece en el contrato."
-
-Reglas de privacidad:
-- Nunca reveles datos sensibles: DNI/NIE/pasaporte, cuentas/IBAN, telefonos, firmas, correos o datos identificativos.
-- Si la pregunta pide esos datos, responde exactamente:
-"No puedo compartir datos sensibles del contrato."
-- No cites texto que incluya datos sensibles.
-
-Pregunta:
-${question}
-`.trim();
-
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          data: fileBuffer.toString("base64"),
-          mimeType: "application/pdf",
-        },
-      },
-      { text: prompt },
-    ]);
-
-    const rawText = result.response.text().trim();
+    const rawText = await generateContractAnswerWithFallback(
+      gemini,
+      fileBuffer.toString("base64"),
+      question
+    );
     const safeAnswer = sanitizeSensitiveData(rawText).trim();
     if (!safeAnswer) {
       return { success: false, error: "No se pudo generar una respuesta." };
@@ -176,4 +202,3 @@ ${question}
     return { success: false, error: toActionError(error) };
   }
 }
-
