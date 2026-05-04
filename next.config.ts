@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       allowedOrigins: ["10.0.2.2"],
+      bodySizeLimit: "12mb",
     },
   },
 };
