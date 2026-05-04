@@ -1,6 +1,7 @@
 "use server";
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
+import pdfParse from "pdf-parse";
 import { getAuthenticatedProfileContext } from "../auth/queries";
 import type { ActionResult } from "../shared/action-result";
 import { toActionError } from "../shared/action-result";
@@ -14,13 +15,13 @@ type AskContractQuestionInput = {
   question: string;
 };
 
-function getGeminiClient() {
-  const apiKey = process.env.GEMINI_API_KEY?.trim();
+function getGroqClient() {
+  const apiKey = process.env.GROQ_API_KEY?.trim();
   if (!apiKey) {
     return null;
   }
 
-  return new GoogleGenerativeAI(apiKey);
+  return new Groq({ apiKey });
 }
 
 function normalizeQuestion(raw: string) {
@@ -36,9 +37,9 @@ function containsSensitiveIntent(text: string) {
     "iban",
     "cuenta bancaria",
     "numero de cuenta",
-    "nÃºmero de cuenta",
+    "número de cuenta",
     "telefono",
-    "telÃ©fono",
+    "teléfono",
     "firma",
     "firmas",
     "correo",
@@ -72,92 +73,6 @@ function sanitizeSensitiveData(text: string) {
   return output;
 }
 
-async function generateContractAnswerWithFallback(
-  gemini: GoogleGenerativeAI,
-  fileBase64: string,
-  question: string
-) {
-  const prompt = `
-Eres un asistente de contratos de alquiler.
-Responde SOLO con informacion contenida en el contrato aportado.
-Si la respuesta no aparece en el contrato, responde exactamente:
-"No aparece en el contrato."
-
-Reglas de privacidad:
-- Nunca reveles datos sensibles: DNI/NIE/pasaporte, cuentas/IBAN, telefonos, firmas, correos o datos identificativos.
-- Si la pregunta pide esos datos, responde exactamente:
-"No puedo compartir datos sensibles del contrato."
-- No cites texto que incluya datos sensibles.
-
-Pregunta:
-${question}
-`.trim();
-
-  const apiKey = process.env.GEMINI_API_KEY?.trim();
-  const discoveredModels: string[] = [];
-  if (apiKey) {
-    try {
-      const listResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
-        { method: "GET" }
-      );
-      if (listResponse.ok) {
-        const payload = (await listResponse.json()) as {
-          models?: Array<{
-            name?: string;
-            supportedGenerationMethods?: string[];
-          }>;
-        };
-        for (const model of payload.models ?? []) {
-          const supportsGenerate = (model.supportedGenerationMethods ?? []).includes(
-            "generateContent"
-          );
-          if (!supportsGenerate || !model.name) {
-            continue;
-          }
-          discoveredModels.push(model.name.replace(/^models\//, ""));
-        }
-      }
-    } catch {
-      // Ignore discovery failures and use static fallback list below.
-    }
-  }
-
-  const modelCandidates = [
-    ...discoveredModels,
-    "gemini-2.0-flash",
-    "gemini-1.5-flash-latest",
-    "gemini-1.5-flash-8b",
-  ];
-  const uniqueCandidates = Array.from(new Set(modelCandidates));
-
-  let lastError: unknown = null;
-  for (const modelName of uniqueCandidates) {
-    try {
-      const model = gemini.getGenerativeModel({ model: modelName });
-      const result = await model.generateContent([
-        {
-          inlineData: {
-            data: fileBase64,
-            mimeType: "application/pdf",
-          },
-        },
-        { text: prompt },
-      ]);
-      return result.response.text().trim();
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  throw (
-    lastError ??
-    new Error(
-      "No hay modelos Gemini compatibles disponibles para esta clave/API version."
-    )
-  );
-}
-
 export async function askContractQuestionAction(
   input: AskContractQuestionInput
 ): Promise<ActionResult<{ answer: string }>> {
@@ -177,11 +92,11 @@ export async function askContractQuestionAction(
       };
     }
 
-    const gemini = getGeminiClient();
-    if (!gemini) {
+    const groq = getGroqClient();
+    if (!groq) {
       return {
         success: false,
-        error: "Falta GEMINI_API_KEY en variables de entorno.",
+        error: "Falta GROQ_API_KEY en variables de entorno.",
       };
     }
 
@@ -224,12 +139,35 @@ export async function askContractQuestionAction(
       return { success: false, error: "El contrato esta vacio." };
     }
 
-    const rawText = await generateContractAnswerWithFallback(
-      gemini,
-      fileBuffer.toString("base64"),
-      question
-    );
-    const safeAnswer = sanitizeSensitiveData(rawText).trim();
+    const parsed = await pdfParse(fileBuffer);
+    const contractText = sanitizeSensitiveData((parsed.text ?? "").trim());
+    if (!contractText) {
+      return {
+        success: false,
+        error:
+          "No pude extraer texto del PDF. Asegurate de que el contrato tenga texto seleccionable.",
+      };
+    }
+
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      temperature: 0,
+      max_tokens: 700,
+      messages: [
+        {
+          role: "system",
+          content:
+            "Eres un asistente de contratos de alquiler. Responde solo con informacion contenida en el contrato. Si no aparece en el contrato, responde exactamente: 'No aparece en el contrato.'. Nunca proporciones datos sensibles ni identificativos.",
+        },
+        {
+          role: "user",
+          content: `Contrato (texto ya anonimizado):\n\n${contractText}\n\nPregunta: ${question}`,
+        },
+      ],
+    });
+
+    const rawAnswer = completion.choices[0]?.message?.content?.trim() ?? "";
+    const safeAnswer = sanitizeSensitiveData(rawAnswer);
     if (!safeAnswer) {
       return { success: false, error: "No se pudo generar una respuesta." };
     }
