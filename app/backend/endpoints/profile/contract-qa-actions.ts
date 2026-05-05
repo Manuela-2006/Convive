@@ -157,7 +157,7 @@ export async function askContractQuestionAction(
         {
           role: "system",
           content:
-            "Eres un asistente de contratos de alquiler. Responde solo con informacion contenida en el contrato. Si no aparece en el contrato, responde exactamente: 'No aparece en el contrato.'. Nunca proporciones datos sensibles ni identificativos.",
+            "Eres un asistente de contratos de alquiler. Responde solo con informacion contenida en el contrato. Si una pregunta no aparece de forma clara en el contrato, indicalo brevemente y da una recomendacion practica en 1-3 frases (por ejemplo: consultar al arrendador/casero, pedir confirmacion por escrito o proponer anexo). Nunca inventes clausulas ni datos. Nunca proporciones datos sensibles ni identificativos.",
         },
         {
           role: "user",
