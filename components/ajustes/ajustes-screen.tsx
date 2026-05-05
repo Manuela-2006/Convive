@@ -691,6 +691,9 @@ export function AjustesScreen({
                     <p className={styles.contractAssistantTitle}>
                       Pregunta sobre tu contrato
                     </p>
+                    {contractAnswer ? (
+                      <p className={styles.contractAssistantAnswer}>{contractAnswer}</p>
+                    ) : null}
                     <textarea
                       className={styles.contractAssistantTextarea}
                       placeholder="Ej: ¿Cuál es la fecha de fin del contrato?"
@@ -708,9 +711,6 @@ export function AjustesScreen({
                     </button>
                     {contractAssistantError ? (
                       <p className={styles.contractAssistantError}>{contractAssistantError}</p>
-                    ) : null}
-                    {contractAnswer ? (
-                      <p className={styles.contractAssistantAnswer}>{contractAnswer}</p>
                     ) : null}
                   </div>
                 ) : (
